@@ -11,11 +11,15 @@ class TBControl {
         void setTarget(int x, int y, int z);
         void step();
         void moveZ();
+        void resetZ();
         bool xyMoving();
+        int xPos();
+        int yPos();
+        int zPos();
     private:
         Axis *xaxis;
         Axis *yaxis;
         Axis *zaxis;
-}
+};
 
 #endif

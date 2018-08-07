@@ -1,18 +1,18 @@
+#include "Arduino.h"
 #include "TBControl.h"
 
-#define xStepPin 3;
-#define xDirPin 4;
-#define yStepPin 5;
-#define yDirPin 6;
-#define zStepPin 7;
-#define zDirPin 8;
+const int xStepPin = 40;
+const int xDirPin =  38;
+const int xLimPin =  24;
+const int yStepPin = 36;
+const int yDirPin =  34;
+const int yLimPin =  22;
+const int zStepPin =  0;
+const int zDirPin =   0;
+const int zLimPin =  26;
 
-#define xLimPin 0;
-#define yLimPin 0;
-#define zLimPin 0;
-
-Axis xAxis(xStepPin, xDirPin, xLimPin, false);
-Axis yAxis(yStepPin, yDirPin, yLimPin, true);
+Axis xAxis(xStepPin, xDirPin, xLimPin, true);
+Axis yAxis(yStepPin, yDirPin, yLimPin, false);
 Axis zAxis(zStepPin, zDirPin, zLimPin, false);
 
 TBControl tb(&xAxis, &yAxis, &zAxis);

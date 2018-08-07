@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "TBControl.h"
 #include "Axis.h"
 
 TBControl::TBControl(Axis *x, Axis *y, Axis *z) {
@@ -37,17 +38,17 @@ void TBControl::resetZ() {
 }
 
 int TBControl::xPos() {
-    return xaxis->position();
+    return xaxis->getPos();
 }
 
 int TBControl::yPos() {
-    return yaxis->position();
+    return yaxis->getPos();
 }
 
 int TBControl::zPos() {
-    return zaxis->position();
+    return zaxis->getPos();
 }
 
 bool TBControl::xyMoving() {
-    return x->moving() || y->moving();
+    return xaxis->moving() || yaxis->moving();
 }

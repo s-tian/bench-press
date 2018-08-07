@@ -5,15 +5,16 @@ Axis::Axis(int step, int dir, int limit, bool reverse) {
     stepPin = step;
     dirPin = dir;
     limitPin = limit;
-    reverse = reverse;
-    limitState = 0;
+    rev = reverse;
+    limitState = 1;
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
+    pinMode(limitPin, INPUT);
     setBackward();
 }
 
 void Axis::reset() {
-    while (limitState) {
+    while (limitState || digitalRead(limitPin)) { // Try to prevent false positive
         limitState = digitalRead(limitPin);
         stepBlocking();
     }
@@ -22,6 +23,8 @@ void Axis::reset() {
 
 void Axis::setTarget(int newTarget) {
     target = newTarget; 
+    Serial.print("Target set to ");
+    Serial.println(target);
     if (target > position) {
         setForward();
     } else {
@@ -49,16 +52,17 @@ void Axis::stepBlocking() {
 }
 
 void Axis::setForward() {
-    if (reverse) {
+    if (rev) {
         digitalWrite(dirPin, LOW);
     } else {
         digitalWrite(dirPin, HIGH);
     }
+    Serial.println("set forwa");
     direction = 1;
 }
 
 void Axis::setBackward() {
-    if (reverse) {
+    if (rev) {
         digitalWrite(dirPin, HIGH);
     } else {
         digitalWrite(dirPin, LOW);
@@ -79,7 +83,7 @@ void Axis::stepEnd() {
     }
 }
 
-int Axis::position() {
+int Axis::getPos() {
     return position; 
 }
 

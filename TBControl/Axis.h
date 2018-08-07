@@ -7,10 +7,10 @@ class Axis {
     public:
         Axis(int step, int dir, int limit, bool reverse);
         void reset();
-        void setTarget();
+        void setTarget(int target);
         void stepBegin();
         void stepEnd();
-        int position();
+        int getPos();
         void moveToTargetBlocking();
         bool moving();
     private:
@@ -21,10 +21,12 @@ class Axis {
         int stepPin;
         int dirPin;
         int limitPin;
+        bool limitState;
         int position;
         int direction;
-        bool reverse;
-}
+        int target;
+        bool rev;
+};
 
 
 #endif
