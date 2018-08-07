@@ -5,7 +5,7 @@
 
 class Axis {
     public:
-        Axis(int step, dir);
+        Axis(int step, int dir, int limit, bool reverse);
         void reset();
         void setTarget();
         void stepBegin();
@@ -20,8 +20,10 @@ class Axis {
         void setBackward();
         int stepPin;
         int dirPin;
+        int limitPin;
         int position;
         int direction;
+        bool reverse;
 }
 
 

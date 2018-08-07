@@ -8,9 +8,9 @@ TBControl::TBControl(Axis *x, Axis *y, Axis *z) {
 }
 
 void TBControl::initialize() {
-    xaxis->initialize();
-    yaxis->initialize();
-    zaxis->initialize();
+    xaxis->reset();
+    yaxis->reset();
+    zaxis->reset();
 }
 
 void TBControl::setTarget(int x, int y, int z) {
@@ -30,6 +30,10 @@ void TBControl::step() {
 
 void TBControl::moveZ() {
     zaxis->moveToTargetBlocking();
+}
+
+void TBControl::resetZ() {
+    zaxis->reset();
 }
 
 int TBControl::xPos() {

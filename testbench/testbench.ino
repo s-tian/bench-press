@@ -7,9 +7,13 @@
 #define zStepPin 7;
 #define zDirPin 8;
 
-Axis xAxis(xStepPin, xDirPin);
-Axis yAxis(yStepPin, yDirPin);
-Axis zAxis(zStepPin, zDirPin);
+#define xLimPin 0;
+#define yLimPin 0;
+#define zLimPin 0;
+
+Axis xAxis(xStepPin, xDirPin, xLimPin, false);
+Axis yAxis(yStepPin, yDirPin, yLimPin, true);
+Axis zAxis(zStepPin, zDirPin, zLimPin, false);
 
 TBControl tb(&xAxis, &yAxis, &zAxis);
 
@@ -43,6 +47,7 @@ void loop() {
         Serial.print(yaxis->position());
         Serial.print(" z:");
         Serial.println(zaxis->position());
+        tb.resetZ();
     }
 }
 

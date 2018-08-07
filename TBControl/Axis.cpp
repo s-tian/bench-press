@@ -1,16 +1,20 @@
 #include "Arduino.h"
 #include "Axis.h"
 
-Axis::Axis(int step, int dir) {
+Axis::Axis(int step, int dir, int limit, bool reverse) {
     stepPin = step;
     dirPin = dir;
+    limitPin = limit;
+    reverse = reverse;
+    limitState = 0;
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
     setBackward();
 }
 
 void Axis::reset() {
-    while (!limitSwitch.hit()) {
+    while (limitState) {
+        limitState = digitalRead(limitPin);
         stepBlocking();
     }
     position = 0;
@@ -45,12 +49,20 @@ void Axis::stepBlocking() {
 }
 
 void Axis::setForward() {
-    digitalWrite(dirPin, HIGH);
+    if (reverse) {
+        digitalWrite(dirPin, LOW);
+    } else {
+        digitalWrite(dirPin, HIGH);
+    }
     direction = 1;
 }
 
 void Axis::setBackward() {
-    digitalWrite(dirPin, LOW);
+    if (reverse) {
+        digitalWrite(dirPin, HIGH);
+    } else {
+        digitalWrite(dirPin, LOW);
+    }
     direction = -1;
 }
 
