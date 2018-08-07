@@ -1,6 +1,5 @@
 import serial
 import time
-import cv2
 
 # This class provides an interface to the gelsight testbench setup via serial.
 
@@ -23,7 +22,7 @@ class TestBench():
         self.waiting = True 
 
     def __handle_msg(self, msg):
-        if msg == "Initialized" || msg.startswith("Moved"):
+        if msg == "Initialized" or msg.startswith("Moved"):
             self.waiting = False
 
     # Update must be called in a loop to receive messages!

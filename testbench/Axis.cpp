@@ -9,7 +9,7 @@ Axis::Axis(int step, int dir) {
     setBackward();
 }
 
-void Axis::initialize() {
+void Axis::reset() {
     while (!limitSwitch.hit()) {
         stepBlocking();
     }
