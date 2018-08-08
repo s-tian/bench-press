@@ -12,10 +12,10 @@ Axis::Axis(int step, int dir, int limit, bool reverse, int max) {
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
     pinMode(limitPin, INPUT);
-    setBackward();
 }
 
 void Axis::reset() {
+    setBackward();
     while (limitState || digitalRead(limitPin)) { // Try to prevent false positive
         limitState = digitalRead(limitPin);
         stepBlocking();
