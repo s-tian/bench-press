@@ -1,6 +1,9 @@
 #include "Arduino.h"
 #include "TBControl.h"
 #include "Axis.h"
+#include "HX711.h"
+
+#define LOAD_CELL_CALIB_FACTOR = -7050
 
 TBControl::TBControl(Axis *x, Axis *y, Axis *z) {
     xaxis = x;

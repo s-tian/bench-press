@@ -26,6 +26,7 @@ class Axis {
         int direction;
         int target;
         bool rev;
+        int maxSteps;
 };
 
 

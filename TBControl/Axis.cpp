@@ -1,12 +1,14 @@
 #include "Arduino.h"
 #include "Axis.h"
 
-Axis::Axis(int step, int dir, int limit, bool reverse) {
+Axis::Axis(int step, int dir, int limit, bool reverse, int max) {
     stepPin = step;
     dirPin = dir;
     limitPin = limit;
     rev = reverse;
     limitState = 1;
+    target = 0;
+    maxSteps = max;
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
     pinMode(limitPin, INPUT);
@@ -22,6 +24,11 @@ void Axis::reset() {
 }
 
 void Axis::setTarget(int newTarget) {
+    if (newTarget < 0 || newTarget > maxSteps) {
+        Serial.print("Invalid target set at ");
+        Serial.println(newTarget);
+        return;
+    }
     target = newTarget; 
     Serial.print("Target set to ");
     Serial.println(target);

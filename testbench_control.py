@@ -1,10 +1,10 @@
 import serial
-import time
+import datetime
 
 # This class provides an interface to the gelsight testbench setup via serial.
 
 class TestBench():
-    
+
     def __init__(self, name):
         self.ser = serial.Serial(name, baudrate=9600)
         self.currmsg = ""
@@ -16,12 +16,13 @@ class TestBench():
 
     def is_waiting(self):
         return self.waiting
-    
+
     def start(self):
         self.ser.write(b'start')
-        self.waiting = True 
+        self.waiting = True
 
     def __handle_msg(self, msg):
+        print(str(datetime.datetime.now()) + ": " + msg)
         if msg == "Initialized" or msg.startswith("Moved"):
             self.waiting = False
 

@@ -19,12 +19,10 @@ void setup() {
     Serial.println("Starting testbench...");
     tb.initialize();
     Serial.println("Initialized");
-    tb.setTarget(3000, 3000, 0);
 
 }
 
 void loop() {
-    tb.step();
 }
 
 
