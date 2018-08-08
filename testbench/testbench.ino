@@ -22,8 +22,19 @@ const int clk4 =      0;
 Axis xAxis(xStepPin, xDirPin, xLimPin, true, 6000);
 Axis yAxis(yStepPin, yDirPin, yLimPin, false, 12000);
 Axis zAxis(zStepPin, zDirPin, zLimPin, false, 1000);
+//
+//HX711 scales[4] = {
+//    HX711(dOut1, clk1),
+//    HX711(dOut2, clk2),
+//    HX711(dOut3, clk3),
+//    HX711(dOut4, clk4)
+//};
 
-TBControl tb(&xAxis, &yAxis, &zAxis);
+HX711 scales [4] = {
+
+  
+};
+TBControl tb(&xAxis, &yAxis, &zAxis, scales);
 
 void setup() {
     Serial.begin(9600);
@@ -70,6 +81,8 @@ void handleInput(String s) {
     } else if (s == "r") {
         tb.initialize();
         Serial.println("Reset");
+    } else if (s == "l") {
+        tb.log();
     } else {
         // By default, a position command
         int xTarget = s.substring(s.indexOf('x') + 1, s.indexOf('y')).toInt();    

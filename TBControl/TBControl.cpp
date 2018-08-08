@@ -3,12 +3,15 @@
 #include "Axis.h"
 #include "HX711.h"
 
-#define LOAD_CELL_CALIB_FACTOR = -7050
+double TBControl::scaleCalibFactors[] = {-7050.0, -7050.0, -7050.0, -7050.0 };
 
-TBControl::TBControl(Axis *x, Axis *y, Axis *z) {
+
+TBControl::TBControl(Axis *x, Axis *y, Axis *z, HX711 *s) {
     xaxis = x;
     yaxis = y;
     zaxis = z;
+    scales = s;
+    //init_scales();
 }
 
 void TBControl::initialize() {
@@ -55,3 +58,32 @@ int TBControl::zPos() {
 bool TBControl::xyMoving() {
     return xaxis->moving() || yaxis->moving();
 }
+
+void TBControl::tare() {
+    for (int i = 0; i < 4; i++) {
+        (*(scales + i)).tare();
+    }
+}
+
+void TBControl::init_scales() {
+    for (int i = 0; i < 4; i++) {
+        (*(scales + i)).set_scale(scaleCalibFactors[i]);
+    }
+    tare();
+}
+
+void TBControl::log() {
+    Serial.print("X: ");
+    Serial.print(xPos());
+    Serial.print(" Y: ");
+    Serial.print(yPos());
+    Serial.print(" Z: ");
+    Serial.print(zPos());
+    for (int i = 0; i < 4; i++) {
+        Serial.print(i+1);
+        Serial.print(": ");
+        Serial.print((*(scales + i)).get_units());
+    }
+    Serial.println();
+}
+
