@@ -64,7 +64,6 @@ void Axis::setForward() {
     } else {
         digitalWrite(dirPin, HIGH);
     }
-    Serial.println("set forwa");
     direction = 1;
 }
 

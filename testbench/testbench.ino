@@ -10,30 +10,26 @@ const int yLimPin =  22;
 const int zStepPin =  0;
 const int zDirPin =   0;
 const int zLimPin =  26;
-const int dOut1 =     0;
-const int clk1 =      0;
-const int dOut2 =     0;
-const int clk2 =      0;
-const int dOut3 =     0;
-const int clk3 =      0;
-const int dOut4 =     0;
-const int clk4 =      0;
+const int dOut1 =    23;
+const int clk1 =     25;
+const int dOut2 =    29;
+const int clk2 =     27;
+const int dOut3 =    53;
+const int clk3 =     51;
+const int dOut4 =    48;
+const int clk4 =     46;
 
 Axis xAxis(xStepPin, xDirPin, xLimPin, true, 6000);
 Axis yAxis(yStepPin, yDirPin, yLimPin, false, 12000);
 Axis zAxis(zStepPin, zDirPin, zLimPin, false, 1000);
-//
-//HX711 scales[4] = {
-//    HX711(dOut1, clk1),
-//    HX711(dOut2, clk2),
-//    HX711(dOut3, clk3),
-//    HX711(dOut4, clk4)
-//};
 
-HX711 scales [4] = {
-
-  
+HX711 scales[4] = {
+    HX711(dOut1, clk1),
+    HX711(dOut2, clk2),
+    HX711(dOut3, clk3),
+    HX711(dOut4, clk4)
 };
+
 TBControl tb(&xAxis, &yAxis, &zAxis, scales);
 
 void setup() {

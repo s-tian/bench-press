@@ -11,7 +11,7 @@ TBControl::TBControl(Axis *x, Axis *y, Axis *z, HX711 *s) {
     yaxis = y;
     zaxis = z;
     scales = s;
-    //init_scales();
+    init_scales();
 }
 
 void TBControl::initialize() {
@@ -79,10 +79,12 @@ void TBControl::log() {
     Serial.print(yPos());
     Serial.print(" Z: ");
     Serial.print(zPos());
+    Serial.print(" ");
     for (int i = 0; i < 4; i++) {
         Serial.print(i+1);
         Serial.print(": ");
         Serial.print((*(scales + i)).get_units());
+        Serial.print(" ");
     }
     Serial.println();
 }
