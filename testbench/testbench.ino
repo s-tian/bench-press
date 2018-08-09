@@ -68,7 +68,6 @@ void loop() {
     }
 }
 
-
 void handleInput(String s) {
     Serial.println(s);
     if (s == "start") {
