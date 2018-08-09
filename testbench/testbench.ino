@@ -3,13 +3,13 @@
 
 const int xStepPin = 40;
 const int xDirPin =  38;
-const int xLimPin =  24;
+const int xLimPin =  26;
 const int yStepPin = 36;
 const int yDirPin =  34;
-const int yLimPin =  22;
-const int zStepPin =  0;
-const int zDirPin =   0;
-const int zLimPin =  26;
+const int yLimPin =  24;
+const int zStepPin = 32;
+const int zDirPin =  30;
+const int zLimPin =  22;
 const int dOut1 =    23;
 const int clk1 =     25;
 const int dOut2 =    29;
@@ -21,7 +21,7 @@ const int clk4 =     46;
 
 Axis xAxis(xStepPin, xDirPin, xLimPin, true, 6000);
 Axis yAxis(yStepPin, yDirPin, yLimPin, false, 12000);
-Axis zAxis(zStepPin, zDirPin, zLimPin, false, 1000);
+Axis zAxis(zStepPin, zDirPin, zLimPin, true, 1000);
 
 HX711 scales[4] = {
     HX711(dOut1, clk1),
@@ -55,14 +55,15 @@ void loop() {
         if (tb.xyMoving()) {
             tb.step();
         } else {
-            //tb.moveZ();
+            tb.moveZ();
             Serial.print("Moved to: x:");
             Serial.print(tb.xPos());
             Serial.print(" y:");
             Serial.print(tb.yPos());
             Serial.print(" z:");
             Serial.println(tb.zPos());
-            //tb.resetZ();
+            tb.resetZ();
+            Serial.println("Ready");
             idle = true;
         }
     }

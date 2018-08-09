@@ -33,9 +33,9 @@ class TestBench():
 
     def __handle_msg(self, msg):
         pm = str(datetime.datetime.now()) + ": " + msg
-        if msg.startswith("Initialized") or msg.startswith("Moved"):
+        if msg.startswith("Initialized") or msg.startswith("Ready"):
             self.state = State.IDLE
-        if msg.startswith("Starting"):
+        if "Starting" in msg:
             self.state = State.READY
         print(pm)
         return pm

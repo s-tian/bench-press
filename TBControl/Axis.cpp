@@ -56,6 +56,7 @@ void Axis::stepBlocking() {
     delayMicroseconds(500);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(500);
+    position += direction;
 }
 
 void Axis::setForward() {
