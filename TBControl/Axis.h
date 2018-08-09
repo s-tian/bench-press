@@ -13,10 +13,11 @@ class Axis {
         int getPos();
         void moveToTargetBlocking();
         bool moving();
-    private:
         void stepBlocking();
         void stepBlocking(int numSteps);
         void setForward();
+
+    private:
         void setBackward();
         int stepPin;
         int dirPin;

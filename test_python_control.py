@@ -10,24 +10,33 @@ while not tb.ready():
 
 tb.start()
 
+while tb.busy():
+    tb.update()
+
 x = 0
 y = 0
 z = 0
 
 mX = 6000
 mY = 12000
-mZ = 1000
+mZ = 2000
 
-while True:
+tb.target_pos(3000, 6000, 0)
+
+while tb.busy():
     tb.update()
-    if not tb.busy() and x < 6000 and y < 12000 and z < 1000:
-        tb.reqData()
-        time.sleep(0.5)
-        tb.target_pos(0, 0, z)
-        x += mX/10
-        y += mY/10
-        z += mZ/10
 
+tb.press_z()
+
+while tb.busy():
+    tb.update()
+
+print("not qwef")
+
+tb.reset()
+
+while tb.busy():
+    tb.update()
 
 
 

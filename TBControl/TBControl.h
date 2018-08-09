@@ -13,12 +13,14 @@ class TBControl {
         void step();
         void moveZ();
         void resetZ();
+        void feedbackMoveZ();
         bool xyMoving();
         int xPos();
         int yPos();
         int zPos();
         void log();
         static double scaleCalibFactors[];
+        static const int FEEDBACK_LIM;
 
     private:
         Axis *xaxis;

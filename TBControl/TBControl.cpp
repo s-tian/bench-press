@@ -4,7 +4,7 @@
 #include "HX711.h"
 
 double TBControl::scaleCalibFactors[] = {-7050.0, -7050.0, -7050.0, -7050.0 };
-
+const int TBControl::FEEDBACK_LIM = 10;
 
 TBControl::TBControl(Axis *x, Axis *y, Axis *z, HX711 *s) {
     xaxis = x;
@@ -41,6 +41,24 @@ void TBControl::moveZ() {
 
 void TBControl::resetZ() {
     zaxis->reset();
+}
+
+void TBControl::feedbackMoveZ() {
+    double weight = 0; 
+    int st = 0;
+    while (weight < FEEDBACK_LIM) {
+        zaxis->setForward();
+        zaxis->stepBlocking();
+        if (st == 0) {
+            for (int i = 0; i < 4; i++) {
+                weight = max(weight, abs((*(scales + i)).get_units())); 
+            }
+
+        }
+        st = (st + 1) % 20;
+    }
+    Serial.print("Pressed to max force ");
+    Serial.println(weight);
 }
 
 int TBControl::xPos() {
@@ -83,7 +101,7 @@ void TBControl::log() {
     for (int i = 0; i < 4; i++) {
         Serial.print(i+1);
         Serial.print(": ");
-        Serial.print((*(scales + i)).get_units());
+        Serial.print(abs((*(scales + i)).get_units()));
         Serial.print(" ");
     }
     Serial.println();

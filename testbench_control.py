@@ -10,6 +10,8 @@ class State(Enum):
 
 class TestBench():
 
+    IDLE_MSGS = ["Initialized", "Moved", "Reset", "Pressed"]
+
     def __init__(self, name):
         self.ser = serial.Serial(name, baudrate=9600, timeout=1)
         self.currmsg = ""
@@ -18,6 +20,17 @@ class TestBench():
     def target_pos(self, x, y, z):
         msg = 'x' + str(x) + 'y' + str(y) + 'z' + str(z) + '\n'
         self.ser.write(msg.encode())
+        self.state = State.BUSY
+        print(self.state)
+
+    def reset(self):
+        self.ser.write(b'r\n')
+        self.ser.flush()
+        self.state = State.BUSY
+
+    def press_z(self):
+        self.ser.write(b'pz\n')
+        self.ser.flush()
         self.state = State.BUSY
 
     def busy(self):
@@ -33,9 +46,9 @@ class TestBench():
 
     def __handle_msg(self, msg):
         pm = str(datetime.datetime.now()) + ": " + msg
-        if msg.startswith("Initialized") or msg.startswith("Ready"):
+        if any([msg.startswith(key) for key in self.IDLE_MSGS]):
             self.state = State.IDLE
-        if "Starting" in msg:
+        if msg.startswith("Starting"):
             self.state = State.READY
         print(pm)
         return pm

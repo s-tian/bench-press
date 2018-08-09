@@ -21,7 +21,7 @@ const int clk4 =     46;
 
 Axis xAxis(xStepPin, xDirPin, xLimPin, true, 6000);
 Axis yAxis(yStepPin, yDirPin, yLimPin, false, 12000);
-Axis zAxis(zStepPin, zDirPin, zLimPin, true, 1000);
+Axis zAxis(zStepPin, zDirPin, zLimPin, true, 2000);
 
 HX711 scales[4] = {
     HX711(dOut1, clk1),
@@ -62,7 +62,6 @@ void loop() {
             Serial.print(tb.yPos());
             Serial.print(" z:");
             Serial.println(tb.zPos());
-            tb.resetZ();
             Serial.println("Ready");
             idle = true;
         }
@@ -78,6 +77,11 @@ void handleInput(String s) {
     } else if (s == "r") {
         tb.initialize();
         Serial.println("Reset");
+    } else if (s == "rz") {
+        tb.resetZ();
+        Serial.println("Resetting z");
+    } else if (s == "pz") {
+        tb.feedbackMoveZ();
     } else if (s == "l") {
         tb.log();
     } else {
