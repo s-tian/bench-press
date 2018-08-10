@@ -20,8 +20,8 @@ while tb.busy():
 
 tb.reqData()
 
-x = 1700 
-y = 6000 
+x = 1700
+y = 6000
 z = 0
 
 mX = 6000
@@ -39,23 +39,23 @@ for i in range(3):
         tb.update()
         cap.grab()
 
-    tb.press_z()
+    tb.press_z(800)
 
     while tb.busy():
         tb.update()
         cap.grab()
 
-    time.sleep(.5) 
+    time.sleep(.5)
     data = tb.reqData()
     ret, frame = cap.read()
     cv2.imwrite("cap_frame" + str(i) + ".png", frame)
 
     tb.reset_z()
-    
+
     while tb.busy():
         tb.update()
         cap.grab()
-    
+
     x += 1000
 
 while tb.busy():

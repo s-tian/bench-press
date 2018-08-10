@@ -28,8 +28,9 @@ class TestBench():
         self.ser.flush()
         self.state = State.BUSY
 
-    def press_z(self):
-        self.ser.write(b'pz\n')
+    def press_z(self, quick_steps):
+        msg = 'pz' + str(quick_steps) + '\n'
+        self.ser.write(msg.encode())
         self.ser.flush()
         self.state = State.BUSY
 

@@ -79,8 +79,8 @@ void handleInput(String s) {
     } else if (s == "rz") {
         tb.resetZ();
         Serial.println("Reset Z");
-    } else if (s == "pz") {
-        tb.feedbackMoveZ();
+    } else if (s.startsWith("pz")) {
+        tb.feedbackMoveZ(s.substring(s.indexOf('z') + 1.toInt()));
     } else if (s == "l") {
         tb.log();
     } else {

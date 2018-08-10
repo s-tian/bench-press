@@ -43,9 +43,15 @@ void TBControl::resetZ() {
     zaxis->reset();
 }
 
-void TBControl::feedbackMoveZ() {
+void TBControl::feedbackMoveZ(int fastSteps) {
     double weight = 0; 
     int st = 0;
+    
+    // fastSteps determines how many steps will be 
+    // taken quickly, with no load cell feedback.
+    
+    zaxis->stepBlocking(fastSteps);
+
     while (weight < FEEDBACK_LIM) {
         zaxis->setForward();
         zaxis->stepBlocking();
