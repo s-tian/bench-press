@@ -33,6 +33,11 @@ class TestBench():
         self.ser.flush()
         self.state = State.BUSY
 
+    def reset_z(self):
+        self.ser.write(b'rz\n')
+        self.ser.flush()
+        self.state = State.BUSY
+
     def busy(self):
         return self.state == State.BUSY
 
