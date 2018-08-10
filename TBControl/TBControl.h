@@ -13,7 +13,7 @@ class TBControl {
         void step();
         void moveZ();
         void resetZ();
-        void feedbackMoveZ(int fastSteps);
+        void feedbackMoveZ(int fastSteps, double thresh);
         bool xyMoving();
         int xPos();
         int yPos();

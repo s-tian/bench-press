@@ -80,7 +80,7 @@ void handleInput(String s) {
         tb.resetZ();
         Serial.println("Reset Z");
     } else if (s.startsWith("pz")) {
-        tb.feedbackMoveZ(s.substring(s.indexOf('z') + 1.toInt()));
+        tb.feedbackMoveZ(s.substring(s.indexOf('z') + 1, s.indexOf('w')).toInt(), s.substring(s.indexOf('w')+1).toInt());
     } else if (s == "l") {
         tb.log();
     } else {

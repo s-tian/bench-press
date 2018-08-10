@@ -11,13 +11,13 @@ TBControl::TBControl(Axis *x, Axis *y, Axis *z, HX711 *s) {
     yaxis = y;
     zaxis = z;
     scales = s;
-    init_scales();
 }
 
 void TBControl::initialize() {
     zaxis->reset();
     xaxis->reset();
     yaxis->reset();
+    init_scales();
 }
 
 void TBControl::setTarget(int x, int y, int z) {
@@ -43,17 +43,17 @@ void TBControl::resetZ() {
     zaxis->reset();
 }
 
-void TBControl::feedbackMoveZ(int fastSteps) {
+void TBControl::feedbackMoveZ(int fastSteps, double thresh) {
     double weight = 0; 
     int st = 0;
     
     // fastSteps determines how many steps will be 
     // taken quickly, with no load cell feedback.
+    zaxis->setForward();
     
     zaxis->stepBlocking(fastSteps);
 
-    while (weight < FEEDBACK_LIM) {
-        zaxis->setForward();
+    while (weight < thresh) {
         zaxis->stepBlocking();
         if (st == 0) {
             weight = 0;
@@ -94,6 +94,7 @@ void TBControl::init_scales() {
     for (int i = 0; i < 4; i++) {
         (*(scales + i)).set_scale(scaleCalibFactors[i]);
     }
+    delay(500);
     tare();
 }
 
