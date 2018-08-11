@@ -72,6 +72,9 @@ class TestBench():
     def reqData(self):
         self.ser.write(b'l\n')
         self.ser.flush()
-        return self.ser.readline()
+        data = self.ser.readline()
+        while data.decode().startswith('l'): # Ignore echo of log request
+            data = self.ser.readline()
+        return data.decode()
 
 
