@@ -28,8 +28,8 @@ class TestBench():
         self.ser.flush()
         self.state = State.BUSY
 
-    def press_z(self, quick_steps):
-        msg = 'pz' + str(quick_steps) + '\n'
+    def press_z(self, quick_steps, thresh):
+        msg = 'pz' + str(quick_steps) + 'w' + str(thresh) + '\n'
         self.ser.write(msg.encode())
         self.ser.flush()
         self.state = State.BUSY
@@ -72,6 +72,9 @@ class TestBench():
     def reqData(self):
         self.ser.write(b'l\n')
         self.ser.flush()
-        return self.ser.readline()
+        data = self.ser.readline()
+        while data.decode().startswith('l'): # Ignore echo of log request
+            data = self.ser.readline()
+        return data.decode()
 
 
