@@ -7,7 +7,11 @@ import sys
 from scipy.io import savemat
 
 # XY coordinates experimentally determined for each of the shapes
-SHAPE_POS = {'star': {'x': 1384, 'y': 6073}}
+SHAPE_POS = {'star': {'x': 1384, 'y': 6073}, 
+             'triangle': {'x': 1400, 'y': 7800},
+             'square': { 'x': 2650, 'y': 7780},
+             'hemisphere': {'x': 2650, 'y': 6040}
+            }
 
 #Ex: python collect_data.py star 100 80 3
 shape_name = sys.argv[1]
@@ -42,8 +46,8 @@ mX = 6000
 mY = 12000
 mZ = 2000
 
-MIN_FORCE_THRESH = 10 
-MAX_FORCE_THRESH = 14 
+MIN_FORCE_THRESH = 7 
+MAX_FORCE_THRESH = 19 
 
 pre_press_frames = []
 press_frames = []
@@ -80,7 +84,7 @@ for i in range(num_trials):
     time.sleep(0.25)
 
     ret, frame = cap.read()
-    cv2.imwrite("cap_framebefore" + str(i) + ".png", frame)
+    #cv2.imwrite("cap_framebefore" + str(i) + ".png", frame)
     ppf = np.copy(frame)
 
     force_threshold = MIN_FORCE_THRESH 
@@ -119,7 +123,7 @@ for i in range(num_trials):
         force_4.append(float(data[:data.find(' ')]))
          
         ret, frame = cap.read()
-        cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
+        #cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
         pre_press_frames.append(np.copy(ppf))
         press_frames.append(np.copy(frame))
 
@@ -177,5 +181,3 @@ tb.reset()
 
 while tb.busy():
     tb.update()
-    
-         
