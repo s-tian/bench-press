@@ -32,8 +32,10 @@ plt.show()
 
 print(thresh.shape)
 
+plt.imshow(pre_press_frames[0])
+print(pre_press_frames.shape)
+
 for i in range(0, 200, 4):
-    plt.imshow(pre_press_frames[0])
     plt.show()
     plt.figure(1)
     plt.subplot(411)
