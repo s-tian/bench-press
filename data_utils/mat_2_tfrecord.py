@@ -126,4 +126,22 @@ for fname in tqdm(mat_paths):
                 writer.write(ex.SerializeToString()) 
             val_ind += record_size 
             val = []
-                 
+
+# Clear out data in 'incomplete' files
+
+if len(train) > 0:
+    writer = tf.python_io.TFRecordWriter('{}train/train_example_{}_to_{}.tfrecord'.format(output_dir, train_ind, train_ind + len(train) - 1))
+    for ex in train:
+        writer.write(ex.SerializeToString()) 
+
+if len(test) > 0:
+    writer = tf.python_io.TFRecordWriter('{}test/test_{}_to_{}.tfrecord'.format(output_dir, test_ind, test_ind + len(test) - 1))
+    for ex in test:
+        writer.write(ex.SerializeToString()) 
+
+if len(val) > 0:
+    writer = tf.python_io.TFRecordWriter('{}val/_val{}_to_{}.tfrecord'.format(output_dir, val_ind, val_ind + len(val) - 1))
+    for ex in val:
+        writer.write(ex.SerializeToString()) 
+
+print('Done converting {} .mat files.'.format(len(mat_paths)))
