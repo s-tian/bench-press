@@ -18,26 +18,30 @@ SHAPE_POS = {'star': {'x': 1384, 'y': 6073},
 
 '''
 Command line arg format:
-python collect_data.py [shape_name] [num_presses] [offset_radius] [force_inc]
-Ex: python collect_data.py star 100 80 3
+python collect_data.py [shape_name] [num_presses] [offset_radius] [images_per_press] [min_force] [max_force]
+Ex: python collect_data.py star 100 5 7 19 
 
 Presses at 100 uniformly randomly selected locations in a radius of 80 steps
-centered at the star, taking an image at every increment of avg 3 reading 
-from load cells from minimum to maximum force threshold, as defined below.
+centered at the star, taking an image at each of 5 uniformly randomly selected 
+force thresholds based on load cells from minimum to maximum force threshold.
 '''
 
 parser = argparse.ArgumentParser(description='Collect gelsight test data')
 parser.add_argument('shape_name', metavar='shape', type=str, choices=SHAPE_POS.keys(), help='name of shape')
 parser.add_argument('num_trials', metavar='N', type=int, help='number of presses to collect')
 parser.add_argument('radius', metavar='radius', type=int, help='radius of circle to uniformly select press location in')
-parser.add_argument('force_inc', metavar='increment', type=int, default=3, help='force threshold increment at which to take data while pressing. Determines how many images are taken and at what interval.')
+parser.add_argument('num_images', metavar='num_images', type=int, help='number of images to get per press')
+parser.add_argument('min_force', metavar='min_force', type=float, help='minimum of the range to select random threshold forces from')
+parser.add_argument('max_force', metavar='max_force', type=float, help='maximum of the range to select random threshold forces from')
 
 args = parser.parse_args()
 
 shape_name = args.shape_name
 num_trials = args.num_trials
 radius = args.radius
-force_inc = args.force_inc
+images_per_press = args.num_images
+min_force_thresh = args.min_force
+max_force_thresh = args.max_force
 
 assert shape_name in SHAPE_POS, "Invalid shape!"
 
@@ -119,12 +123,13 @@ for i in range(num_trials):
     # cv2.imwrite("cap_framebefore" + str(i) + ".png", frame)
     ppf = np.copy(frame)
 
-    force_threshold = MIN_FORCE_THRESH 
+    force_thresholds = np.sort(np.random.uniform(min_force_thresh, max_force_thresh, 
+                                                 size=images_per_press))
     
-    while force_threshold < MAX_FORCE_THRESH:
-
+    for i, force_threshold in enumerate(force_thresholds): 
+        
         # Initial press -- go fast on first 1200 stepss
-        if force_threshold == MIN_FORCE_THRESH: 
+        if i == 0: 
             tb.press_z(1200, force_threshold)
         else:
             tb.press_z(0, force_threshold)
@@ -157,8 +162,6 @@ for i in range(num_trials):
         # cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
         pre_press_frames.append(np.copy(ppf))
         press_frames.append(np.copy(frame))
-
-        force_threshold += force_inc 
         
     if i % 5 == 0: # Save progress often so we don't lose data!
         savemat('data/' + ctimestr + '-' + shape_name + '.mat',
@@ -181,16 +184,6 @@ for i in range(num_trials):
     while tb.busy():
         tb.update()
         cap.grab()
-
-# print(x_pos)
-# print(y_pos)
-# print(z_pos)
-# print(shape)
-# print(force_thresh)
-# print(force_1)
-# print(force_2)
-# print(force_3)
-# print(force_4)
 
 savemat('data/' + ctimestr + '-' + shape_name + '.mat',
         {
