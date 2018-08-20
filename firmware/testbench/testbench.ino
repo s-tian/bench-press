@@ -53,9 +53,10 @@ void loop() {
     }
     if (!idle) {
         if (tb.xyMoving()) {
-            tb.step();
+            tb.stepXY();
+        } else if (tb.zMoving()) {
+            tb.stepZ();
         } else {
-            tb.moveZ();
             Serial.print("Moved to: x:");
             Serial.print(tb.xPos());
             Serial.print(" y:");

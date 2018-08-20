@@ -10,11 +10,13 @@ class TBControl {
         TBControl(Axis *x, Axis *y, Axis *z, HX711 *scales); 
         void initialize();
         void setTarget(int x, int y, int z);
-        void step();
-        void moveZ();
+        void stepXY();
+        void stepZ();
+        void moveZToTargetBlocking();
         void resetZ();
         void feedbackMoveZ(int fastSteps, double thresh);
         bool xyMoving();
+        bool zMoving();
         int xPos();
         int yPos();
         int zPos();

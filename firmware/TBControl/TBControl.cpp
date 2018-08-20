@@ -26,7 +26,12 @@ void TBControl::setTarget(int x, int y, int z) {
     zaxis->setTarget(z);
 }
 
-void TBControl::step() {
+/**
+ * Take a single step in BOTH x and y directions if target not yet reached. 
+ * If one axis target has been reached but not the other, move only one.
+ */
+
+void TBControl::stepXY() {
     xaxis->stepBegin();
     yaxis->stepBegin();
     delayMicroseconds(500);
@@ -35,13 +40,28 @@ void TBControl::step() {
     delayMicroseconds(500);
 }
 
-void TBControl::moveZ() {
+/**
+ * Blocking command to reach target Z position.
+ */
+
+void TBControl::moveZToTargetBlocking() {
     zaxis->moveToTargetBlocking();
+}
+
+void TBControl::stepZ() {
+    zaxis->stepBegin();
+    delayMicroseconds(500);
+    zaxis->stepEnd();
+    delayMicroseconds(500);
 }
 
 void TBControl::resetZ() {
     zaxis->reset();
 }
+
+/**
+ * Move downward in the Z dir until specified avg force reading is reached.
+ */
 
 void TBControl::feedbackMoveZ(int fastSteps, double thresh) {
     double weight = 0; 
@@ -82,6 +102,10 @@ int TBControl::zPos() {
 
 bool TBControl::xyMoving() {
     return xaxis->moving() || yaxis->moving();
+}
+
+bool TBControl::zMoving() {
+    return zaxis->moving();
 }
 
 void TBControl::tare() {
