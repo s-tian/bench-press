@@ -1,5 +1,6 @@
 import serial
 import datetime
+import cv2
 from enum import Enum
 
 # This class provides an interface to the gelsight testbench setup via serial.
@@ -12,13 +13,14 @@ class TestBench():
 
     IDLE_MSGS = ["Initialized", "Moved", "Reset", "Pressed"]
 
-    def __init__(self, name):
+    def __init__(self, name, cam_index):
         self.ser = serial.Serial(name, baudrate=9600, timeout=1)
+        self.cap = cv2.VideoCapture(cam_index)
         self.currmsg = ""
         self.state = State.IDLE
 
     def target_pos(self, x, y, z):
-        """ 
+        """
         Command testbench to visit an xyz position.
         After calling target_pos, wait for the testbench to become idle again.
         """
@@ -30,12 +32,12 @@ class TestBench():
 
     def reset(self):
         """
-        Command testbench to reset using limit switches and reestablish 
+        Command testbench to reset using limit switches and reestablish
         the origin.
         After calling reset, wait for the testbench to become idle again.
         """
 
-        self.ser.write(b'r\n') 
+        self.ser.write(b'r\n')
         self.ser.flush()
         self.state = State.BUSY
 
@@ -47,7 +49,7 @@ class TestBench():
         a layer of serial communication.
         After calling press_z, wait for the testbench to become idle again.
         """
-    
+
         msg = 'pz' + str(quick_steps) + 'w' + str(thresh) + '\n'
         self.ser.write(msg.encode())
         self.ser.flush()
@@ -57,7 +59,7 @@ class TestBench():
         """
         Command testbench to reset the Z axis ONLY using the limit switch,
         re-establishing the origin.
-        After calling reset_z, wait for the testbench to become idle again. 
+        After calling reset_z, wait for the testbench to become idle again.
         """
 
         self.ser.write(b'rz\n')
@@ -72,7 +74,7 @@ class TestBench():
 
     def start(self):
         """
-        Command testbench to complete init sequence. 
+        Command testbench to complete init sequence.
         This means resetting the axes and re-establishing the origin, as
         well as initializing and tareing the load cells.
         After calling start, wait for the testbench to become idle again.
@@ -93,7 +95,7 @@ class TestBench():
 
     def update(self):
         """
-        If you are waiting on a message (for example, indicator that state will 
+        If you are waiting on a message (for example, indicator that state will
         change from busy to idle), call update in a loop, otherwise new messages
         will not be received over serial.
         """
@@ -105,12 +107,17 @@ class TestBench():
                 self.currmsg = ""
             else:
                 self.currmsg += ch
+        # Keep camera buffer empty
+        self.cap.grab()
 
-    def reqData(self):
+    def get_frame(self):
+        return self.cap.read()
+
+    def req_data(self):
         """
-        Queries testbench for latest XYZ position and load cell readings. 
-        This method, unlike other commands sent to the testbench, 
-        is _synchronous__. The state does not change to busy, and the string 
+        Queries testbench for latest XYZ position and load cell readings.
+        This method, unlike other commands sent to the testbench,
+        is _synchronous__. The state does not change to busy, and the string
         returned is directly the data string.
         """
 

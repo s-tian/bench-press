@@ -8,7 +8,7 @@ from scipy.io import savemat
 import argparse
 
 # XY coordinates experimentally determined for each of the shapes
-SHAPE_POS = {'star': {'x': 1384, 'y': 6073}, 
+SHAPE_POS = {'star': {'x': 1384, 'y': 6073},
              'triangle': {'x': 1400, 'y': 7800},
              'square': { 'x': 2650, 'y': 7780},
              'hemisphere': {'x': 2650, 'y': 6040},
@@ -19,10 +19,10 @@ SHAPE_POS = {'star': {'x': 1384, 'y': 6073},
 '''
 Command line arg format:
 python collect_data.py [shape_name] [num_presses] [offset_radius] [images_per_press] [min_force] [max_force]
-Ex: python collect_data.py star 100 5 7 19 
+Ex: python collect_data.py star 100 5 7 19
 
 Presses at 100 uniformly randomly selected locations in a radius of 80 steps
-centered at the star, taking an image at each of 5 uniformly randomly selected 
+centered at the star, taking an image at each of 5 uniformly randomly selected
 force thresholds based on load cells from minimum to maximum force threshold.
 '''
 
@@ -45,8 +45,7 @@ max_force_thresh = args.max_force
 
 assert shape_name in SHAPE_POS, "Invalid shape!"
 
-tb = TestBench('/dev/ttyACM0')
-cap = cv2.VideoCapture(0)
+tb = TestBench('/dev/ttyACM0', 0)
 
 while not tb.ready():
     time.sleep(0.1)
@@ -58,25 +57,25 @@ while tb.busy():
     tb.update()
 
 '''
-Grab a quick reading, use to verify that load cells have been initialized 
+Grab a quick reading, use to verify that load cells have been initialized
 and tared correctly
 '''
 
-print(tb.reqData())
+print(tb.req_data())
 
-x = SHAPE_POS[shape_name]['x'] 
-y = SHAPE_POS[shape_name]['y'] 
+x = SHAPE_POS[shape_name]['x']
+y = SHAPE_POS[shape_name]['y']
 z = 0
 
 dx = 0
-dy = 0 
+dy = 0
 
 mX = 6000
 mY = 12000
 mZ = 2000
 
-MIN_FORCE_THRESH = 7 
-MAX_FORCE_THRESH = 19 
+MIN_FORCE_THRESH = 7
+MAX_FORCE_THRESH = 19
 
 pre_press_frames = []
 press_frames = []
@@ -90,56 +89,54 @@ force_2 = []
 force_3 = []
 force_4 = []
 
-ctimestr = datetime.datetime.now().strftime("%Y-%m-%d:%H:%M:%S") 
+ctimestr = datetime.datetime.now().strftime("%Y-%m-%d:%H:%M:%S")
 
 for i in range(num_trials):
-    
+
     p_x = int(np.random.uniform(-radius, radius))
     p_y = int(np.random.uniform(-radius, radius))
 
     while p_x**2 + p_y**2 > radius**2:
         p_x = int(np.random.uniform(-radius, radius))
         p_y = int(np.random.uniform(-radius, radius))
-    
+
     dx = p_x
     dy = p_y
-    
+
     target_x = x + dx
     target_y = y + dy
-    
+
     assert target_x < mX, "Invalid X target: " + str(target_x)
     assert target_y < mY, "Invalid Y target: " + str(target_y)
-    
+
     tb.target_pos(target_x, target_y, 0)
 
     while tb.busy():
         tb.update()
-        cap.grab()
-    
+
     time.sleep(0.25)
-    
+
     # Grab before pressing image
-    ret, frame = cap.read()
+    ret, frame = tb.get_frame()
     # cv2.imwrite("cap_framebefore" + str(i) + ".png", frame)
     ppf = np.copy(frame)
 
-    force_thresholds = np.sort(np.random.uniform(min_force_thresh, max_force_thresh, 
+    force_thresholds = np.sort(np.random.uniform(min_force_thresh, max_force_thresh,
                                                  size=images_per_press))
-    
-    for i, force_threshold in enumerate(force_thresholds): 
-        
+
+    for i, force_threshold in enumerate(force_thresholds):
+
         # Initial press -- go fast on first 1200 stepss
-        if i == 0: 
+        if i == 0:
             tb.press_z(1200, force_threshold)
         else:
             tb.press_z(0, force_threshold)
 
         while tb.busy():
             tb.update()
-            cap.grab()
 
         time.sleep(0.5)
-        data = tb.reqData()
+        data = tb.req_data()
         print(data)
 
         x_pos.append(int(data[data.find('X')+3:data.find('Y')]))
@@ -157,12 +154,12 @@ for i in range(num_trials):
         force_3.append(float(data[:data.find(' ')]))
         data = data[data.find(' ') + 4:]
         force_4.append(float(data[:data.find(' ')]))
-         
-        ret, frame = cap.read()
+
+        ret, frame = tb.get_frame()
         # cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
         pre_press_frames.append(np.copy(ppf))
         press_frames.append(np.copy(frame))
-        
+
     if i % 5 == 0: # Save progress often so we don't lose data!
         savemat('data/' + ctimestr + '-' + shape_name + '.mat',
                 {
@@ -176,14 +173,13 @@ for i in range(num_trials):
                     "force_3": force_3,
                     "force_4": force_4,
                     "press_frames": press_frames,
-                    "pre_press_frames" : pre_press_frames 
+                    "pre_press_frames" : pre_press_frames
                 })
 
     tb.reset_z()
 
     while tb.busy():
         tb.update()
-        cap.grab()
 
 savemat('data/' + ctimestr + '-' + shape_name + '.mat',
         {
@@ -197,7 +193,7 @@ savemat('data/' + ctimestr + '-' + shape_name + '.mat',
             "force_3": force_3,
             "force_4": force_4,
             "press_frames": press_frames,
-            "pre_press_frames" : pre_press_frames 
+            "pre_press_frames" : pre_press_frames
         })
 
 tb.reset()
