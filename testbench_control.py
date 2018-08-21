@@ -111,14 +111,16 @@ class TestBench():
         self.cap.grab()
 
     def get_frame(self):
-        return self.cap.read()
+        ret, frame = self.cap.read()
+        assert ret, "Failed to get frame"
+        return frame
 
     def req_data(self):
         """
         Queries testbench for latest XYZ position and load cell readings.
         This method, unlike other commands sent to the testbench,
-        is _synchronous__. The state does not change to busy, and the string
-        returned is directly the data string.
+        is _synchronous_. The state does not change to busy, and the return
+        value is a dictionary with parsed values.
         """
 
         self.ser.write(b'l\n')
@@ -126,6 +128,20 @@ class TestBench():
         data = self.ser.readline()
         while data.decode().startswith('l'): # Ignore echo of log request
             data = self.ser.readline()
-        return data.decode()
+        return self.__parse_data_str(data.decode())
 
-
+    def __parse_data_str(self, data):
+        """
+        Turn data strings from testbench into usable dictionaries
+        """
+        res = {}
+        res['x'] = int(data[data.find('X')+3:data.find('Y')])
+        res['y'] = int(data[data.find('Y')+3:data.find('Z')])
+        data = data[data.find('Z') + 3:]
+        res['z'] = int(data[:data.find(' ')])
+        data = data[data.find(':') + 2:]
+        for i in range(4):
+            res['force_' + str(i+1)] = float(data[:data.find(' ')])
+            if i < 3:
+                data = data[data.find(' ') + 4:]
+        return res

@@ -139,21 +139,17 @@ for i in range(num_trials):
         data = tb.req_data()
         print(data)
 
-        x_pos.append(int(data[data.find('X')+3:data.find('Y')]))
-        y_pos.append(int(data[data.find('Y')+3:data.find('Z')]))
         shape.append(shape_name)
         force_thresh.append(force_threshold)
-        data = data[data.find('Z') + 3:]
-        z_pos.append(int(data[:data.find(' ')]))
-        ti = data.find(":")
-        data = data[ti+2:]
-        force_1.append(float(data[:data.find(' ')]))
-        data = data[data.find(' ') + 4:]
-        force_2.append(float(data[:data.find(' ')]))
-        data = data[data.find(' ') + 4:]
-        force_3.append(float(data[:data.find(' ')]))
-        data = data[data.find(' ') + 4:]
-        force_4.append(float(data[:data.find(' ')]))
+
+        x_pos.append(data['x'])
+        y_pos.append(data['y'])
+        z_pos.append(data['z'])
+        force_1.append(data['force_1'])
+        force_2.append(data['force_2'])
+        force_3.append(data['force_3'])
+        force_4.append(data['force_4'])
+
 
         ret, frame = tb.get_frame()
         # cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
