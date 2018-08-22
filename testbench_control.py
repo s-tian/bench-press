@@ -16,6 +16,8 @@ class TestBench():
     def __init__(self, name, cam_index):
         self.ser = serial.Serial(name, baudrate=9600, timeout=1)
         self.cap = cv2.VideoCapture(cam_index)
+        self.height = self.cap.get(cv2.CV_CAP_PROP_FRAME_HEIGHT)
+        self.width = self.cap.get(cv2.CV_CAP_PROP_FRAME_WIDTH)
         self.currmsg = ""
         self.state = State.IDLE
 
@@ -145,3 +147,6 @@ class TestBench():
             if i < 3:
                 data = data[data.find(' ') + 4:]
         return res
+
+    def frame_shape(self):
+        return (self.height, self.width)
