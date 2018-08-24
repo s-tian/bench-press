@@ -16,8 +16,8 @@ class TestBench():
     def __init__(self, name, cam_index):
         self.ser = serial.Serial(name, baudrate=9600, timeout=1)
         self.cap = cv2.VideoCapture(cam_index)
-        self.height = self.cap.get(cv2.CV_CAP_PROP_FRAME_HEIGHT)
-        self.width = self.cap.get(cv2.CV_CAP_PROP_FRAME_WIDTH)
+        self.height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.currmsg = ""
         self.state = State.IDLE
 

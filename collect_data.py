@@ -117,7 +117,7 @@ for i in range(num_trials):
     time.sleep(0.25)
 
     # Grab before pressing image
-    ret, frame = tb.get_frame()
+    frame = tb.get_frame()
     # cv2.imwrite("cap_framebefore" + str(i) + ".png", frame)
     ppf = np.copy(frame)
 
@@ -151,7 +151,7 @@ for i in range(num_trials):
         force_4.append(data['force_4'])
 
 
-        ret, frame = tb.get_frame()
+        frame = tb.get_frame()
         # cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
         pre_press_frames.append(np.copy(ppf))
         press_frames.append(np.copy(frame))
