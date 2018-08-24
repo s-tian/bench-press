@@ -18,7 +18,7 @@ SHAPE_POS = {'star': {'x': 1384, 'y': 6073},
 
 '''
 Command line arg format:
-python collect_data.py [shape_name] [num_presses] [offset_radius] [images_per_press] [min_force] [max_force]
+python collect_data.py [shape_name] [num_presses] [offset_radius] [images_per_press] [min_force] [max_force] [--output_dir]
 Ex: python collect_data.py star 100 5 7 19
 
 Presses at 100 uniformly randomly selected locations in a radius of 80 steps
@@ -33,6 +33,7 @@ parser.add_argument('radius', metavar='radius', type=int, help='radius of circle
 parser.add_argument('num_images', metavar='num_images', type=int, help='number of images to get per press')
 parser.add_argument('min_force', metavar='min_force', type=float, help='minimum of the range to select random threshold forces from')
 parser.add_argument('max_force', metavar='max_force', type=float, help='maximum of the range to select random threshold forces from')
+parser.add_argument('--out', metavar='out', type=str, default='data/', help='dir for output data')
 
 args = parser.parse_args()
 
@@ -157,7 +158,7 @@ for i in range(num_trials):
         press_frames.append(np.copy(frame))
 
     if i % 5 == 0: # Save progress often so we don't lose data!
-        savemat('data/' + ctimestr + '-' + shape_name + '.mat',
+        savemat(out + ctimestr + '-' + shape_name + '.mat',
                 {
                     "x": x_pos,
                     "y": y_pos,
@@ -177,7 +178,7 @@ for i in range(num_trials):
     while tb.busy():
         tb.update()
 
-savemat('data/' + ctimestr + '-' + shape_name + '.mat',
+savemat(out + ctimestr + '-' + shape_name + '.mat',
         {
             "x": x_pos,
             "y": y_pos,
