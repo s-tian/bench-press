@@ -52,9 +52,10 @@ void loop() {
         }
     }
     if (!idle) {
-        if (tb.xyMoving()) {
+        while (tb.xyMoving()) {
             tb.stepXY();
-        } else if (tb.zMoving()) {
+        }
+        if (tb.zMoving()) {
             tb.stepZ();
         } else {
 //            Serial.print("Moved to: x:");
@@ -64,6 +65,7 @@ void loop() {
 //            Serial.print(" z:");
 //            Serial.println(tb.zPos());
             Serial.println("Ready");
+            
             Serial.flush();
             idle = true;
         }

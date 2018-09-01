@@ -32,9 +32,11 @@ class TBControl {
         HX711 *scales;
         void tare();
         void init_scales();
-        int xnormD;
-        int ynormD;
-        int xyCount;
+        unsigned long xtime;
+        unsigned long ytime;
+        unsigned long pytime;
+        unsigned long pxtime;
+        
 };
 
 #endif

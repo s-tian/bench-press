@@ -11,9 +11,10 @@ TBControl::TBControl(Axis *x, Axis *y, Axis *z, HX711 *s) {
     yaxis = y;
     zaxis = z;
     scales = s;
-    xnormD = 0;
-    ynormD = 0;
-    xyCount = 0;
+    xtime = 0;
+    pxtime = 0;
+    ytime = 0;
+    pytime = 0;
 }
 
 void TBControl::initialize() {
@@ -35,25 +36,51 @@ void TBControl::setTarget(int x, int y, int z) {
  */
 
 void TBControl::stepXY() {
-    if (xyCount % xnormD == 0) {
+    unsigned long time = micros();
+    int diffx = time - pxtime;
+    int diffy = time - pytime; 
+    bool xstep = abs(diffx) > xtime;
+    bool ystep = abs(diffy) > ytime;
+
+    if (xstep) {
         xaxis->stepBegin();
-        delayMicroseconds(500);
-        xaxis->stepEnd();
-        delayMicroseconds(500);
     }
-    if (xyCount % ynormD == 0) {
+    if (ystep) {
         yaxis->stepBegin();
-        delayMicroseconds(500);
-        yaxis->stepEnd();
-        delayMicroseconds(500);
     }
-    xyCount++;
+
+    if (xstep) {
+        xaxis->stepEnd();
+    }
+
+    if (ystep) {
+        yaxis->stepEnd();
+    }
+
+    unsigned long etime = micros();
+    if (xstep) {
+        pxtime = etime;
+    }
+    if (ystep) {
+        pytime = etime; 
+    }
 }
 
 void TBControl::moveNorm() {
-    xnormD = xaxis->distToTarget();
-    ynormD = yaxis->distToTarget();
-    xyCount = 0;
+    
+    unsigned long xd = xaxis->distToTarget();
+    unsigned long yd = yaxis->distToTarget();
+    if (xd > yd) { 
+        xtime = 1000;
+        ytime = (xtime * xd) / yd;
+    } else {
+        ytime = 1000;
+        xtime = (ytime * yd) / xd;
+        Serial.println(xtime);
+    }
+    unsigned long time = micros();
+    pxtime = time;
+    pytime = time;
 }
 
 /**
@@ -89,7 +116,7 @@ void TBControl::feedbackMoveZ(int fastSteps, double thresh) {
     
     zaxis->stepBlocking(fastSteps);
 
-    while (weight < thresh) {
+    while (weight < thresh && zPos() < 1200) {
         zaxis->stepBlocking();
         if (st == 0) {
             weight = 0;
