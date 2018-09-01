@@ -11,6 +11,9 @@ TBControl::TBControl(Axis *x, Axis *y, Axis *z, HX711 *s) {
     yaxis = y;
     zaxis = z;
     scales = s;
+    xnormD = 0;
+    ynormD = 0;
+    xyCount = 0;
 }
 
 void TBControl::initialize() {
@@ -32,12 +35,25 @@ void TBControl::setTarget(int x, int y, int z) {
  */
 
 void TBControl::stepXY() {
-    xaxis->stepBegin();
-    yaxis->stepBegin();
-    delayMicroseconds(500);
-    xaxis->stepEnd();
-    yaxis->stepEnd();
-    delayMicroseconds(500);
+    if (xyCount % xnormD == 0) {
+        xaxis->stepBegin();
+        delayMicroseconds(500);
+        xaxis->stepEnd();
+        delayMicroseconds(500);
+    }
+    if (xyCount % ynormD == 0) {
+        yaxis->stepBegin();
+        delayMicroseconds(500);
+        yaxis->stepEnd();
+        delayMicroseconds(500);
+    }
+    xyCount++;
+}
+
+void TBControl::moveNorm() {
+    xnormD = xaxis->distToTarget();
+    ynormD = yaxis->distToTarget();
+    xyCount = 0;
 }
 
 /**

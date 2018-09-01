@@ -21,7 +21,7 @@ const int clk4 =     46;
 
 Axis xAxis(xStepPin, xDirPin, xLimPin, true, 6000);
 Axis yAxis(yStepPin, yDirPin, yLimPin, false, 12000);
-Axis zAxis(zStepPin, zDirPin, zLimPin, true, 2000);
+Axis zAxis(zStepPin, zDirPin, zLimPin, true, 1250);
 
 HX711 scales[4] = {
     HX711(dOut1, clk1),
@@ -33,7 +33,7 @@ HX711 scales[4] = {
 TBControl tb(&xAxis, &yAxis, &zAxis, scales);
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(250000);
     Serial.println("Starting testbench...");
 }
 
@@ -57,13 +57,14 @@ void loop() {
         } else if (tb.zMoving()) {
             tb.stepZ();
         } else {
-            Serial.print("Moved to: x:");
-            Serial.print(tb.xPos());
-            Serial.print(" y:");
-            Serial.print(tb.yPos());
-            Serial.print(" z:");
-            Serial.println(tb.zPos());
+//            Serial.print("Moved to: x:");
+//            Serial.print(tb.xPos());
+//            Serial.print(" y:");
+//            Serial.print(tb.yPos());
+//            Serial.print(" z:");
+//            Serial.println(tb.zPos());
             Serial.println("Ready");
+            Serial.flush();
             idle = true;
         }
     }
@@ -90,6 +91,7 @@ void handleInput(String s) {
         int yTarget = s.substring(s.indexOf('y') + 1, s.indexOf('z')).toInt();
         int zTarget = s.substring(s.indexOf('z') + 1).toInt();
         tb.setTarget(xTarget, yTarget, zTarget);
+        tb.moveNorm();
         idle = false;
     }
 }

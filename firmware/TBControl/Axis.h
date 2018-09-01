@@ -16,6 +16,7 @@ class Axis {
         void stepBlocking();
         void stepBlocking(int numSteps);
         void setForward();
+        int distToTarget();
 
     private:
         void setBackward();

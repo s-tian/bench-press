@@ -15,6 +15,7 @@ class TBControl {
         void moveZToTargetBlocking();
         void resetZ();
         void feedbackMoveZ(int fastSteps, double thresh);
+        void moveNorm();
         bool xyMoving();
         bool zMoving();
         int xPos();
@@ -31,6 +32,9 @@ class TBControl {
         HX711 *scales;
         void tare();
         void init_scales();
+        int xnormD;
+        int ynormD;
+        int xyCount;
 };
 
 #endif

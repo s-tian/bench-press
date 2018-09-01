@@ -30,13 +30,17 @@ void Axis::setTarget(int newTarget) {
         return;
     }
     target = newTarget; 
-    Serial.print("Target set to ");
-    Serial.println(target);
+    //Serial.print("Target set to ");
+    //Serial.println(target);
     if (target > position) {
         setForward();
     } else {
         setBackward();
     }
+}
+
+int Axis::distToTarget() {
+    return abs(target - position); 
 }
 
 void Axis::stepBlocking(int numSteps) {
