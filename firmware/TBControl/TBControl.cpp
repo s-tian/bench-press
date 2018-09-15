@@ -116,7 +116,7 @@ void TBControl::feedbackMoveZ(int fastSteps, double thresh) {
     
     zaxis->stepBlocking(fastSteps);
 
-    while (weight < thresh && zPos() < 1200) {
+    while (weight < thresh && zPos() < 1275) {
         zaxis->stepBlocking();
         if (st == 0) {
             weight = 0;
@@ -129,6 +129,14 @@ void TBControl::feedbackMoveZ(int fastSteps, double thresh) {
     }
     Serial.print("Pressed to max force ");
     Serial.println(weight);
+}
+
+double TBControl::avgWeight() {
+    double weight = 0;
+    for (int i = 0; i < 4; i++) {
+        weight += abs((*(scales + i)).get_units()); 
+    }
+    return weight / 4;
 }
 
 int TBControl::xPos() {

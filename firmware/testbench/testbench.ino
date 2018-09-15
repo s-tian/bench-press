@@ -21,7 +21,7 @@ const int clk4 =     46;
 
 Axis xAxis(xStepPin, xDirPin, xLimPin, true, 6000);
 Axis yAxis(yStepPin, yDirPin, yLimPin, false, 12000);
-Axis zAxis(zStepPin, zDirPin, zLimPin, true, 1250);
+Axis zAxis(zStepPin, zDirPin, zLimPin, true, 1300);
 
 HX711 scales[4] = {
     HX711(dOut1, clk1),
@@ -40,6 +40,8 @@ void setup() {
 String input = "";
 int rx_byte;
 bool idle = true;
+double z_force_thresh = 10;
+int i = 0;
 
 void loop() {
     if (Serial.available()) {
@@ -55,8 +57,11 @@ void loop() {
         while (tb.xyMoving()) {
             tb.stepXY();
         }
+       
+        //if (tb.zMoving() && (i % 10 != 0 || tb.avgWeight() < z_force_thresh)) {
         if (tb.zMoving()) {
             tb.stepZ();
+            //i = (i + 1) % 10;
         } else {
 //            Serial.print("Moved to: x:");
 //            Serial.print(tb.xPos());

@@ -21,6 +21,7 @@ class TBControl {
         int xPos();
         int yPos();
         int zPos();
+        double avgWeight();
         void log();
         static double scaleCalibFactors[];
         static const int FEEDBACK_LIM;

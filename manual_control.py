@@ -13,10 +13,6 @@ tb.start()
 while tb.busy():
     tb.update()
        
-x = 0
-y = 0
-z = 0
-
 def addx(p):
     global x
     x += p
@@ -27,17 +23,29 @@ def addy(p):
  
 def addz(p):
     global z
-    z += p/2
+    z += p
 
 step = 50
 
-inps = {'w': lambda: addx(step), 's': lambda: addx(-step), 'a': lambda: addy(step), 'd': lambda: addy(-step), 'i': lambda: addz(-step), 'k': lambda: addz(step)}
+inps = {'w': lambda: addx(step), 's': lambda: addx(-step), 'a': lambda: addy(step), 'd': lambda: addy(-step), 'i': lambda: addz(-step/5), 'k': lambda: addz(step/5)}
+
+tb.target_pos(2000, 6000, 0)
+x = 2000 
+y = 6000 
+z = 0
+
+
+while tb.busy():
+    tb.update()
 
 while True:
     ch = getch.getch()
     if ch in inps:
         inps[ch]()
+
+    print(tb.req_data())
     tb.target_pos(x, y, z)
-    tb.update()
+    while tb.busy():
+        tb.update()
 
 

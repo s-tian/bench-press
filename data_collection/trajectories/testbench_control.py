@@ -15,9 +15,9 @@ class TestBench():
 
     def __init__(self, name, cam_index):
         self.ser = serial.Serial(name, baudrate=250000, timeout=1)
-        #self.cap = cv2.VideoCapture(cam_index)
-        #self.height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        #self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.cap = cv2.VideoCapture(cam_index)
+        self.height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.currmsg = ""
         self.state = State.IDLE
 
@@ -110,8 +110,7 @@ class TestBench():
             else:
                 self.currmsg += ch
         # Keep camera buffer empty
-        #self.cap.grab()
-     
+        self.cap.grab()
 
     def get_frame(self):
         ret, frame = self.cap.read()
@@ -147,6 +146,7 @@ class TestBench():
             res['force_' + str(i+1)] = float(data[:data.find(' ')])
             if i < 3:
                 data = data[data.find(' ') + 4:]
+        print(res)
         return res
 
     def frame_shape(self):
