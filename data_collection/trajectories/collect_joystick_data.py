@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import cv2
+import pickle as pkl
 
 tb = TestBench('/dev/ttyACM0', 0)
 
@@ -141,6 +142,10 @@ def run_traj(num_steps, policy):
 
 ctimestr = datetime.datetime.now().strftime("%Y-%m-%d:%H:%M:%S")
 
+with open('joystick_stats.pkl', 'rb') as f:
+    stats = pkl.load(f)
+    mean, std = stats['mean'], stats['std']
+
 for i in range(5000):
     if not i % 100:
         tb.reset()
@@ -150,7 +155,7 @@ for i in range(5000):
     traj = run_traj(18, random_actions)
     
     time.sleep(3)
-    save_traj.save_tf_record('traj_data/' + ctimestr + '/traj'+str(i) + '/', 'traj' + str(i), traj)
+    save_traj.save_tf_record('traj_data/' + ctimestr + '/traj'+str(i) + '/', 'traj' + str(i), traj, mean, std)
 
 tb.reset();
 while tb.busy():

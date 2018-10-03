@@ -136,6 +136,10 @@ def run_traj(num_steps, policy):
 
 ctimestr = datetime.datetime.now().strftime("%Y-%m-%d:%H:%M:%S")
 
+with open('bearing_stats.pkl', 'rb') as f:
+    stats = pkl.load(f)
+    mean, std = stats['mean'], stats['std']
+
 for i in range(2000):
     if not i % 100:
         tb.reset()

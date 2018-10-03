@@ -6,5 +6,5 @@
 *.jpg
 *.pkl
 *.mat
-trajectories/
+traj_data/
 __pycache__/

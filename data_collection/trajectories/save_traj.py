@@ -15,51 +15,7 @@ def _bytes_feature(value):
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
 
-
-mean = {
-        'force_1': 5.548266944444444,
-        'z': 150,
-        'x_act': 0,
-        'force_4': 5.346665555555556,
-        'y_act': 0,
-        'y': 6045.260583333334,
-        'force_3': 6.150440555555555,
-        'force_2': 6.4838152777777776,
-        'z_act': 0,
-        'x': 5500
-    }
-std = {
-        'force_1': 8.618291543401973,
-        'z': 86.6,
-        'x_act': 40.55583610822862,
-        'force_4': 5.871973470396116,
-        'y_act': 40.9047147811397,
-        'y': 212.2458477847846,
-        'force_3': 7.239953607917641,
-        'force_2': 4.568602618451527,
-        'z_act': 86.6,
-        'x': 209.59929224857643
-
-    }
-
-
-
-#std = {
- #       'force_1': 8.618291543401973,
- #       'z': 34.865522493962516,
- #       'x_act': 40.55583610822862,
- #       'force_4': 5.871973470396116,
- #       'y_act': 40.9047147811397,
- #       'y': 212.2458477847846,
- #       'force_3': 7.239953607917641,
- #       'force_2': 4.568602618451527,
- #       'z_act': 6.070706704238715,
- #       'x': 209.59929224857643
-
-    #}
-
-
-def save_tf_record(dir, filename, traj):
+def save_tf_record(dir, filename, traj, mean, std):
     if not os.path.exists(dir):
         os.makedirs(dir)
     #images = [ i for i in traj['images']]
