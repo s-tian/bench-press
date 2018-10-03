@@ -1,0 +1,10 @@
+*~
+*.swp
+*.swo
+*.tfrecord
+*.tfrecords
+*.jpg
+*.pkl
+*.mat
+trajectories/
+__pycache__/
