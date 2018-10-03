@@ -19,9 +19,11 @@ const int clk3 =     51;
 const int dOut4 =    48;
 const int clk4 =     46;
 
-Axis xAxis(xStepPin, xDirPin, xLimPin, true, 6000);
+const int xInvInitPos = 8000;
+
+Axis xAxis(xStepPin, xDirPin, xLimPin, true, 8000);
 Axis yAxis(yStepPin, yDirPin, yLimPin, false, 12000);
-Axis zAxis(zStepPin, zDirPin, zLimPin, true, 1300);
+Axis zAxis(zStepPin, zDirPin, zLimPin, true, 1600);
 
 HX711 scales[4] = {
     HX711(dOut1, clk1),
@@ -83,8 +85,11 @@ void handleInput(String s) {
         tb.initialize();
         Serial.println("Initialized");
     } else if (s == "r") {
-        tb.initialize();
+        tb.initialize(0, 0, 0);
         Serial.println("Reset");
+    } else if (s == "rinvx") {
+	tb.initialize(0, 0, xInvInitPos);
+	Serial.println("Reset");
     } else if (s == "rz") {
         tb.resetZ();
         Serial.println("Reset Z");
@@ -102,5 +107,3 @@ void handleInput(String s) {
         idle = false;
     }
 }
-
-

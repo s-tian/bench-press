@@ -8,7 +8,7 @@
 class TBControl {
     public:
         TBControl(Axis *x, Axis *y, Axis *z, HX711 *scales); 
-        void initialize();
+        void initialize(int zInit, int yInit, int xInit);
         void setTarget(int x, int y, int z);
         void stepXY();
         void stepZ();

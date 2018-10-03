@@ -14,13 +14,13 @@ Axis::Axis(int step, int dir, int limit, bool reverse, int max) {
     pinMode(limitPin, INPUT);
 }
 
-void Axis::reset() {
+void Axis::reset(int zeroPos) {
     setBackward();
     while (limitState || digitalRead(limitPin)) { // Try to prevent false positive
         limitState = digitalRead(limitPin);
         stepBlocking();
     }
-    position = 0;
+    position = zeroPos;
 }
 
 void Axis::setTarget(int newTarget) {

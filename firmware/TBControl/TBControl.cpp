@@ -17,10 +17,10 @@ TBControl::TBControl(Axis *x, Axis *y, Axis *z, HX711 *s) {
     pytime = 0;
 }
 
-void TBControl::initialize() {
-    zaxis->reset();
-    xaxis->reset();
-    yaxis->reset();
+void TBControl::initialize(int zInit, int yInit, int xInit) {
+    zaxis->reset(zInit);
+    xaxis->reset(xInit);
+    yaxis->reset(yInit);
     init_scales();
 }
 
