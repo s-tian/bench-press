@@ -14,6 +14,9 @@ while not tb.ready():
     time.sleep(0.1)
     tb.update()
 
+tb.flip_x_reset()
+tb.sleep(0.5)
+
 tb.start()
 
 while tb.busy():
@@ -157,7 +160,7 @@ for i in range(5000):
     time.sleep(3)
     save_traj.save_tf_record('traj_data/' + ctimestr + '/traj'+str(i) + '/', 'traj' + str(i), traj, mean, std)
 
-tb.reset();
+tb.reset()
 while tb.busy():
     tb.update()    
 

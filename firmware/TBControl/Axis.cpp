@@ -15,7 +15,15 @@ Axis::Axis(int step, int dir, int limit, bool reverse, int max) {
 }
 
 void Axis::reset(int zeroPos) {
-    setBackward();
+    /* If we're not going to assign the reset position to 
+       zero, it's assumed to be on the far side of the testbench, so we should 
+       go the forward direction to reach the zero position.
+    */
+    if (zeroPos) {
+        setForward();
+    } else {
+        setBackward();
+    }
     while (limitState || digitalRead(limitPin)) { // Try to prevent false positive
         limitState = digitalRead(limitPin);
         stepBlocking();

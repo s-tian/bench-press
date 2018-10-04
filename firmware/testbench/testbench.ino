@@ -43,6 +43,7 @@ String input = "";
 int rx_byte;
 bool idle = true;
 double z_force_thresh = 10;
+int xInitPos = 0;
 int i = 0;
 
 void loop() {
@@ -82,14 +83,13 @@ void loop() {
 void handleInput(String s) {
     Serial.println(s);
     if (s == "start") {
-        tb.initialize();
+        tb.initialize(0, 0, xInitPos);
         Serial.println("Initialized");
+    } else if (s == "invx") {
+        xInitPos = xInvInitPos;
     } else if (s == "r") {
-        tb.initialize(0, 0, 0);
+        tb.initialize(0, 0, xInitPos);
         Serial.println("Reset");
-    } else if (s == "rinvx") {
-	tb.initialize(0, 0, xInvInitPos);
-	Serial.println("Reset");
     } else if (s == "rz") {
         tb.resetZ();
         Serial.println("Reset Z");

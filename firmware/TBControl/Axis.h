@@ -6,7 +6,7 @@
 class Axis {
     public:
         Axis(int step, int dir, int limit, bool reverse, int max);
-        void reset();
+        void reset(int zeroPos);
         void setTarget(int target);
         void stepBegin();
         void stepEnd();

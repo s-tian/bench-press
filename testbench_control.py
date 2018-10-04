@@ -43,6 +43,10 @@ class TestBench():
         self.ser.flush()
         self.state = State.BUSY
 
+    def flip_x_reset(self):
+        self.ser.write(b'invx\n')
+        self.ser.flush()
+
     def press_z(self, quick_steps, thresh):
         """
         Command testbench to descend in the z direction in small steps

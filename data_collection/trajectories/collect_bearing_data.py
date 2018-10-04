@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 import cv2
 
 tb = TestBench('/dev/ttyACM0', 0)
-
 while not tb.ready():
     time.sleep(0.1)
     tb.update()
+
 
 tb.start()
 
