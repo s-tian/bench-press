@@ -1,6 +1,31 @@
 #include "Arduino.h"
 #include "TBControl.h"
 
+// New PCB Pin mappings
+
+const int xStepPin = 36;
+const int xDirPin =  34;
+const int xLimPin =  23;
+const int yStepPin = 40;
+const int yDirPin =  38;
+const int yLimPin =  22;
+const int zStepPin = 42;
+const int zDirPin =  44;
+const int zLimPin =  24;
+const int dOut1 =    28;
+const int clk1 =     26;
+const int dOut2 =    30;
+const int clk2 =     32;
+const int dOut3 =    52;
+const int clk3 =     50;
+const int dOut4 =    48;
+const int clk4 =     46;
+
+
+/*
+
+Old pin mappings
+
 const int xStepPin = 40;
 const int xDirPin =  38;
 const int xLimPin =  26;
@@ -18,6 +43,8 @@ const int dOut3 =    53;
 const int clk3 =     51;
 const int dOut4 =    48;
 const int clk4 =     46;
+
+*/
 
 const int xInvInitPos = 8000;
 

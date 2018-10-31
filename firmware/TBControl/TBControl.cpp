@@ -99,7 +99,7 @@ void TBControl::stepZ() {
 }
 
 void TBControl::resetZ() {
-    zaxis->reset();
+    zaxis->reset(0);
 }
 
 /**
