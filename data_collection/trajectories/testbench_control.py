@@ -13,9 +13,11 @@ class TestBench():
 
     IDLE_MSGS = ["Initialized", "Moved", "Reset", "Pressed", "Ready"]
 
-    def __init__(self, name, cam_index):
+    def __init__(self, name, cam_index, side_cam_index=None):
         self.ser = serial.Serial(name, baudrate=250000, timeout=1)
         self.cap = cv2.VideoCapture(cam_index)
+        if side_cam_index is not None:
+            self.side_cam_cap = cv2.VideoCapture(side_cam_index)
         self.height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.currmsg = ""
@@ -42,6 +44,10 @@ class TestBench():
         self.ser.write(b'r\n')
         self.ser.flush()
         self.state = State.BUSY
+
+    def flip_x_reset(self):
+        self.ser.write(b'invx\n')
+        self.ser.flush()
 
     def press_z(self, quick_steps, thresh):
         """
@@ -111,6 +117,12 @@ class TestBench():
                 self.currmsg += ch
         # Keep camera buffer empty
         self.cap.grab()
+        self.side_cam_cap.grab()
+     
+    def get_side_cam_frame(self):
+        ret, frame = self.side_cam_cap.read()
+        assert ret, "Failed to get side cam frame"
+        return frame
 
     def get_frame(self):
         ret, frame = self.cap.read()
@@ -146,7 +158,6 @@ class TestBench():
             res['force_' + str(i+1)] = float(data[:data.find(' ')])
             if i < 3:
                 data = data[data.find(' ') + 4:]
-        print(res)
         return res
 
     def frame_shape(self):
