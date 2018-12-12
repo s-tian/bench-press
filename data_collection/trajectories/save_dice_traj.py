@@ -28,7 +28,7 @@ def save_tf_record(dir, filename, traj, mean, std):
     
     for i, im in enumerate(traj['full_images']):
         cv2.imwrite(os.path.join(dir, filename + '_' + str(i) + '.jpg'), im)
-    for i, im in enumerate(traj['side_images']: 
+    for i, im in enumerate(traj['side_images']): 
         cv2.imwrite(os.path.join(dir, filename + '_side' + str(i) + '.jpg'), im)
 
     filename = os.path.join(dir, filename + '.tfrecords')
@@ -74,8 +74,11 @@ def save_dd_record(dir, fname, traj):
         os.makedirs(dir)
     filename = os.path.join(dir, fname+ '.hd5')
     images = [ i for i in traj['images']]
-    clip = mpy.ImageSequenceClip(images, fps=25)
+    clip = mpy.ImageSequenceClip(images, fps=5)
     clip.write_gif(dir + fname + '.gif')
+    side_images = [i for i in traj['side_images']]
+    clip2 = mpy.ImageSequenceClip(side_images, fps=5)
+    clip2.write_gif(dir + fname + '_side.gif')
     print(('Writing', filename))
     dd.io.save(filename, traj)     
     
