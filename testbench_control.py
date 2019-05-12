@@ -114,7 +114,7 @@ class TestBench():
             else:
                 self.currmsg += ch
         # Keep camera buffer empty
-        #self.cap.grab()
+        self.cap.grab()
      
 
     def get_frame(self):

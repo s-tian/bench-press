@@ -7,15 +7,16 @@ import sys
 import cv2
 import pickle as pkl
 import serial
-from notify_run import Notify
+#from notify_run import Notify
 
-side_camera_index = 0
-tb_camera_index = 1
+side_camera_index = 2
+tb_camera_index = 0
 
 tb = TestBench('/dev/ttyACM0', tb_camera_index, side_camera_index)
 resetter = serial.Serial('/dev/ttyUSB0', baudrate=9600, timeout=1)
 
-notify = Notify()
+#notify = Notify()
+#notify.register()
 
 while not tb.ready():
     time.sleep(0.1)
@@ -29,7 +30,7 @@ tb.start()
 while tb.busy():
     tb.update()
 
-ZERO_POS = [4900, 5200, 0]
+ZERO_POS = [5200, 5300, 0]
 max_force = 15 
 min_force = 6.5 
 
@@ -44,21 +45,19 @@ minX, minY, minZ = 4000, 4300, 0
 print(tb.req_data())
 
 def reset_dice():
-    resetter.write(b'150\n')
+    resetter.write(b'50\n')
+
 
 def loosen_dice():
-    resetter.write(b'4000\n') 
+    resetter.write(b'2000\n') 
 
 def random_actions(state):
      
-    act = [np.random.random_integers(50, 200), np.random.random_integers(50, 200), np.random.random_integers(5, 10)]
-    for i in range(3):
-        if np.random.rand() > 0.5:
-            act[i] *= -1
+    act = [np.random.random_integers(-150, 150), np.random.random_integers(-150, 150), np.random.random_integers(-10, 10)]
     return act
 
 def get_randomoffset():
-    return [np.random.random_integers(-25, 25), np.random.random_integers(-25, 25), np.random.random_integers(0, 0)]
+    return [np.random.random_integers(-10, 10), np.random.random_integers(-10, 10), np.random.random_integers(0, 0)]
 
 
 def run_traj(num_steps, policy):
@@ -70,8 +69,8 @@ def run_traj(num_steps, policy):
         ch = resetter.read().decode()
         confirm += ch
     print(confirm)
-    if confirm == '':
-        notify.send('something happened.. check robot!!')
+    #if confirm == '':
+        #notify.send('something happened.. check robot!!')
     num_corr = 0
     images = []
     full_images = []
@@ -123,7 +122,6 @@ def run_traj(num_steps, policy):
     act = None
     slip = False
     corr_next = False
-    action_queue = []
     action_repeat_count = 0
     action_repeat = 3
 
@@ -154,33 +152,12 @@ def run_traj(num_steps, policy):
         data = tb.req_data()
 
         # After every 3 actions (x 3 action repeat), backtrack to relocate the dice
-        if (n + 1) % 9 == 0:
-            print('BACKTRACK')
-            # BACKTRACK half to initial position
-            delta_home = np.array([data['x'] - OFFSET_HOME_POS[0], data['y'] - OFFSET_HOME_POS[0], data['z'] - OFFSET_HOME_POS[0]])
-            half_to_home_act = 1*delta_home/2
-            new_act = act[:]
-            new_act = half_to_home_act[:]
-            new_act[0] = -new_act[0]
-            new_act[1] = -new_act[1]
-            new_act[2] = 0
-            action_queue.append([0, 0, -300])
-            action_queue.append(new_act)
-            action_queue.append([0, 0, 300])
-            for actz in action_queue:
-                pos = [pos[i]+actz[i] for i in range(3)]  
-                normalize_pos(pos)
-                tb.target_pos(*pos)
-                while tb.busy():
-                    tb.update()
-            action_queue = []
-               
+
         frame = tb.get_frame()
         side_frame = tb.get_side_cam_frame()
         data['x_act'] = act[0]
         data['y_act'] = act[1]
         data['z_act'] = act[2]
-
         print(data)
         forces = [data['force_1'], data['force_2'], data['force_3'], data['force_4']]
         avg = sum(forces)/4

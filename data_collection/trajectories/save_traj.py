@@ -74,6 +74,9 @@ def save_dd_record(dir, fname, traj):
     images = [ i for i in traj['images']]
     clip = mpy.ImageSequenceClip(images, fps=25)
     clip.write_gif(dir + fname + '.gif')
+    side_images = [i for i in traj['side_images']]
+    clip2 = mpy.ImageSequenceClip(images, fps=25)
+    clip.write_gif(dir + fname + '_side.gif')
     print(('Writing', filename))
     dd.io.save(filename, traj)     
     

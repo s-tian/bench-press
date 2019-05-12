@@ -42,10 +42,14 @@ for d in dirs:
     if not os.path.exists(output_dir + d):
         os.makedirs(output_dir + d)
 
-folders = ['2018-12-05:20:45:28', '2018-12-04:22:25:06', '2018-12-05:19:57:02', '2018-12-05:21:57:26', '2018-12-05:22:02:59']
+#folders = ['2018-12-05:20:45:28', '2018-12-04:22:25:06', '2018-12-05:19:57:02', '2018-12-05:21:57:26', '2018-12-05:22:02:59']
+#folders = ['2019-02-14:21:23:14', '2019-02-15:14:55:24']
+folders =  ['2019-05-08:22:15:47', '2019-05-08:22:56:52']
 traj_paths = []
 for folder in folders:
     traj_paths.extend(glob.glob('traj_data/{}/traj*/'.format(folder)))
+
+print('Found {} trajectories!'.format(len(traj_paths)))
 
 split = (args.p_train, args.p_test, args.p_val)
 
@@ -72,11 +76,10 @@ f = {
     'z_act': []
 }
 
-pickle_stats_dir = 'dice_stats.pkl'
-with open('dice_stats.pkl', 'rb') as f:
+pickle_stats_dir = 'dice_2-14_stats.pkl'
+with open(pickle_stats_dir, 'rb') as f:
     stats = pickle.load(f)
     mean, std = stats['mean'], stats['std']
-
 
 slip = 0
 for fname in tqdm(traj_paths):
@@ -103,7 +106,7 @@ for fname in tqdm(traj_paths):
         for feat in step_data:
             if feat != 'slip':
                 step_data[feat] = (step_data[feat] - mean[feat]) / std[feat]
-                state = [
+        state = [
             step_data['x'],
             step_data['y'],
             step_data['z'],
