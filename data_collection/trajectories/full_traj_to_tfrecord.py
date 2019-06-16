@@ -42,7 +42,7 @@ for d in dirs:
     if not os.path.exists(output_dir + d):
         os.makedirs(output_dir + d)
 
-folders = ['2019-01-19:18:48:00']
+folders = data_path
 traj_paths = []
 for folder in folders:
     traj_paths.extend(glob.glob('traj_data/{}/traj*/'.format(folder)))

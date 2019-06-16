@@ -151,8 +151,6 @@ def run_traj(num_steps, policy):
         print(millis() - bt)
         data = tb.req_data()
 
-        # After every 3 actions (x 3 action repeat), backtrack to relocate the dice
-
         frame = tb.get_frame()
         side_frame = tb.get_side_cam_frame()
         data['x_act'] = act[0]
