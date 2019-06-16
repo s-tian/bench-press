@@ -21,7 +21,7 @@ Sometimes the axes get a little bit gunky and movements become noticely louder, 
 # Electronics
 The CNC kit comes with a main electronics board which contains a microcontroller, but we instead do most of the work using our own Arduino Mega for control. In order to support all the extra electronics (load cells, limit switches) added on, we also build a custom PCB which should be mounted next to the original electronics board. At this time, the only purpose that the original, CNC electronics board has is **to provide power to the stepper motors**. This is accomplished by wiring out the bottom rows of pins from where the stepper motors used to be, on the original board, to the corresponding pins on the custom board. Wiring all of these pins is *likely not necessary*, and done mostly due to a lack of research done on which pins exactly are needed for power. 
 
-The PCB looks like ![this](./doc/pcb.jpg), on the front. Header pins of some kind (male, female) are soldered to all of the through holes, depending on how the external connector works. 
+The PCB looks like ![this](./doc/pcb.png), on the front. Header pins of some kind (male, female) are soldered to all of the through holes, depending on how the external connector works. 
 
 A brief lay of the land: On the left middle-bottom column, are the locations of the three stepper motor drivers.
 **Important: The stepper motor drivers get hot during operation. Be careful!**
@@ -51,7 +51,7 @@ while tb.busy():
 ```
 This will allow the testbench to continue receiving sensor and camera data while the motors move. If you do not do this, the camera buffer in particular will fill with frames, and you will experience a strange issue where trying to get frames from the testbench just seems to yield the same frame every time. In reality, they are just adjacent frames in time (and thus look extremely similar), which have not been flushed out of the buffer yet. To fix this, call `tb.update` 5-10 times, which should flush the buffer out before getting a new image. Once `tb.busy() ` evaluates to false, the testbench has completed the task it was instructed to do.
 
-See `test_python_control.py` for an example of how the basic setup of a script might look like (TODO: Update this test script, to not use the camera separately). 
+See `manual_control.py` in the root level folder for an example of how the basic setup of a script might look like, or to just play around with the machine control using your keyboard. This script is helpful for determining a "origin" x, y, z position for a new object you place on the testbench, etc. 
 
 There are pre-written data collection scripts in `data_collection/trajectories/collect_blah_data.py`, which are probably an okay reference for how to set up some data collection with the rig, including doing data logging.
 
