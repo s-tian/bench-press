@@ -24,8 +24,8 @@ parser = argparse.ArgumentParser(description='Convert full trajectory folders to
 parser.add_argument('inp_path', metavar='inp_path', type=str, help='directory containing trajectory subdirectories')
 parser.add_argument('out_path', metavar='out_path', type=str, help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
 parser.add_argument('-n', '--num', metavar='record_size', type=int, default=1, help='number of examples to store in each .tfrecord file')
-parser.add_argument('-p_train', metavar='p_train', type=float, default=0.75, help='proportion of examples, on average, to put in training set')
-parser.add_argument('-p_test', metavar='p_test', type=float, default=0.2, help='proportion of examples, on average, to put in test set')
+parser.add_argument('-p_train', metavar='p_train', type=float, default=0.9, help='proportion of examples, on average, to put in training set')
+parser.add_argument('-p_test', metavar='p_test', type=float, default=0.05, help='proportion of examples, on average, to put in test set')
 parser.add_argument('-p_val', metavar='p_val', type=float, default=0.05, help='proportion of examples, on average, to put into validation set')
 
 args = parser.parse_args()
@@ -42,8 +42,11 @@ for d in dirs:
     if not os.path.exists(output_dir + d):
         os.makedirs(output_dir + d)
 
-traj_paths = glob.glob('{}/2018*/traj*/'.format(data_path))
-
+folders = ['2019-01-19:18:48:00']
+traj_paths = []
+for folder in folders:
+    traj_paths.extend(glob.glob('traj_data/{}/traj*/'.format(folder)))
+print(traj_paths)
 split = (args.p_train, args.p_test, args.p_val)
 
 assert sum(split) == 1, "Proportions for example distribution don't sum to one."
@@ -55,68 +58,12 @@ val = []
 train_ind = 0
 test_ind = 0
 val_ind = 0
-"""
-force_1: mean: 5.548266944444444 std: 8.618291543401973
-z: mean: 1115.4815277777777 std: 34.865522493962516
-x_act: mean: -0.36525 std: 40.55583610822862
-force_4: mean: 5.346665555555556 std: 5.871973470396116
-y_act: mean: 0.3839166666666667 std: 40.9047147811397
-y: mean: 6045.260583333334 std: 212.2458477847846
-force_3: mean: 6.150440555555555 std: 7.239953607917641
-force_2: mean: 6.4838152777777776 std: 4.568602618451527
-z_act: mean: 0.06966666666666667 std: 6.070706704238715
-x: mean: 2644.52925 std: 209.59929224857643
-"""
-mean = {
-        'force_1': 5.548266944444444,
-        'z': 1115.4815277777777,
-        'x_act': 0,
-        'force_4': 5.346665555555556,
-        'y_act': 0,
-        'y': 6045.260583333334,
-        'force_3': 6.150440555555555,
-        'force_2': 6.4838152777777776,
-        'z_act': 0,
-        'x': 2644.52925
-    }
-std = {
-        'force_1': 8.618291543401973,
-        'z': 34.865522493962516,
-        'x_act': 40.55583610822862,
-        'force_4': 5.871973470396116,
-        'y_act': 40.9047147811397,
-        'y': 212.2458477847846,
-        'force_3': 7.239953607917641,
-        'force_2': 4.568602618451527,
-        'z_act': 6.070706704238715,
-        'x': 209.59929224857643
 
-    }
+pickle_stats_dir = 'dice_nobacktrack_stats.pkl'
+with open(pickle_stats_dir, 'rb') as f:
+    stats = pickle.load(f)
+    mean, std = stats['mean'], stats['std']
 
-
-f = {
-    'force_1': [],
-    'force_2':[],
-    'force_3':[],
-    'force_4':[],
-    'x': [],
-    'y': [],
-    'z': [],
-    'x_act': [],
-    'y_act': [],
-    'z_act': []
-}
-
-for fname in []:
-    data = pickle.load(open(glob.glob(fname + '*.pkl')[0], 'rb'))
-
-    for step_data in data[1:]:
-        for item in step_data:
-            if item != 'slip':
-                f[item].append(step_data[item])
-for item in []:
-    if item != 'slip':
-        print(item + ': mean: ' + str(np.mean(f[item])) + ' std: ' + str(np.std(f[item])))
 slip = 0
 for fname in tqdm(traj_paths):
     feature = {}
@@ -131,6 +78,7 @@ for fname in tqdm(traj_paths):
         for feat in step_data:
             if feat != 'slip':
                 step_data[feat] = (step_data[feat] - mean[feat]) / std[feat]
+
         act = [step_data['x_act'], step_data['y_act'], step_data['z_act']]
         state = [
             step_data['x'],
