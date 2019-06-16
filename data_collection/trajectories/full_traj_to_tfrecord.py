@@ -23,6 +23,7 @@ def _float_feature(value):
 parser = argparse.ArgumentParser(description='Convert full trajectory folders to .tfrecord')
 parser.add_argument('inp_path', metavar='inp_path', type=str, help='directory containing trajectory subdirectories')
 parser.add_argument('out_path', metavar='out_path', type=str, help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
+parser.add_argument('pickle_stats', metavar='stats_pkl', type=str, help='pickle to load stats from for normalization: see compute_stats.py')
 parser.add_argument('-n', '--num', metavar='record_size', type=int, default=1, help='number of examples to store in each .tfrecord file')
 parser.add_argument('-p_train', metavar='p_train', type=float, default=0.9, help='proportion of examples, on average, to put in training set')
 parser.add_argument('-p_test', metavar='p_test', type=float, default=0.05, help='proportion of examples, on average, to put in test set')
@@ -34,6 +35,7 @@ data_path = args.inp_path
 record_size = args.num
 
 output_dir = args.out_path
+stats_pkl = args.stats_pkl
 
 # Make dirs if they don't already exist.
 dirs = ['', 'train', 'test', 'val']
@@ -59,8 +61,7 @@ train_ind = 0
 test_ind = 0
 val_ind = 0
 
-pickle_stats_dir = 'dice_nobacktrack_stats.pkl'
-with open(pickle_stats_dir, 'rb') as f:
+with open(stats_kl, 'rb') as f:
     stats = pickle.load(f)
     mean, std = stats['mean'], stats['std']
 
