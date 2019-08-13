@@ -33,6 +33,7 @@ parser.add_argument('radius', metavar='radius', type=int, help='radius of circle
 parser.add_argument('num_images', metavar='num_images', type=int, help='number of images to get per press')
 parser.add_argument('min_force', metavar='min_force', type=float, help='minimum of the range to select random threshold forces from')
 parser.add_argument('max_force', metavar='max_force', type=float, help='maximum of the range to select random threshold forces from')
+parser.add_argument('--save_rate', metavar='save_rate', type=int, default=5, help='how often to save out data')
 parser.add_argument('--out', metavar='out', type=str, default='data/', help='dir for output data')
 
 args = parser.parse_args()
@@ -43,6 +44,7 @@ radius = args.radius
 images_per_press = args.num_images
 min_force_thresh = args.min_force
 max_force_thresh = args.max_force
+save_rate = args.save_rate
 
 assert shape_name in SHAPE_POS, "Invalid shape!"
 
@@ -125,10 +127,10 @@ for i in range(num_trials):
     force_thresholds = np.sort(np.random.uniform(min_force_thresh, max_force_thresh,
                                                  size=images_per_press))
 
-    for i, force_threshold in enumerate(force_thresholds):
+    for j, force_threshold in enumerate(force_thresholds):
 
         # Initial press -- go fast on first 150 steps for large gelsight
-        if i == 0:
+        if j == 0:
             tb.press_z(450, force_threshold)
         else:
             tb.press_z(0, force_threshold)
@@ -157,7 +159,7 @@ for i in range(num_trials):
         pre_press_frames.append(np.copy(ppf))
         press_frames.append(np.copy(frame))
 
-    if i % 5 == 0: # Save progress often so we don't lose data!
+    if i % args.save_rate == 0: # Save progress often so we don't lose data!
         savemat(args.out + ctimestr + '-' + shape_name + '.mat',
                 {
                     "x": x_pos,
