@@ -1,4 +1,4 @@
-from testbench_control import TestBench
+from tb_control.testbench_control import TestBench
 import getch
 import time
 
