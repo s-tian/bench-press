@@ -3,7 +3,7 @@ import getch
 import time
 
 tb = TestBench('/dev/ttyACM0', 0)
-tb.flip_x_reset()
+#tb.flip_x_reset()
 
 while not tb.ready():
     time.sleep(0.1)
@@ -13,7 +13,6 @@ tb.start()
 
 while tb.busy():
     tb.update()
-
        
 def addx(p):
     global x
@@ -27,15 +26,15 @@ def addz(p):
     global z
     z += p
 
-step = 50
+step = 200
 
-inps = {'w': lambda: addx(step), 's': lambda: addx(-step), 'a': lambda: addy(step), 'd': lambda: addy(-step), 'i': lambda: addz(-step/5), 'k': lambda: addz(step/5)}
+inps = {'w': lambda: addx(step), 's': lambda: addx(-step), 'a': lambda: addy(step), 'd': lambda: addy(-step), 'i': lambda: addz(-step/2), 'k': lambda: addz(step/2)}
 data = tb.req_data()
 x = data['x']
 y = data['y']
-tb.target_pos(x, y, 500)
-x = 2000 
-y = 6000 
+tb.target_pos(x, y, 0)
+x = 0 
+y = 0 
 z = 0
 
 
