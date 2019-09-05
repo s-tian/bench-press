@@ -42,7 +42,10 @@ Assuming everything is wired, to run the machine, the Arduino needs to be connec
 # Software
 This repository contains a few things. The first is the firmware code that runs on the Arduino Mega. This is the low level code that describes routines such as moving to a certain position, reading out sensor values, etc. Most likely, this does not need to be modified and will continue to live on the Arduino. If this does need to be changed, program the Arduino through the [Arduino IDE program](https://www.arduino.cc/en/Guide/Linux). 
 
+A library is required here, for the HX711 load cells. The specific commit version of the library to download is [here:](https://github.com/bogde/HX711/tree/e80de1c07e). The library has since been updated which breaks the firmware code. So the easiest way is to install from the link above into the local Arduino library folder.
+
 Next is Python (3, although not tested with 2) code which interfaces with the Arduino firmware via serial, which can be found in `testbench_control.py`. This code abstracts away all of the serial communication and common functionality, so that you can simply create a Python script, declare a `TestBench` object, say, `tb = TestBench('/dev/ttyACM0', 0)`, where the first two arguments are the serial port which the testbench is connected to and the second is the camera index we would like to read from. The serial port argument is almost always `/dev/ttyACM0` on Linux machines with one Testbench connected. 
+
 
 Also, various scripts that have been used for data collection are included. To use the code in this respository, I highly recommend making a virtual environment, and in your environment, go into this directory and type `pip install -r requirements.txt` to automatically install required packages. This will give you things you need to run visual MPC as well, so there might be a few extraneous packages. If you want to be really minimal, there are not so many requirements for this repository that you can't do it manually.
 
