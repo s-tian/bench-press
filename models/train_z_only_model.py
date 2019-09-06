@@ -1,8 +1,8 @@
 import tensorflow as tf
-import keras 
-from keras.applications import ResNet50
-from keras import backend as K
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras import backend as K
 import numpy as np
+import ipdb
 from scipy.io import loadmat
 import cv2
 import glob
@@ -28,9 +28,10 @@ def load_data(paths, split=(0.8, 0.2)):
 
     for path in paths:
         filenames = glob.glob(path + '/*.mat')
+        print(filenames)
         for mat in filenames:
             print('Loading file: ' + mat)
-            data = loadmat(path + mat) 
+            data = loadmat(mat) 
             frames.extend(data['press_frames'])
             zs = data['z'][0]
 
@@ -67,16 +68,14 @@ def build_model(inp):
     x = tf.contrib.layers.flatten(out)
     # Feed through 2 FC layers w/ ReLU activation, then get output
     x = tf.layers.dense(x, 512, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer1', activation=tf.nn.relu)
-    x = tf.layers.dense(x, 512, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer2', activation=tf.nn.relu)
-    x = tf.layers.dense(x, 256, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer3', activation=tf.nn.relu)
-    x = tf.layers.dense(x, 256, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer4', activation=tf.nn.relu)
-    x = tf.layers.dense(x, 128, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer5', activation=tf.nn.relu)
-    x = tf.layers.dense(x, 1, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer6')
+    x = tf.layers.dense(x, 256, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer2', activation=tf.nn.relu)
+    x = tf.layers.dense(x, 128, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer3', activation=tf.nn.relu)
+    x = tf.layers.dense(x, 1, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer4')
     return x 
 
 DATA_DIRS = [
-'~/gelsight-tb/data_collection/data/2019-09-05:19:47:21',
-'~/gelsight-tb/data_collection/data/2019-09-05:18:31:04'
+'/home/stephentian/gelsight-tb/data_collection/data/2019-09-05:19:47:21',
+'/home/stephentian/gelsight-tb/data_collection/data/2019-09-05:18:31:04'
 ]
 
 x_train, x_test, y_train, y_test, data_mean, data_var = load_data(DATA_DIRS)
@@ -145,6 +144,7 @@ def train_model(sess, train_X, train_Y, test_X, test_Y, train_operation,
                 i += 1
                 if (start//batch_size) % howOften == 0:
                     K.set_learning_phase(0)
+
                     testSet = np.random.choice(len(test_X), test_size, replace=False)
                     tX, tY = test_X[testSet], test_Y[testSet]
                     summary, l = sess.run([summarize, loss], feed_dict = update_d(test_feed, {X: tX, Y: tY}))
@@ -167,6 +167,7 @@ def train_model(sess, train_X, train_Y, test_X, test_Y, train_operation,
     # Total test set acc 
     total_l = 0
     n = 0
+
     K.set_learning_phase(0)
     for start in range(0, len(test_X), batch_size):
         end = start + batch_size
@@ -180,7 +181,8 @@ def train_model(sess, train_X, train_Y, test_X, test_Y, train_operation,
     #print("Final accuracy was %.04f" % accuracies[-1])
 
 config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.3
+#config.gpu_options.per_process_gpu_memory_fraction = 0.5
+config.gpu_options.allow_growth=True
 saver = tf.train.Saver()
 
 summarize = tf.summary.merge_all()
