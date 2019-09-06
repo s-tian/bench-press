@@ -67,7 +67,7 @@ mZ = 1500
 MIN_FORCE_THRESH = 7
 MAX_FORCE_THRESH = 19
 
-RESET_POS_EVERY_N = 30
+NEW_FILE_EVERY = 30 
 data_file_num = 0
 
 pre_press_frames = []
@@ -84,6 +84,9 @@ ctimestr = datetime.datetime.now().strftime("%Y-%m-%d:%H:%M:%S")
 data_dir = out + ctimestr
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
+
+with open(data_dir + '/config.yaml', 'w') as outfile:
+    yaml.dump(config, outfile)
 
 for i in range(num_trials):
 
@@ -138,7 +141,7 @@ for i in range(num_trials):
     press_frames.append(np.copy(frame))
     time.sleep(0.5)
 
-    if i % 30 == 0: # Save progress often so we don't lose data!
+    if i % NEW_FILE_EVERY == 0 and i > 0: # Save progress often so we don't lose data!
         savemat(data_dir  + '/data_{}.mat'.format(data_file_num),
                 {
                     "x": x_pos,
