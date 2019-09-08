@@ -71,16 +71,17 @@ DXL_MOVING_STATUS_THRESHOLD = 20                # Dynamixel moving status thresh
 
 index = 0
 dxl_goal_position = [DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE]         # Goal position
+TICKS_PER_REV = 4096
 
 class Dynamixel():
     
 
-    def __init__(self, device_name):
+    def __init__(self, device_name, home_pos):
 
         # Initialize PortHandler instance
         # Set the port path
         # Get methods and members of PortHandlerLinux or PortHandlerWindows
-        self.portHandler = PortHandler(DEVICENAME)
+        self.portHandler = PortHandler(device_name)
         
         # Initialize PacketHandler instance
         # Set the protocol version
@@ -114,6 +115,12 @@ class Dynamixel():
             print("%s" % self.packetHandler.getRxPacketError(dxl_error))
         else:
             print("Dynamixel has been successfully connected")
+
+        self.home_pos = home_pos
+
+    def move_to_angle(self, angle):
+        target_pos = (int) ((angle / 360) * TICKS_PER_REV + self.home_pos)
+        self.set_pos(target_pos)
 
     def set_pos(self, position):
         # Write goal position
