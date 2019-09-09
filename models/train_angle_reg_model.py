@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras import backend as K
 import numpy as np
+import datetime
 import ipdb
 import pickle as pkl
 from scipy.io import loadmat
@@ -33,14 +34,13 @@ def load_data(paths, split=(0.8, 0.2)):
         for mat in filenames:
             print('Loading file: ' + mat)
             data = loadmat(mat) 
-            frames.extend(data['press_frames'])
+            angles = data['contact_angle'][0]
+            press_frames = data['press_frames']
             zs = data['z'][0]
-
             for i in range(len(data['press_frames'])):
-                z_0 = HOME_POS['z']
-                z = zs[i]
-                z_off = (z - z_0) * 0.04
-                offsets.append([z_off])
+                if zs[i] > 500:
+                    offsets.append([angles[i]])
+                    frames.append(press_frames[i])
 
         # Source for this: Kurt 
     frames = np.array(frames)
@@ -71,14 +71,13 @@ def build_model(inp):
     x = tf.layers.dense(x, 512, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer1', activation=tf.nn.relu)
     x = tf.layers.dense(x, 256, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer2', activation=tf.nn.relu)
     x = tf.layers.dense(x, 256, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer3', activation=tf.nn.relu)
+
     x = tf.layers.dense(x, 256, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer4', activation=tf.nn.relu)
     x = tf.layers.dense(x, 1, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='layer5')
     return x 
 
-DATA_DIRS = [
-'/home/stephentian/gelsight-tb/data_collection/data/2019-09-05:19:47:21',
-'/home/stephentian/gelsight-tb/data_collection/data/2019-09-05:18:31:04'
-]
+DATA_DIRS = glob.glob('/home/stephentian/gelsight-tb/data_collection/data/angle_baseline*')
+
 
 x_train, x_test, y_train, y_test, data_mean, data_var = load_data(DATA_DIRS)
 
@@ -184,7 +183,7 @@ def train_model(sess, train_X, train_Y, test_X, test_Y, train_operation,
         'l1': total_l1,
         'mse': indiv_mse
     }
-    with open('logs/' + ctimstr + 'test_losses_zonly.pkl', 'wb') as f:
+    with open('test_losses_angle_baseline.pkl', 'wb') as f:
         pkl.dump(out, f)
     print('overall test l1 loss:{}'.format(np.mean(np.array(total_l1))))
      
@@ -205,5 +204,5 @@ test_writer = tf.summary.FileWriter('logs/' + ctimestr +'/test')
 with tf.Session(config=config) as sess:
     
     tf.global_variables_initializer().run()
-    train_model(sess, x_train, y_train, x_test, y_test, train_operation, inflated_l1loss, 1, BATCH_SIZE, 60)
+    train_model(sess, x_train, y_train, x_test, y_test, train_operation, inflated_l1loss, 100, BATCH_SIZE, 60)
     saver.save(sess, "/tmp/offset_model.ckpt")
