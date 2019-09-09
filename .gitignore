@@ -10,3 +10,4 @@ traj_data/
 __pycache__/
 logs/
 env/
+data_collection/data

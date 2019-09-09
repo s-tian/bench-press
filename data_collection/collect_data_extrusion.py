@@ -91,11 +91,13 @@ if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 import numpy as np
 def meanwoutliers(data):
-    std = np.std(data)  
-    m = np.mean(data)
+    data = [i for i in data if i < 30]
+    if len(data) > 2:
+        std = np.std(data)  
+        m = np.mean(data)
+        print(f'std: {std}, mean: {m}')
+        data = [i for i in data if (i - m) < 1.2*std]
     print(data)
-    print(f'std: {std}, mean: {m}')
-    data = [i for i in data if (i - m) < 1.5*std]
     return np.mean(data)
 
 with open(data_dir + '/config.yaml', 'w') as outfile:
@@ -134,7 +136,8 @@ for i in range(num_trials):
             tb.update()
         data = tb.req_data()
         print(data)
-        force_mean = meanwoutliers([data['force_1'], data['force_2'], data['force_3'], data['force_4']])
+        #force_mean = meanwoutliers([data['force_1'], data['force_2'], data['force_3'], data['force_4']])
+        force_mean = min([data['force_1'], data['force_2'], data['force_3'], data['force_4']])
 
     time.sleep(0.5)
     data = tb.req_data()
