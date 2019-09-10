@@ -13,11 +13,15 @@ class TestBench():
 
     IDLE_MSGS = ["Initialized", "Moved", "Reset", "Pressed", "Ready"]
 
-    def __init__(self, name, cam_index):
+    def __init__(self, name, cam_index, second_cam_idx=None):
         self.ser = serial.Serial(name, baudrate=250000, timeout=1)
         self.cap = cv2.VideoCapture(cam_index)
         self.height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        if second_cam_idx is not None:
+            self.cap2 = cv2.VideoCapture(cam_index)
+        else:
+            self.cap2 = None
         self.currmsg = ""
         self.state = State.IDLE
 
@@ -115,12 +119,17 @@ class TestBench():
                 self.currmsg += ch
         # Keep camera buffer empty
         self.cap.grab()
+        if self.cap2 is not None:
+            self.cap2.grab()
      
-
     def get_frame(self):
         ret, frame = self.cap.read()
         assert ret, "Failed to get frame"
-        return frame
+        if self.cap2 is None:
+            return frame
+        else:
+            ret, frame2 = self.cap2.read()
+            return frame, frame2
 
     def req_data(self):
         """
