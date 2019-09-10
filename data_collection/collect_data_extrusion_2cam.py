@@ -183,7 +183,9 @@ for i in range(num_trials):
         
         data_file_num+=1
         pre_press_frames = []
+        pre_press_frames_2 = []
         press_frames = []
+        press_frames_2 = []
         x_pos = []
         y_pos = []
         z_pos = []
