@@ -19,7 +19,7 @@ class TestBench():
         self.height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         if second_cam_idx is not None:
-            self.cap2 = cv2.VideoCapture(cam_index)
+            self.cap2 = cv2.VideoCapture(second_cam_idx)
         else:
             self.cap2 = None
         self.currmsg = ""
