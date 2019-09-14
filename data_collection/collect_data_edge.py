@@ -26,13 +26,14 @@ force thresholds based on load cells from minimum to maximum force threshold.
 
 parser = argparse.ArgumentParser(description='Collect gelsight test data')
 parser.add_argument('num_trials', metavar='N', type=int, help='number of presses to collect')
-parser.add_argument('radius', metavar='radius', type=int, help='radius of circle to uniformly select press location in')
 parser.add_argument('--out', metavar='out', type=str, default='data/', help='dir for output data')
 
 args = parser.parse_args()
 
 num_trials = args.num_trials
-radius = args.radius
+z_radius = config['z_radius']
+y_radius = config['y_radius']
+
 out = args.out
 
 tb = TestBench('/dev/ttyACM0', 0)
@@ -89,15 +90,16 @@ with open(data_dir + '/config.yaml', 'w') as outfile:
     yaml.dump(config, outfile)
 
 for i in range(num_trials):
-
+    print('---------- TRIAL {} -----------'.format(i))
     target_x, target_y, target_z = HOME_POS['x'], HOME_POS['y'], HOME_POS['z']
+
     x, y, z = target_x, target_y, target_z 
     
     tb.target_pos(target_x, target_y, target_z)
     while tb.busy():
         tb.update()
     
-    p_z = int(np.random.uniform(0, radius))
+    p_z = int(np.random.uniform(0, z_radius))
     p_y = 0
     p_x = 0	 
     dx = p_x
@@ -123,6 +125,16 @@ for i in range(num_trials):
         tb.update()
     
     time.sleep(0.5)
+    py = int(np.random.uniform(0, y_radius)) 
+    #py = y_radius
+
+    target_y += py
+    tb.target_pos(target_x, target_y, target_z)
+    while tb.busy():
+        tb.update()
+
+    time.sleep(.5)
+
     data = tb.req_data()
     print(data)
     
@@ -140,6 +152,11 @@ for i in range(num_trials):
     pre_press_frames.append(np.copy(ppf))
     press_frames.append(np.copy(frame))
     time.sleep(0.5)
+
+    target_z -= p_z
+    tb.target_pos(target_x, target_y, target_z)
+    while tb.busy():
+        tb.update()
 
     if i % NEW_FILE_EVERY == 0 and i > 0: # Save progress often so we don't lose data!
         savemat(data_dir  + '/data_{}.mat'.format(data_file_num),

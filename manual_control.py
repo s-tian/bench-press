@@ -28,7 +28,7 @@ def addz(p):
 
 step = 200
 
-inps = {'w': lambda: addx(step), 's': lambda: addx(-step), 'a': lambda: addy(step), 'd': lambda: addy(-step), 'i': lambda: addz(-step/2), 'k': lambda: addz(step/2)}
+inps = {'w': lambda: addx(step), 's': lambda: addx(-step), 'a': lambda: addy(step), 'd': lambda: addy(-step), 'i': lambda: addz(-step/2), 'k': lambda: addz(25)}
 data = tb.req_data()
 x = data['x']
 y = data['y']

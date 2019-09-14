@@ -12,7 +12,7 @@ import ipdb
 import yaml
 import os
 
-with open('config_extrusion_2cam.yaml', 'r') as f:
+with open('config_extrusion_2cam_large.yaml', 'r') as f:
     config = yaml.load(f)
 
 HOME_POS = config['home']
@@ -40,6 +40,7 @@ out = args.out
 tb = TestBench('/dev/ttyACM0', 0, 2)
 dyna = Dynamixel('/dev/ttyUSB0', dyna_config['home'])
 
+dyna.move_to_angle(-90)
 while not tb.ready():
     time.sleep(0.1)
     tb.update()
@@ -49,7 +50,6 @@ tb.start()
 while tb.busy():
     tb.update()
 
-dyna.move_to_angle(0)
 '''
 Grab a quick reading, use to verify that load cells have been initialized
 and tared correctly
@@ -109,22 +109,31 @@ with open(data_dir + '/config.yaml', 'w') as outfile:
 
 time.sleep(0.5) 
 
-
 for i in range(num_trials):
     print('----------------------- Trial {} -----------------------'.format(i)) 
     target_x, target_y, target_z = HOME_POS['x'], HOME_POS['y'], HOME_POS['z']
     x, y, z = target_x, target_y, target_z 
     
+    dyna.move_to_angle(-90)
     tb.target_pos(target_x, target_y, target_z)
     while tb.busy():
         tb.update()
     
-    dyna.move_to_angle(0)
     time.sleep(1)
-    
+
     offset_angle = np.random.uniform(-dynamixel_angle_max, -dynamixel_angle_min)
-    #angles = np.linspace(22.5, 60, num=10) 
+    #angles = np.linspace(60, 90, num=6) 
     #offset_angle = -angles[i]
+
+    total_distance = 18.5
+    total_ticks = total_distance / 0.04
+    
+    y_offset = total_ticks * ((dynamixel_angle_max + offset_angle) / (dynamixel_angle_max - dynamixel_angle_min))
+    target_y += y_offset
+    tb.target_pos(target_x, target_y, target_z)
+    while tb.busy():
+        tb.update()
+    
     print(offset_angle)
     dyna.move_to_angle(offset_angle)
 
@@ -147,15 +156,19 @@ for i in range(num_trials):
     # if offset_angle < -55:
     #     max_z += 50
     # max_z += 50 
-    max_z = 60474.06 + (163.777 - 60474.06)/(1+(-offset_angle/402.8657)**1.805)
+    #max_z = 60474.06 + (163.777 - 60474.06)/(1+(-offset_angle/402.8657)**1.805)
+    slope = (1800-50)/(90-60)
+    b = 185 - (slope * 60) 
+    max_z = -offset_angle * slope + b
     print('MAX Z' + str(max_z))
     step = 0
     while mean < MIN_FORCE_THRESH: 
-        target_z += 50 
         if step == 0:
             target_z += (max_z * 3.0 / 4)
             target_z += (max_z * 1.0/4) % 50
             step += 1 
+        else:
+            target_z += 50
         if target_z > max_z:
             print('Hit z threshold based on trig!')
             break
@@ -238,9 +251,4 @@ savemat(data_dir + '/data_{}.mat'.format(data_file_num),
             "pre_press_frames_2" : pre_press_frames_2
         })
 
-tb.reset()
-
-while tb.busy():
-    tb.update()
-
-dyna.move_to_angle(0)
+dyna.move_to_angle(-90)

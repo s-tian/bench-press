@@ -4,6 +4,7 @@ import cv2
 cap = cv2.VideoCapture(2)
 cap2 = cv2.VideoCapture(0) 
 
+i = 0
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -16,6 +17,12 @@ while(True):
     # Display the resulting frame
     cv2.imshow('frame',gray)
     cv2.imshow('frame2',gray2)
+    if cv2.waitKey(1) & 0xFF == ord('a'):
+        print('hi')
+        cv2.imwrite('out_{}.png'.format(i), gray2);
+        i += 1
+
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
