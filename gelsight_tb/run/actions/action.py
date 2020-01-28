@@ -17,6 +17,9 @@ class DeltaAction(Action):
     def apply(self, environment):
         environment.move_delta(self.delta)
 
+    def __str__(self):
+        return f'[Action: DeltaAction {self.delta}]'
+
 
 class AbsoluteAction(Action):
 
@@ -27,6 +30,9 @@ class AbsoluteAction(Action):
     def apply(self, environment):
         environment.move_to(self.pos)
 
+    def __str__(self):
+        return f'[Action: AbsoluteAction {self.pos}]'
+
 
 class SleepAction(Action):
 
@@ -36,6 +42,9 @@ class SleepAction(Action):
 
     def apply(self, environment):
         time.sleep(self.time)
+
+     def __str__(self):
+        return f'[Action: Sleep for {self.time} seconds]'
 
 
 class SequentialAction(Action):
@@ -48,3 +57,17 @@ class SequentialAction(Action):
     def apply(self, environment):
         for action in self.action_list:
             action.apply(environment)
+
+    def __str__(self):
+        return '\n'.join(str(self.action_list))
+
+class DynamixelAngleAction(Action):
+
+    def __init__(self, angle):
+        self.angle = angle
+
+    def apply(self, environment):
+        environment.move_dyna_to_angle(self.angle)
+
+    def __str__(self):
+        return f'[Action: Dynamixel to {self.angle} degrees]'

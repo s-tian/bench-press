@@ -12,7 +12,7 @@ def run(conf, num_rollouts):
     policy = policy_class(conf)
 
     for rollout_idx in range(num_rollouts):
-        agent.rollout(policy)
+        agent.rollout(policy, rollout_idx)
 
 
 if __name__ == '__main__':

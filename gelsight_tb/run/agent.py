@@ -18,13 +18,16 @@ class Agent:
     def _reset_env(self):
         self.env.reset()
 
-    def rollout(self, policy):
+    def rollout(self, policy, idx):
         done = False
         num_steps = 0
+        observations = []
         observation = self.env.get_obs()
+        observations.append(observation)
         while not done and num_steps < self.config.agent.max_steps:
-            action = policy(observation, num_steps)
+            action = policy.get_action(observation, num_steps)
             self.env.step(action)
             observation = self.env.get_obs()
-
+            observations.append(observation)
+        self.logger.log_obs(observations, idx)
 
