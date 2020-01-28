@@ -1,5 +1,4 @@
 from tb_control.dynamixel_interface import Dynamixel
-import time
 import ipdb
 ipdb.set_trace()
 d = Dynamixel('/dev/ttyUSB0', 2900)

@@ -73,8 +73,8 @@ index = 0
 dxl_goal_position = [DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE]         # Goal position
 TICKS_PER_REV = 4096
 
+
 class Dynamixel():
-    
 
     def __init__(self, device_name, home_pos):
 

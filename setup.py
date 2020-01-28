@@ -1,10 +1,10 @@
 from setuptools import setup
 
 setup(
-    name='tb-control',
+    name='gelsight_tb',
     version='1.0',
     description='Control gelsight tb',
     author='ST ',
     author_email='stephentian@berkeley.edu',
-    packages=['tb_control'],  #same as name
+    packages=['gelsight_tb'],  #same as name
 )
