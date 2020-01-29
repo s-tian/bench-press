@@ -8,7 +8,7 @@ class Logger:
 
     def __init__(self, conf):
         self.all_conf = conf
-        self.logger_conf = conf.logger_conf
+        self.logger_conf = conf.logger
         self.log_dir = self._make_log_dir()
         self._log_conf()
 
@@ -28,6 +28,6 @@ class Logger:
 
     def log_obs(self, obs, index):
         assert isinstance(obs, list), 'observations should be logged in list format, first dim being time'
-        dd.io.save(f"{self.log_dir}/record_{index}.h5")
+        dd.io.save(f"{self.log_dir}/record_{index}.h5", obs)
 
 

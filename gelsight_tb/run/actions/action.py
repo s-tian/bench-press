@@ -43,7 +43,7 @@ class SleepAction(Action):
     def apply(self, environment):
         time.sleep(self.time)
 
-     def __str__(self):
+    def __str__(self):
         return f'[Action: Sleep for {self.time} seconds]'
 
 
@@ -60,6 +60,7 @@ class SequentialAction(Action):
 
     def __str__(self):
         return '\n'.join(str(self.action_list))
+
 
 class DynamixelAngleAction(Action):
 

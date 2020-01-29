@@ -1,4 +1,4 @@
-from gelsight_tb.run.logger import Logger
+from gelsight_tb.utils.logger import Logger
 from gelsight_tb.utils.infra import str_to_class
 
 
@@ -26,8 +26,10 @@ class Agent:
         observations.append(observation)
         while not done and num_steps < self.config.agent.max_steps:
             action = policy.get_action(observation, num_steps)
+            print(action)
             self.env.step(action)
             observation = self.env.get_obs()
             observations.append(observation)
+            num_steps += 1
         self.logger.log_obs(observations, idx)
 
