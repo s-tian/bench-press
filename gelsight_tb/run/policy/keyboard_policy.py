@@ -1,9 +1,9 @@
 from gelsight_tb.run.policy.base_policy import BasePolicy
-from gelsight_tb.actions.action import DeltaAction, DynamixelAngleAction
+from gelsight_tb.run.actions.action import DeltaAction, DynamixelAngleAction
 import getch
 
 
-class ManualPolicy(BasePolicy):
+class KeyboardPolicy(BasePolicy):
 
     INPUTS = {
         'w': DeltaAction((50, 0, 0)),
@@ -17,6 +17,7 @@ class ManualPolicy(BasePolicy):
     }
 
     def get_action(self, observation, num_steps):
+        ch = None
         while ch not in self.INPUTS:
             ch = getch.getch()
         return self.INPUTS[ch]

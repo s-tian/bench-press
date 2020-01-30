@@ -5,9 +5,10 @@ import time
 
 class Camera:
 
-    def __init__(self, name, goal_height, goal_width):
-        self.name = name
-        self.cap = cv2.VideoCapture(name)
+    def __init__(self, name, index, goal_height, goal_width):
+        self.name = name            # Human-friendly name
+        self.index = index          # Capture index (e.g. 0)
+        self.cap = cv2.VideoCapture(self.index)
         self.raw_height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.raw_width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.goal_height, self.goal_width = goal_height, goal_width
@@ -42,3 +43,6 @@ class CameraThread(threading.Thread):
     def get_frame(self):
         return self.current_frame
 
+    # Get human-readable name specified in config
+    def get_name(self):
+        return self.camera.name

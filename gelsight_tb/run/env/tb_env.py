@@ -42,10 +42,10 @@ class TBEnv(BaseEnv):
 
     def _setup_cameras(self):
         cameras = []
-        for camera_name in self.config.camera.camera_names:
-            camera = Camera(camera_name, self.config.camera.goal_height,
-                            self.config.camera.goal_width)
-            camera_thread = CameraThread(camera, self.config.camera.thread_rate)
+        for camera_name, camera_conf in self.config.cameras.items():
+            camera = Camera(camera_name, camera_conf.index, camera_conf.goal_height,
+                            camera_conf.goal_width)
+            camera_thread = CameraThread(camera, camera_conf.thread_rate)
             camera_thread.start()
             cameras.append(camera_thread)
         return cameras
@@ -69,19 +69,20 @@ class TBEnv(BaseEnv):
         target = np.array(position) + np.array((x, y, z))
         self.move_to(target)
 
-     def move_dyna_to_angle(self, angle):
-         if self.dynamixel_bounds[0] <= angle <= self.dynamixel_bounds[1]:
-             self.dynamixel.move_to_angle(angle)
-         else:
-             self.logger.log_text(f'Dynamixel cannot move to OOB pos {angle}')
+    def move_dyna_to_angle(self, angle):
+        if self.dynamixel_bounds[0] <= angle <= self.dynamixel_bounds[1]:
+            self.dynamixel.move_to_angle(angle)
+        else:
+            self.logger.log_text(f'Dynamixel cannot move to OOB pos {angle}')
 
     def get_current_image_obs(self):
-        return [c_thread.get_frame() for c_thread in self.cameras]
+        return {c_thread.get_name(): c_thread.get_frame() for c_thread in self.cameras}
 
     def get_tb_obs(self):
         return self.tb.req_data()
 
     def get_obs(self):
-        return {'state': self.get_tb_obs(),
-                'images': self.get_current_image_obs()}
+        return {'tb_state': self.get_tb_obs(),
+                'images': self.get_current_image_obs(),
+                'dynamixel_state': self.dynamixel.get_current_angle()}
 
