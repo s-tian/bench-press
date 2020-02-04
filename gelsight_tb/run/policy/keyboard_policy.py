@@ -8,12 +8,12 @@ class KeyboardPolicy(BasePolicy):
     INPUTS = {
         'w': DeltaAction((50, 0, 0)),
         's': DeltaAction((-50, 0, 0)),
-        'a': DeltaAction((0, 50, 0)),
-        'd': DeltaAction((0, -50, 0)),
+        'a': DeltaAction((0, -50, 0)),
+        'd': DeltaAction((0, 50, 0)),
         'i': DeltaAction((0, -25, 0)),
         'j': DeltaAction((0, 25, 0)),
         'o': DynamixelAngleAction(0),
-        'p': DynamixelAngleAction(30),
+        'p': DynamixelAngleAction(22.5),
     }
 
     def get_action(self, observation, num_steps):
