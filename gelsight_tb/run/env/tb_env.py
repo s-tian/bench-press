@@ -11,14 +11,19 @@ class TBEnv(BaseEnv):
     def __init__(self, env_config, logger):
         super(TBEnv, self).__init__(env_config, logger)
         self.cameras = self._setup_cameras()
-        self.tb = self._setup_tb()
         if self.config.dynamixel:
             self.dynamixel_bounds = np.array(self.config.dynamixel.bounds)
             self._setup_dynamixel()
             assert len(self.dynamixel_bounds) == 2, 'Dynamixel bounds should be [lower, upper]'
             assert self.dynamixel_bounds[0] < self.dynamixel_bounds[1], 'Dynamixel lower bound bigger than upper?'
+        self.tb = self._setup_tb()
         self.min_bounds = np.array(self.config.min_bounds)
         self.max_bounds = np.array(self.config.max_bounds)
+
+    def clean_up(self):
+        for camera_thread in self.cameras:
+            camera_thread.stop()
+            camera_thread.join()
 
     def _setup_tb(self):
         self.logger.log_text('------------- Setting up TB -----------------')
@@ -60,8 +65,10 @@ class TBEnv(BaseEnv):
 
     def move_to(self, position):
         position = np.array(position)
-        assert np.all(position >= self.min_bounds), f'Position target {position} must be at least min bounds'
-        assert np.all(position <= self.max_bounds), f'Position target {position} must be at most max bounds'
+        #assert np.all(position >= self.min_bounds), f'Position target {position} must be at least min bounds'
+        #assert np.all(position <= self.max_bounds), f'Position target {position} must be at most max bounds'
+        if np.any(position < self.min_bounds) or np.any(position > self.max_bounds):
+            return
         self.tb.target_pos(*position)
         while self.tb.busy():
             self.tb.update()

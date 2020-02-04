@@ -13,7 +13,7 @@ def run(conf, num_rollouts):
 
     for rollout_idx in range(num_rollouts):
         agent.rollout(policy, rollout_idx)
-
+    agent.env.clean_up()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='run policies on testbench')
