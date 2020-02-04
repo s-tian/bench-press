@@ -4,23 +4,22 @@ import cv2
 from enum import Enum
 
 # This class provides an interface to the gelsight testbench setup via serial.
+# Does NOT provide an interface to any attached cameras, etc.
+
+
 class State(Enum):
     IDLE = 0
     BUSY = 1
     READY = 2
 
-class TestBench():
+
+class TestBench:
 
     IDLE_MSGS = ["Initialized", "Moved", "Reset", "Pressed", "Ready"]
 
-    def __init__(self, name, cam_index, side_cam_index=None):
+    def __init__(self, name):
         self.ser = serial.Serial(name, baudrate=250000, timeout=1)
-        self.cap = cv2.VideoCapture(cam_index)
-        if side_cam_index is not None:
-            self.side_cam_cap = cv2.VideoCapture(side_cam_index)
-        self.height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.currmsg = ""
+        self.curr_msg = ""
         self.state = State.IDLE
 
     def target_pos(self, x, y, z):
@@ -111,23 +110,10 @@ class TestBench():
         for i in range(self.ser.inWaiting()):
             ch = self.ser.read().decode()
             if ch == "\n":
-                self.__handle_msg(self.currmsg)
-                self.currmsg = ""
+                self.__handle_msg(self.curr_msg)
+                self.curr_msg = ""
             else:
-                self.currmsg += ch
-        # Keep camera buffer empty
-        self.cap.grab()
-        self.side_cam_cap.grab()
-     
-    def get_side_cam_frame(self):
-        ret, frame = self.side_cam_cap.read()
-        assert ret, "Failed to get side cam frame"
-        return frame
-
-    def get_frame(self):
-        ret, frame = self.cap.read()
-        assert ret, "Failed to get frame"
-        return frame
+                self.curr_msg += ch
 
     def req_data(self):
         """
@@ -144,7 +130,8 @@ class TestBench():
             data = self.ser.readline()
         return self.__parse_data_str(data.decode())
 
-    def __parse_data_str(self, data):
+    @staticmethod
+    def __parse_data_str(data):
         """
         Turn data strings from testbench into usable dictionaries
         """
@@ -160,5 +147,3 @@ class TestBench():
                 data = data[data.find(' ') + 4:]
         return res
 
-    def frame_shape(self):
-        return (self.height, self.width)

@@ -1,0 +1,24 @@
+agent:
+  type: gelsight_tb.run.agent.Agent
+  max_steps: 10
+
+logger:
+  log_folder: logs/
+  log_text: True
+
+env:
+  type: gelsight_tb.run.env.tb_env.TBEnv
+  cameras:
+    gelsight_1:
+      index: 0
+      goal_height: 48
+      goal_width: 64
+      thread_rate: 30
+    external:
+      index: 1
+      goal_height: 480
+      goal_width: 640
+      thread_rate: 30
+
+policy:
+  type: gelsight_tb.run.policy.keyboard_policy.KeyboardPolicy

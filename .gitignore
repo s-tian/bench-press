@@ -8,3 +8,5 @@
 *.mat
 traj_data/
 __pycache__/
+logs/
+data_collection/data

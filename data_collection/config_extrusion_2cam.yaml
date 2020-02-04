@@ -1,0 +1,9 @@
+home:
+    x: 2675  
+    y: 1600 
+    z: 0 
+
+dynamixel:
+    home: 2880
+    max-angle: 60 
+    min-angle: 22.5
