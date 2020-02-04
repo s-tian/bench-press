@@ -1,6 +1,6 @@
 agent:
   type: gelsight_tb.run.agent.Agent
-  max_steps: 10
+  max_steps: 200
 
 logger:
   log_folder: logs/
@@ -8,16 +8,24 @@ logger:
 
 env:
   type: gelsight_tb.run.env.tb_env.TBEnv
+  serial_name: '/dev/ttyACM0'
+  min_bounds: [1000, 0, 0]
+  max_bounds: [8000, 12000, 1800] 
+  dynamixel:
+    name: '/dev/ttyUSB0'
+    home_pos: 1565 
+    reset_on_start: True
+    bounds: [-49.5, 0]
   cameras:
-    gelsight_1:
-      index: 0
-      goal_height: 48
-      goal_width: 64
-      thread_rate: 30
     external:
-      index: 1
+      index: 0
       goal_height: 480
       goal_width: 640
+      thread_rate: 60
+    gelsight1:
+      index: 1
+      goal_height: 48
+      goal_width: 64
       thread_rate: 30
 
 policy:

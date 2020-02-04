@@ -11,13 +11,19 @@ class TBEnv(BaseEnv):
     def __init__(self, env_config, logger):
         super(TBEnv, self).__init__(env_config, logger)
         self.cameras = self._setup_cameras()
+        if self.config.dynamixel:
+            self.dynamixel_bounds = np.array(self.config.dynamixel.bounds)
+            self._setup_dynamixel()
+            assert len(self.dynamixel_bounds) == 2, 'Dynamixel bounds should be [lower, upper]'
+            assert self.dynamixel_bounds[0] < self.dynamixel_bounds[1], 'Dynamixel lower bound bigger than upper?'
         self.tb = self._setup_tb()
-        self.dynamixel = self._setup_dynamixel()
-        self.dynamixel_bounds = np.array(self.config.dynamixel_bounds)
-        assert len(self.dynamixel_bounds) == 2, 'Dynamixel bounds should be [lower, upper]'
-        assert self.dynamixel_bounds[0] < self.dynamixel_bounds[1], 'Dynamixel lower bound bigger than upper?'
         self.min_bounds = np.array(self.config.min_bounds)
         self.max_bounds = np.array(self.config.max_bounds)
+
+    def clean_up(self):
+        for camera_thread in self.cameras:
+            camera_thread.stop()
+            camera_thread.join()
 
     def _setup_tb(self):
         self.logger.log_text('------------- Setting up TB -----------------')
@@ -26,6 +32,8 @@ class TBEnv(BaseEnv):
         while not tb.ready():
             time.sleep(0.1)
             tb.update()
+        tb.flip_x_reset()
+        time.sleep(0.2)
         tb.start()
         while tb.busy():
             tb.update()
@@ -35,13 +43,14 @@ class TBEnv(BaseEnv):
         return tb
 
     def _setup_dynamixel(self):
-        dyna = Dynamixel(self.config.dynamixel.name, self.config.dynamixel.home_pos)
+        self.dynamixel = Dynamixel(self.config.dynamixel.name, self.config.dynamixel.home_pos)
         if self.config.dynamixel.reset_on_start:
             self.move_dyna_to_angle(0)
-        return dyna
 
     def _setup_cameras(self):
         cameras = []
+        if not self.config.cameras:
+            return cameras
         for camera_name, camera_conf in self.config.cameras.items():
             camera = Camera(camera_name, camera_conf.index, camera_conf.goal_height,
                             camera_conf.goal_width)
@@ -56,8 +65,10 @@ class TBEnv(BaseEnv):
 
     def move_to(self, position):
         position = np.array(position)
-        assert np.all(position >= self.min_bounds), f'Position target {position} must be at least min bounds'
-        assert np.all(position <= self.max_bounds), f'Position target {position} must be at most max bounds'
+        #assert np.all(position >= self.min_bounds), f'Position target {position} must be at least min bounds'
+        #assert np.all(position <= self.max_bounds), f'Position target {position} must be at most max bounds'
+        if np.any(position < self.min_bounds) or np.any(position > self.max_bounds):
+            return
         self.tb.target_pos(*position)
         while self.tb.busy():
             self.tb.update()
@@ -82,7 +93,10 @@ class TBEnv(BaseEnv):
         return self.tb.req_data()
 
     def get_obs(self):
+        if self.config.dynamixel:
+            return {'tb_state': self.get_tb_obs(),
+                    'images': self.get_current_image_obs(),
+                    'dynamixel_state': self.dynamixel.get_current_angle()}
         return {'tb_state': self.get_tb_obs(),
-                'images': self.get_current_image_obs(),
-                'dynamixel_state': self.dynamixel.get_current_angle()}
+                'images': self.get_current_image_obs()}
 
