@@ -65,9 +65,11 @@ class TBEnv(BaseEnv):
 
     def move_to(self, position):
         position = np.array(position)
-        #assert np.all(position >= self.min_bounds), f'Position target {position} must be at least min bounds'
-        #assert np.all(position <= self.max_bounds), f'Position target {position} must be at most max bounds'
-        if np.any(position < self.min_bounds) or np.any(position > self.max_bounds):
+        if np.any(position < self.min_bounds):
+            self.logger.log_text(f'Position target {position} must be at least min bounds')
+            return
+        if np.any(position > self.max_bounds):
+            self.logger.log_text(f'Position target {position} must be at most max bounds')
             return
         self.tb.target_pos(*position)
         while self.tb.busy():
