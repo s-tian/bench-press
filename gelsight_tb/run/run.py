@@ -15,6 +15,7 @@ def run(conf, num_rollouts):
         agent.rollout(policy, rollout_idx)
     agent.env.clean_up()
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='run policies on testbench')
     parser.add_argument('config_file', action='store')
