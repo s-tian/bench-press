@@ -7,11 +7,9 @@ from gelsight_tb.models.model import Model
 
 class PolicyNetwork(Model):
 
-    def __init__(self, conf):
-        super(PolicyNetwork, self).__init__()
-        self.conf = conf
+    def __init__(self, conf, load_resume=None):
+        super(PolicyNetwork, self).__init__(conf, load_resume)
         self.batch_size = self.conf.batch_size
-        self.build_network()
 
     def build_network(self):
         num_image_inputs = self.conf.num_image_inputs
