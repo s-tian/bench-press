@@ -2,9 +2,10 @@ import torch
 import torch.nn as nn
 import numpy as np
 from gelsight_tb.models.modules.vgg_encoder import get_vgg_16_encoder
+from gelsight_tb.models.model import Model
 
 
-class PolicyNetwork(nn.Module):
+class PolicyNetwork(Model):
 
     def __init__(self, conf):
         super(PolicyNetwork, self).__init__()
