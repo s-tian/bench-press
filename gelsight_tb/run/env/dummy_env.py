@@ -10,10 +10,10 @@ class DummyEnv(BaseEnv):
     def get_obs(self):
         return {'tb_state':
                     {
-                        'x': 1200,
-                        'y': 2000,
-                        'z': 300
+                        'x': np.random.randint(1000, 1500),
+                        'y': np.random.randint(1700, 2400),
+                        'z': np.random.randint(0, 1000)
                     },
-                'images': [np.zeros((48, 64, 3)) for i in range(3)],
-                'dynamixel_state': np.zeros(1)}
+                'images': [np.random.randint(0, 256, (48, 64, 3)) for _ in range(3)],
+                'dynamixel_state': np.random.randint(0, 30)}
 

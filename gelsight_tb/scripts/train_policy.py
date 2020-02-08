@@ -23,7 +23,6 @@ class Trainer:
             self.device = torch.device('cpu')
         self.model_class = str_to_class(conf.model.type)
         self.model = self.model_class(conf.model, resume_dir).to(self.device)
-        import ipdb; ipdb.set_trace()
         self.dataset_class = str_to_class(conf.dataset.type)
         self.dataset = self.dataset_class(conf.dataset)
         self.total_dataset_len = len(self.dataset)
@@ -39,11 +38,23 @@ class Trainer:
                     ImageTransform(transforms.ColorJitter(brightness=0.3, contrast=0.2, saturation=0.2, hue=0.2)),
                     ImageTransform(transforms.RandomRotation(5))
                 ]),
-                ImageTransform(transforms.ToTensor())
+                ImageTransform(transforms.ToTensor()),
             ])
 
-        self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size)
-        self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size)
+        self.val_dataset.dataset.transform = transforms.Compose(
+            [
+                ImageTransform(transforms.ToTensor()),
+            ]
+        )
+
+        if self.conf.dataset.dataloader_workers > 1:
+            self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size,
+                                                                num_workers=conf.dataset.dataloader_workers)
+            self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size,
+                                                              num_workers=conf.dataset.dataloader_workers)
+        else:
+            self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size)
+            self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size)
 
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.summary_writer = self._make_summary_writer()
@@ -51,7 +62,7 @@ class Trainer:
         self.start_epoch = 0
 
         if resume_dir is not None:
-            self.start_epoch = self._load_most_recent_chkpt() + 1
+            self.start_epoch = self._load_most_recent_chkpt()
 
         self.current_epoch = self.start_epoch
 
@@ -79,13 +90,13 @@ class Trainer:
     def val(self):
         with autograd.no_grad():
             losses = []
-            for batch_idx, batch in tqdm(enumerate(self.val_dataloader)):
+            for batch_idx, batch in enumerate(self.val_dataloader):
                 inputs = deep_map(lambda x: x.to(self.device), batch)
                 output = self.model(inputs)
                 loss = self.model.loss(output, inputs['label'])
-                losses.append(loss * batch.shape[0])
-            loss = sum(losses) / len(self.val_dataloader)
-            self.summary_writer.log_scalar('val/loss', loss, self.global_step)
+                losses.append(loss * self._batch_size(batch))
+            loss = sum(losses) / len(self.val_dataloader.dataset)
+            self.summary_writer.add_scalar('val/loss', loss, self.global_step)
 
     def train(self):
         with tqdm(total=self.conf.num_epochs) as pbar:
@@ -93,15 +104,16 @@ class Trainer:
             while self.current_epoch < self.conf.num_epochs:
                 if self.current_epoch > self.start_epoch:
                     self.val()
-                self.model.save_checkpoint({
-                    'epoch': self.current_epoch,
-                    'global_step': self.global_step,
-                    'state_dict': self.model.state_dict(),
-                    'optimizer': self.optimizer.state_dict(),
-                }, self.current_epoch)
+                self.current_epoch += 1
+                if self.current_epoch % self.conf.checkpoint_every == 0:
+                    self.model.save_checkpoint({
+                        'epoch': self.current_epoch,
+                        'global_step': self.global_step,
+                        'state_dict': self.model.state_dict(),
+                        'optimizer': self.optimizer.state_dict(),
+                    }, self.current_epoch)
                 self.model.dump_params()
                 self._train_one_epoch(self.current_epoch)
-                self.current_epoch += 1
                 pbar.update(1)
 
     def _train_one_epoch(self, epoch_num):
@@ -115,11 +127,15 @@ class Trainer:
             loss = self.model.loss(output, inputs['label'])
             loss.backward()
             self.optimizer.step()
-            del output, loss
             self.global_step = self.global_step + 1
-            losses.append(loss * batch.shape[0])
-        loss = sum(losses) / len(self.train_dataloader)
-        self.summary_writer.log_scalar('train/loss', loss, self.global_step)
+            losses.append(loss * self._batch_size(batch))
+            del output, loss
+        loss = sum(losses) / len(self.train_dataloader.dataset)
+        self.summary_writer.add_scalar('train/loss', loss, self.global_step)
+
+    @staticmethod
+    def _batch_size(batch):
+        return batch['label'].shape[0]
 
 
 if __name__ == '__main__':

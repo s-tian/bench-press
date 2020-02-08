@@ -3,6 +3,7 @@ import torch.nn as nn
 from omegaconf import OmegaConf
 import datetime
 import os
+import glob
 from pathlib import Path
 
 
@@ -33,6 +34,10 @@ class Model(nn.Module):
     def save_checkpoint(self, d, epoch_num):
         folder_name = os.path.join(self.exp_path, 'weights')
         os.makedirs(folder_name, exist_ok=True)
+        # Delete previous model versions to save space :(
+        prev_chkpts = glob.glob(f'{folder_name}/*.pth')
+        for prev_checkpt in prev_chkpts:
+            os.remove(prev_checkpt)
         torch.save(d, os.path.join(folder_name, f'{epoch_num}.pth'))
 
     def build_network(self):

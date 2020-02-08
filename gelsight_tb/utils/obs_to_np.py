@@ -20,7 +20,7 @@ def obs_to_state(obs, norm_conf):
     z = obs['tb_state']['z']
     dynamixel = obs['dynamixel_state']
 
-    unnormalized_state = np.concatenate((np.array([x, y, z]), np.array(dynamixel)))
+    unnormalized_state = np.concatenate((np.array([x, y, z]), np.array([dynamixel])))
     normalized_state = normalize(unnormalized_state, norm_conf.mean, norm_conf.scale)
     return normalized_state
 

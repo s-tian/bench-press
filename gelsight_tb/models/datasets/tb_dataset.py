@@ -35,14 +35,13 @@ class TBDataset(Dataset):
 
     def _make_data_point(self, obs_1, obs_2):
         images = obs_to_images(obs_1, self.conf.norm)
-        state = obs_to_state(obs_1, self.conf.norm).astype(int)
-        actions = obs_to_action(obs_1, obs_2, self.conf.norm).astype(int)
+        state = obs_to_state(obs_1, self.conf.norm).astype(np.float32)
+        actions = obs_to_action(obs_1, obs_2, self.conf.norm).astype(np.float32)
         data_point = {
             'images': images,
             'state': state,
             'label': actions
         }
-
         if self.transform is None:
             return data_point
         transformed = self.transform(data_point)
