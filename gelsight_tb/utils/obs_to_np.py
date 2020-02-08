@@ -26,7 +26,10 @@ def obs_to_state(obs, norm_conf):
 
 
 def obs_to_images(obs, norm_conf):
-    images = obs['images']
+    images_dict = obs['images']
+    images = []
+    for key in sorted(images_dict.keys()):
+        images.append(images_dict[key])
     return [normalize_img(image).astype(np.uint8) for image in images]
 
 
