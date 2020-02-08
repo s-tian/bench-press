@@ -2,16 +2,16 @@ import torch
 from torch.utils.data import Dataset
 import deepdish as dd
 import glob
-import numpy as np
 import bisect
 from gelsight_tb.utils.obs_to_np import *
 
 
 class TBDataset(Dataset):
 
-    def __init__(self, conf):
+    def __init__(self, conf, transform=None):
         self.conf = conf
         self.folder = conf.folder
+        self.transform = transform
         self.h5_files = [folder for folder in glob.glob('**/*.h5')]
         print(f'located {len(self.h5_files)} h5 files!')
         self.file_lengths = []
@@ -37,9 +37,12 @@ class TBDataset(Dataset):
         images = obs_to_images(obs_1, self.conf.norm)
         state = obs_to_state(obs_1, self.conf.norm)
         actions = obs_to_action(obs_1, obs_2, self.conf.norm)
-        return {
+        data_point = {
             'images': images,
             'state': state,
             'label': actions
         }
 
+        if self.transform is None:
+            return data_point
+        return self.transform(data_point)

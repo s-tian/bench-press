@@ -10,7 +10,8 @@ def denormalize(arr, mean, std):
 
 
 def normalize_img(img):
-    return (img / 255.) * 2 - 1
+    #return (img / 255.) * 2 - 1
+    return img
 
 
 def obs_to_state(obs, norm_conf):

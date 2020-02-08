@@ -1,6 +1,7 @@
 import torch
 from torch import autograd
 from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms, utils
 import numpy as np
 import argparse
 from omegaconf import OmegaConf
@@ -8,6 +9,7 @@ from tqdm import tqdm
 import sys
 import os
 from gelsight_tb.utils.infra import str_to_class, deep_map
+from gelsight_tb.models.datasets.transforms import ImageTransform
 
 
 class Trainer:
@@ -27,6 +29,18 @@ class Trainer:
         self.train_val_split = [int(self.conf.train_frac * self.total_dataset_len),
                                 self.total_dataset_len - int(self.conf.train_frac * self.total_dataset_len)]
         self.train_dataset, self.val_dataset = torch.utils.data.random_split(self.dataset, self.train_val_split)
+
+        self.train_dataset.dataset.transform = transforms.compose(
+            [
+                transforms.RandomApply(
+                [
+                    ImageTransform(transforms.toPILImage()),
+                    ImageTransform(transforms.ColorJitter(brightness=0.3, contrast=0.2, saturation=0.2, hue=0.2)),
+                    ImageTransform(transforms.RandomRotation(5))
+                ]),
+                ImageTransform(transforms.ToTensor())
+            ])
+
         self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size)
         self.val_dataloader = torch.utils.data.DataLoader(self.val_dataloader, batch_size=conf.model.batch_size)
 
