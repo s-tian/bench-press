@@ -1,7 +1,8 @@
 from gelsight_tb.run.policy.base_policy import BasePolicy
-from gelsight_tb.run.actions.action import DeltaAction, DynamixelAngleAction
+from gelsight_tb.run.actions.action import DeltaAction, DynamixelAngleAction, EndAction
 import getch
 import cv2
+
 
 class KeyboardPolicy(BasePolicy):
 
@@ -16,6 +17,7 @@ class KeyboardPolicy(BasePolicy):
         'j': DeltaAction((0, 0, 100)),
         'o': DynamixelAngleAction(0),
         'p': DynamixelAngleAction(-49),
+        'g': EndAction(),
     }
 
     def get_action(self, observation, num_steps):

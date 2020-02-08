@@ -8,6 +8,12 @@ class Action:
         raise NotImplementedError
 
 
+class EndAction:
+
+    def apply(self, environment):
+        pass
+
+
 class DeltaAction(Action):
 
     def __init__(self, delta):

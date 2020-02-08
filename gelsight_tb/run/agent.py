@@ -1,6 +1,6 @@
 from gelsight_tb.utils.logger import Logger
 from gelsight_tb.utils.infra import str_to_class
-
+from gelsight_tb.run.actions.action import EndAction
 
 class Agent:
 
@@ -27,6 +27,8 @@ class Agent:
         while not done and num_steps < self.config.agent.max_steps:
             action = policy.get_action(observation, num_steps)
             print(action)
+            if isinstance(action, EndAction):
+                done = True
             self.env.step(action)
             observation = self.env.get_obs()
             observations.append(observation)
