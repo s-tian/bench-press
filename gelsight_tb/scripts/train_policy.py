@@ -32,10 +32,13 @@ class Trainer:
 
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.summary_writer = self._make_summary_writer()
-        self.global_step = None
+        self.global_step = 0
+        self.start_epoch = 0
 
         if resume_dir is not None:
-            self._load_most_recent_chkpt()
+            self.start_epoch = self._load_most_recent_chkpt() + 1
+
+        self.current_epoch = self.start_epoch
 
     def _make_summary_writer(self):
         folder_name = os.path.join(self.model.exp_path, 'logs')
@@ -69,18 +72,22 @@ class Trainer:
             loss = sum(losses) / len(self.val_dataloader)
             self.summary_writer.log_scalar('val/loss', loss, self.global_step)
 
-    def train(self, start_epoch):
-        for epoch in range(start_epoch, self._hp.num_epochs):
-            if epoch > start_epoch:
-                self.val()
-            self.model.save_checkpoint({
-                'epoch': epoch,
-                'global_step': self.global_step,
-                'state_dict': self.model.state_dict(),
-                'optimizer': self.optimizer.state_dict(),
-            })
-            self.model.dump_params(self.exp_path)
-            self._train_one_epoch(epoch)
+    def train(self):
+        with tqdm(total=self.conf.num_epochs) as pbar:
+            pbar.update(self.current_epoch)
+            while self.current_epoch < self.conf.num_epochs:
+                if self.current_epoch > self.start_epoch:
+                    self.val()
+                self.model.save_checkpoint({
+                    'epoch': self.current_epoch,
+                    'global_step': self.global_step,
+                    'state_dict': self.model.state_dict(),
+                    'optimizer': self.optimizer.state_dict(),
+                })
+                self.model.dump_params(self.exp_path)
+                self._train_one_epoch(self.current_epoch)
+                self.current_epoch += 1
+                pbar.update(1)
 
     def _train_one_epoch(self, epoch_num):
         self.model.train()
@@ -111,4 +118,5 @@ if __name__ == '__main__':
         print('Failed to load config, exiting now...')
         sys.exit()
 
-    train(conf, args.resume_dir)
+    trainer = Trainer(conf, args.resume_dir)
+    trainer.train()

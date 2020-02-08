@@ -91,6 +91,9 @@ class TBEnv(BaseEnv):
     def get_current_image_obs(self):
         return {c_thread.get_name(): c_thread.get_frame() for c_thread in self.cameras}
 
+    def get_current_raw_image_obs(self):
+        return {c_thread.get_name(): c_thread.get_raw_frame() for c_thread in self.cameras}
+
     def get_tb_obs(self):
         return self.tb.req_data()
 
@@ -98,7 +101,9 @@ class TBEnv(BaseEnv):
         if self.config.dynamixel:
             return {'tb_state': self.get_tb_obs(),
                     'images': self.get_current_image_obs(),
+                    'raw_images': self.get_current_image_obs(),
                     'dynamixel_state': self.dynamixel.get_current_angle()}
         return {'tb_state': self.get_tb_obs(),
-                'images': self.get_current_image_obs()}
+                'images': self.get_current_image_obs(),
+                'raw_images': self.get_current_raw_image_obs()}
 

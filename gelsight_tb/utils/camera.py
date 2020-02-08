@@ -22,7 +22,7 @@ class Camera:
     """
     def get_frame(self):
         success, raw_frame = self.get_raw_frame()
-        return cv2.resize(raw_frame, (self.goal_width, self.goal_height), interpolation=cv2.INTER_AREA)
+        return raw_frame, cv2.resize(raw_frame, (self.goal_width, self.goal_height), interpolation=cv2.INTER_AREA)
 
 
 class CameraThread(threading.Thread):
@@ -32,7 +32,7 @@ class CameraThread(threading.Thread):
         assert isinstance(camera, Camera), 'CameraThread must be built using Camera obj'
         self.camera = camera
         self.thread_rate = thread_rate # (polling rate in Hz)
-        self.current_frame = None
+        self.current_frame, self.current_frame_raw = None, None
         self.running_lock = threading.Lock()
         self.running = None
 
@@ -44,8 +44,9 @@ class CameraThread(threading.Thread):
                 if not self.running:
                     break
             start = time.time()
-            current_bgr_frame = self.camera.get_frame()
+            raw_bgr, current_bgr_frame = self.camera.get_frame()
             self.current_frame = cv2.cvtColor(current_bgr_frame, cv2.COLOR_BGR2RGB)
+            self.current_frame_raw = cv2.cvtColor(raw_bgr, cv2.COLOR_BGR2RGB)
             end = time.time()
             time_per_cycle = 1.0 / self.thread_rate  # Number of seconds per cycle
             remaining = start - end + time_per_cycle
@@ -54,6 +55,9 @@ class CameraThread(threading.Thread):
 
     def get_frame(self):
         return self.current_frame
+
+    def get_raw_frame(self):
+        return self.current_frame_raw
 
     # Get human-readable name specified in config
     def get_name(self):
