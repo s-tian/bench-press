@@ -12,7 +12,7 @@ class TBDataset(Dataset):
         self.conf = conf
         self.folder = conf.folder
         self.transform = transform
-        self.h5_files = [folder for folder in glob.glob('**/*.h5')]
+        self.h5_files = [folder for folder in glob.glob(f'{self.folder}**/*.h5')]
         print(f'located {len(self.h5_files)} h5 files!')
         self.file_lengths = []
         for f in self.h5_files:
@@ -35,8 +35,8 @@ class TBDataset(Dataset):
 
     def _make_data_point(self, obs_1, obs_2):
         images = obs_to_images(obs_1, self.conf.norm)
-        state = obs_to_state(obs_1, self.conf.norm)
-        actions = obs_to_action(obs_1, obs_2, self.conf.norm)
+        state = obs_to_state(obs_1, self.conf.norm).astype(int)
+        actions = obs_to_action(obs_1, obs_2, self.conf.norm).astype(int)
         data_point = {
             'images': images,
             'state': state,
@@ -45,4 +45,5 @@ class TBDataset(Dataset):
 
         if self.transform is None:
             return data_point
-        return self.transform(data_point)
+        transformed = self.transform(data_point)
+        return transformed

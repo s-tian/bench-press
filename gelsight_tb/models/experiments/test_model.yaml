@@ -1,0 +1,21 @@
+seed: 0
+
+model:
+  type: gelsight_tb.models.policy_network.PolicyNetwork
+  num_image_inputs: 3
+  encoder_features: 64
+  action_dim: 4
+  policy_layers: [256, 128, 64, 64]
+  batch_size: 32
+  log_dir: training_models/test_model
+
+dataset:
+  type: gelsight_tb.models.datasets.tb_dataset.TBDataset
+  folder: test_training_data/
+  norm:
+    mean: [0, 0, 0, 0]
+    scale: [1000, 1000, 500, 30]
+
+train_frac: 0.8
+num_epochs: 100
+exp_name: testing

@@ -18,8 +18,8 @@ class PolicyNetwork(Model):
         current_layer_width = len(self.image_encoders * self.conf.encoder_features)
         self.fc_layers = []
         for layer in self.conf.policy_layers:
-            self.fc_layers.append(nn.Linear(current_layer_width, layer['num_features']))
-            current_layer_width = layer['num_features']
+            self.fc_layers.append(nn.Linear(current_layer_width, layer))
+            current_layer_width = layer
         self.output_layer = nn.Linear(current_layer_width, self.conf.action_dim)
 
     def forward(self, inputs):

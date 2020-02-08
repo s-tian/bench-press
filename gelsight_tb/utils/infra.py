@@ -10,11 +10,11 @@ def str_to_class(path_name):
     return getattr(module, class_name)
 
 
-def deep_map(x, fn):
+def deep_map(fn, x):
     if isinstance(x, dict):
-        return {x: deep_map(k, fn) for x, k in x.items()}
+        return {x: deep_map(fn, k) for x, k in x.items()}
     if isinstance(x, list):
-        return [deep_map(i, fn) for i in x]
+        return [deep_map(fn, i) for i in x]
     return fn(x)
 
 

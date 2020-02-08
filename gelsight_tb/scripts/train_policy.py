@@ -23,6 +23,7 @@ class Trainer:
             self.device = torch.device('cpu')
         self.model_class = str_to_class(conf.model.type)
         self.model = self.model_class(conf.model, resume_dir).to(self.device)
+        import ipdb; ipdb.set_trace()
         self.dataset_class = str_to_class(conf.dataset.type)
         self.dataset = self.dataset_class(conf.dataset)
         self.total_dataset_len = len(self.dataset)
@@ -30,11 +31,11 @@ class Trainer:
                                 self.total_dataset_len - int(self.conf.train_frac * self.total_dataset_len)]
         self.train_dataset, self.val_dataset = torch.utils.data.random_split(self.dataset, self.train_val_split)
 
-        self.train_dataset.dataset.transform = transforms.compose(
+        self.train_dataset.dataset.transform = transforms.Compose(
             [
                 transforms.RandomApply(
                 [
-                    ImageTransform(transforms.toPILImage()),
+                    ImageTransform(transforms.ToPILImage()),
                     ImageTransform(transforms.ColorJitter(brightness=0.3, contrast=0.2, saturation=0.2, hue=0.2)),
                     ImageTransform(transforms.RandomRotation(5))
                 ]),
@@ -42,7 +43,7 @@ class Trainer:
             ])
 
         self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size)
-        self.val_dataloader = torch.utils.data.DataLoader(self.val_dataloader, batch_size=conf.model.batch_size)
+        self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size)
 
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.summary_writer = self._make_summary_writer()
@@ -97,8 +98,8 @@ class Trainer:
                     'global_step': self.global_step,
                     'state_dict': self.model.state_dict(),
                     'optimizer': self.optimizer.state_dict(),
-                })
-                self.model.dump_params(self.exp_path)
+                }, self.current_epoch)
+                self.model.dump_params()
                 self._train_one_epoch(self.current_epoch)
                 self.current_epoch += 1
                 pbar.update(1)

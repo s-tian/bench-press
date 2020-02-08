@@ -3,7 +3,7 @@ agent:
   max_steps: 10
 
 logger:
-  log_folder: logs/
+  log_folder: test_training_data/
   log_text: True
 
 env:

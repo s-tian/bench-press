@@ -8,6 +8,12 @@ class DummyEnv(BaseEnv):
         self.logger.log_text(f'<DummyEnv> Taking action {action}')
 
     def get_obs(self):
-        return {'state': np.zeros(3),
-                'images': np.zeros((48, 64, 3))}
+        return {'tb_state':
+                    {
+                        'x': 1200,
+                        'y': 2000,
+                        'z': 300
+                    },
+                'images': [np.zeros((48, 64, 3)) for i in range(3)],
+                'dynamixel_state': np.zeros(1)}
 

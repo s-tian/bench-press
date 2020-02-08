@@ -10,3 +10,5 @@ class BaseEnv:
     def get_obs(self):
         raise NotImplementedError
 
+    def clean_up(self):
+        pass
