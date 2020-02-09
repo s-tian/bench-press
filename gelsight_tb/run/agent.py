@@ -22,6 +22,7 @@ class Agent:
         done = False
         num_steps = 0
         observations = []
+        self.env.reset()
         observation = self.env.get_obs()
         observations.append(observation)
         while not done and num_steps < self.config.agent.max_steps:

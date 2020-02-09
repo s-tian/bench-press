@@ -19,11 +19,16 @@ class TBEnv(BaseEnv):
         self.tb = self._setup_tb()
         self.min_bounds = np.array(self.config.min_bounds)
         self.max_bounds = np.array(self.config.max_bounds)
+        self.home_pos = np.array(self.config.home_pos)
 
     def clean_up(self):
         for camera_thread in self.cameras:
             camera_thread.stop()
             camera_thread.join()
+
+    def reset(self):
+        self.move_to(self.home_pos)
+        self.move_dyna_to_angle(0)
 
     def _setup_tb(self):
         self.logger.log_text('------------- Setting up TB -----------------')
