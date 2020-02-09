@@ -7,16 +7,18 @@ import cv2
 class KeyboardPolicy(BasePolicy):
 
     INPUTS = {
-        'w': DeltaAction((100, 0, 0)),
-        's': DeltaAction((-100, 0, 0)),
+        'w': DeltaAction((150, 0, 0)),
+        's': DeltaAction((-150, 0, 0)),
         'a': DeltaAction((0, -100, 0)),
         'd': DeltaAction((0, 100, 0)),
         'n': DeltaAction((0, -600, 0)),
         'm': DeltaAction((0, 600, 0)),
         'i': DeltaAction((0, 0, -100)),
         'j': DeltaAction((0, 0, 100)),
-        'o': DynamixelAngleAction(0),
-        'p': DynamixelAngleAction(-49),
+        'o': DeltaAction((0, 0, -200)),
+        'k': DeltaAction((0, 0, 200)),
+        '[': DynamixelAngleAction(0),
+        ']': DynamixelAngleAction(-49),
         'g': EndAction(),
     }
 

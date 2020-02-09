@@ -27,6 +27,10 @@ class TBEnv(BaseEnv):
             camera_thread.join()
 
     def reset(self):
+        home_pos_x = np.copy(self.home_pos)
+        tb_state = self.tb.req_data()
+        home_pos_x[1] = tb_state['y']
+        self.move_to(home_pos_x)
         self.move_to(self.home_pos)
         self.move_dyna_to_angle(0)
 
