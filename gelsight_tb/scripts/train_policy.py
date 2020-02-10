@@ -99,7 +99,7 @@ class Trainer:
             self.summary_writer.add_scalar('val/loss', loss, self.global_step)
 
     def train(self):
-        with tqdm(total=self.conf.num_epochs) as pbar:
+        with tqdm(total=self.conf.num_epochs, desc="epoch: ") as pbar:
             pbar.update(self.current_epoch)
             while self.current_epoch < self.conf.num_epochs:
                 if self.current_epoch > self.start_epoch:
@@ -119,6 +119,7 @@ class Trainer:
     def _train_one_epoch(self, epoch_num):
         self.model.train()
         epoch_len = len(self.train_dataloader)
+        print(epoch_len)
         losses = []
         for batch_idx, batch in tqdm(enumerate(self.train_dataloader)):
             inputs = deep_map(lambda x: x.to(self.device), batch)
