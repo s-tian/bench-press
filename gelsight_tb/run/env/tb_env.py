@@ -110,7 +110,7 @@ class TBEnv(BaseEnv):
         if self.config.dynamixel:
             return {'tb_state': self.get_tb_obs(),
                     'images': self.get_current_image_obs(),
-                    'raw_images': self.get_current_image_obs(),
+                    'raw_images': self.get_current_raw_image_obs(),
                     'dynamixel_state': self.dynamixel.get_current_angle()}
         return {'tb_state': self.get_tb_obs(),
                 'images': self.get_current_image_obs(),
