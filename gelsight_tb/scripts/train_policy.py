@@ -97,13 +97,14 @@ class Trainer:
                 output = self.model(inputs)
                 loss = self.model.loss(output, inputs['label'])
                 if verbose:
-                    print('-------------------------------------------')
-                    true_action = denormalize_action(batch['label'], self.conf.dataset.norm)
-                    policy_action = denormalize_action(output.cpu().numpy(), self.conf.dataset.norm)
-                    print(f'Expert action was {true_action}')
-                    print(f'Policy action was {policy_action}')
-                    print('-------------------------------------------')
-                losses.append(loss * self._batch_size(batch))
+                    true_action_batch = denormalize_action(batch['label'], self.conf.dataset.norm)
+                    policy_action_batch = denormalize_action(output.cpu().numpy(), self.conf.dataset.norm)
+                    for true_action, policy_action in zip(true_action_batch, policy_action_batch):
+                        print('-------------------------------------------')
+                        print(f'Expert action was {true_action}')
+                        print(f'Policy action was {policy_action}')
+                        print('-------------------------------------------')
+                    losses.append(loss * self._batch_size(batch))
             loss = sum(losses) / len(self.val_dataloader.dataset)
             self.summary_writer.add_scalar('val/loss', loss, self.global_step)
 

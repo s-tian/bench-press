@@ -32,11 +32,13 @@ class Model(nn.Module):
     def save_checkpoint(self, d, epoch_num):
         folder_name = os.path.join(self.exp_path, 'weights')
         os.makedirs(folder_name, exist_ok=True)
-        # Delete previous model versions to save space :(
-        prev_chkpts = glob.glob(f'{folder_name}/*.pth')
-        for prev_checkpt in prev_chkpts:
-            os.remove(prev_checkpt)
         torch.save(d, os.path.join(folder_name, f'{epoch_num}.pth'))
+
+        # Delete previous model versions to save space :(
+        checkpoints = os.listdir(folder_name)
+        checkpoints.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+        oldest_file = os.path.join(folder_name, checkpoints[0])
+        os.remove(oldest_file)
 
     def build_network(self):
         raise NotImplementedError
