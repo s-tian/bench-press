@@ -65,7 +65,7 @@ class SequentialAction(Action):
             action.apply(environment)
 
     def __str__(self):
-        return '\n'.join(str(self.action_list))
+        return '\n'.join([str(a) for a in self.action_list])
 
 
 class DynamixelAngleAction(Action):

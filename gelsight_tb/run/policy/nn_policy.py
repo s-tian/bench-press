@@ -15,30 +15,44 @@ class NNPolicy(BasePolicy):
             self.device = torch.device('cuda')
         else:
             self.device = torch.device('cpu')
-        self.model_class = str_to_class(self.conf.model_conf.model.type)
-        self.model = self.model_class(self.conf.model_conf).to(self.device)
-        print(f'Loading model from {self.conf.model.checkpoint}')
-        checkpoint = torch.load(self.conf.model_checkpoint)
+        self.model_class = str_to_class(self.policy_conf.model_conf.model.type)
+        self.model = self.model_class(self.policy_conf.model_conf.model).to(self.device)
+        print(f'Loading model from {self.policy_conf.model_checkpoint}')
+        checkpoint = torch.load(self.policy_conf.model_checkpoint)
         self.model.load_state_dict(checkpoint['state_dict'])
         self.model.eval()
 
+    @staticmethod
+    def prep_images(images):
+        """
+        :param images:
+        :return: prepped images, with batch dimension added and channel dimension switched
+        """
+        prepped = []
+        for im in images:
+            im_p = np.transpose(im, (2, 0, 1))[None].astype(np.float32) / 255.
+            prepped.append(im_p)
+        return prepped
+
     def get_action(self, observation, num_steps):
-        norm_conf = self.conf.model_conf.dataset.norm
+        norm_conf = self.policy_conf.model_conf.dataset.norm
         images = obs_to_images(observation, norm_conf)
+        images = self.prep_images(images)
+
         state = obs_to_state(observation, norm_conf).astype(np.float32)
         inp = {
-            'images': np.array(images)[None], # Add batch dimensions to inputs
+            'images': images, # Add batch dimensions to inputs
             'state': state[None]
         }
-        inp = deep_map(lambda x: x.to(self.device), inp)
-        output = denormalize_action(self.model(inp).cpu(), norm_conf)[0]
+        inp = deep_map(lambda x: torch.from_numpy(x).to(self.device), inp)
+        output = denormalize_action(self.model(inp).cpu().detach().numpy(), norm_conf)[0]
 
         gripper_open = True
         if output[-1] < -49.5 / 2:
             gripper_open = False
         gripper_action = action.DynamixelAngleAction(0) if gripper_open else action.DynamixelAngleAction(-49.5)
 
-        for i in range(output):
+        for i in range(len(output)):
             if np.abs(output[i]) < 10:
                 output[i] = 0
 

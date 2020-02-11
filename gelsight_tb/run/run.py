@@ -9,7 +9,7 @@ def run(conf, num_rollouts):
     agent = agent_class(conf)
 
     policy_class = str_to_class(conf.policy.type)
-    policy = policy_class(conf)
+    policy = policy_class(conf.policy)
 
     for rollout_idx in range(num_rollouts):
         agent.rollout(policy, rollout_idx)
