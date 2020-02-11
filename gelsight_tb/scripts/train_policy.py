@@ -43,7 +43,7 @@ class Trainer:
             ])
 
         self.val_dataset.dataset.transform = transforms.Compose(
-            [                    print('-------------------------------------------')
+            [
                 ImageTransform(transforms.ToTensor()),
             ]
         )

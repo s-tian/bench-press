@@ -42,4 +42,11 @@ def obs_to_action(obs_1, obs_2, norm_conf):
 
 
 def denormalize_action(action, norm_conf):
-    return denormalize(action, norm_conf.mean, norm_conf.scale)
+    """
+    :param action: batch of actions with shape (B, a_dim)
+    :param norm_conf: dict containing mean and scale parameters
+    :return: denormalized actions in real testbench tick space
+    """
+    action_means = np.zeros(action.shape[1])
+    action_means[-1] = norm_conf.mean[-1]
+    return denormalize(action, action_means, norm_conf.scale)

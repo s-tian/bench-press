@@ -23,6 +23,7 @@ class PolicyNetwork(Model):
             self.fc_layers.append(nn.Linear(current_layer_width, layer))
             current_layer_width = layer
         self.output_layer = nn.Linear(current_layer_width, self.conf.action_dim)
+        self.relu = torch.nn.ReLU()
 
     def forward(self, inputs):
         """
@@ -40,7 +41,7 @@ class PolicyNetwork(Model):
         image_states_comb = torch.cat((image_encodings_cat, state_input), dim=1)
         output = image_states_comb
         for layer in self.fc_layers:
-            output = layer(output)
+            output = self.relu(layer(output))
         output = self.output_layer(output)
         return output
 
