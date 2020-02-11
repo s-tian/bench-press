@@ -14,6 +14,6 @@ class DummyEnv(BaseEnv):
                         'y': np.random.randint(1700, 2400),
                         'z': np.random.randint(0, 1000)
                     },
-                'images': [np.random.randint(0, 256, (48, 64, 3)) for _ in range(3)],
+                'images': {f'cam_{i}': np.random.randint(0, 256, (48, 64, 3)) for i in range(3)},
                 'dynamixel_state': np.random.randint(0, 30)}
 

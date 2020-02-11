@@ -15,8 +15,8 @@ dataset:
   folder: test_training_data/
   dataloader_workers: 1
   norm:
-    mean: [0, 0, 0, 0]
-    scale: [1000, 1000, 500, 30]
+    mean: [6700, 5700, 900, -25]
+    scale: [1300, 2000, 900, 25]
 
 train_frac: 0.8
 num_epochs: 100

@@ -39,3 +39,7 @@ def obs_to_action(obs_1, obs_2, norm_conf):
     action = state_2 - state_1
     action[3] = state_2[3] # The gripper action is an absolute action
     return action
+
+
+def denormalize_action(action, norm_conf):
+    return denormalize(action, norm_conf.mean, norm_conf.scale)

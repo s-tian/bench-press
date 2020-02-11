@@ -12,3 +12,6 @@ class BaseEnv:
 
     def clean_up(self):
         pass
+
+    def reset(self):
+        pass

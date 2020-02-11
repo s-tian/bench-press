@@ -18,8 +18,6 @@ class Model(nn.Module):
             self.exp_path = load_resume
         self.dump_params()
         self.build_network()
-        if load_resume is not None:
-            self._load_most_recent_chkpt()
 
     @staticmethod
     def _make_exp_path(dir_name, exp_name):

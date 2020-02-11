@@ -10,6 +10,7 @@ import sys
 import os
 from gelsight_tb.utils.infra import str_to_class, deep_map
 from gelsight_tb.models.datasets.transforms import ImageTransform
+from gelsight_tb.utils.obs_to_np import denormalize_action
 
 
 class Trainer:
@@ -42,7 +43,7 @@ class Trainer:
             ])
 
         self.val_dataset.dataset.transform = transforms.Compose(
-            [
+            [                    print('-------------------------------------------')
                 ImageTransform(transforms.ToTensor()),
             ]
         )
@@ -78,22 +79,30 @@ class Trainer:
         np.random.seed(self.conf.seed)
 
     def _load_most_recent_chkpt(self):
-        checkpoints = os.listdir(os.path.join(self.model.exp_path, 'weights'))
-        checkpoints.sort(key=lambda f: int(filter(str.isdigit, f)))
-        most_recent_file = checkpoints[-1]
+        weights_path = os.path.join(self.model.exp_path, 'weights')
+        checkpoints = os.listdir(weights_path)
+        checkpoints.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+        most_recent_file = os.path.join(weights_path, checkpoints[-1])
         print(f'Loading checkpoint from file {most_recent_file}')
         checkpoint = torch.load(most_recent_file)
         self.model.load_state_dict(checkpoint['state_dict'])
         self.global_step = checkpoint['global_step']
         return checkpoint['epoch']
 
-    def val(self):
+    def val(self, verbose=False):
         with autograd.no_grad():
             losses = []
             for batch_idx, batch in enumerate(self.val_dataloader):
                 inputs = deep_map(lambda x: x.to(self.device), batch)
                 output = self.model(inputs)
                 loss = self.model.loss(output, inputs['label'])
+                if verbose:
+                    print('-------------------------------------------')
+                    true_action = denormalize_action(batch['label'], self.conf.dataset.norm)
+                    policy_action = denormalize_action(output.cpu().numpy(), self.conf.dataset.norm)
+                    print(f'Expert action was {true_action}')
+                    print(f'Policy action was {policy_action}')
+                    print('-------------------------------------------')
                 losses.append(loss * self._batch_size(batch))
             loss = sum(losses) / len(self.val_dataloader.dataset)
             self.summary_writer.add_scalar('val/loss', loss, self.global_step)
@@ -142,7 +151,8 @@ class Trainer:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train policy')
     parser.add_argument('config_file', action='store')
-    parser.add_argument('--resume_dir', action='store', type=str, dest="resume_dir")
+    parser.add_argument('--resume_dir', action='store', type=str, dest='resume_dir')
+    parser.add_argument('--val', action='store_true', dest='val')
     args = parser.parse_args()
     try:
         conf = OmegaConf.load(args.config_file)
@@ -151,4 +161,7 @@ if __name__ == '__main__':
         sys.exit()
 
     trainer = Trainer(conf, args.resume_dir)
-    trainer.train()
+    if args.val:
+        trainer.val(verbose=True)
+    else:
+        trainer.train()
