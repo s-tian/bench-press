@@ -1,0 +1,64 @@
+agent:
+  type: gelsight_tb.run.agent.Agent
+  max_steps: 200
+
+logger:
+  log_folder: test_bc_policy/
+  log_text: True
+
+env:
+  type: gelsight_tb.run.env.tb_env.TBEnv
+  serial_name: '/dev/ttyACM0'
+  home_pos: [6700, 5700, 0]
+  min_bounds: [1000, 0, 0]
+  max_bounds: [8000, 12000, 1800] 
+  dynamixel:
+    name: '/dev/ttyUSB1'
+    home_pos: 1565 
+    reset_on_start: True
+    bounds: [-49.5, 0]
+  cameras:
+    external:
+      index: 4
+      goal_height: 48
+      goal_width: 64
+      thread_rate: 60
+    gelsight_top:
+      index: 0
+      goal_height: 48
+      goal_width: 64
+      thread_rate: 60
+    gelsight_side:
+      index: 2
+      goal_height: 48
+      goal_width: 64
+      thread_rate: 60
+
+policy:
+  type: gelsight_tb.run.policy.nn_policy.NNPolicy
+  model_checkpoint: training_models/bc_policy/bc_on_100_traj/weights/100.pth
+  model_conf:
+    seed: 0
+    model:
+      type: gelsight_tb.models.policy_network.PolicyNetwork
+      num_image_inputs: 3
+      encoder_features: 64
+      action_dim: 4
+      state_dim: 4
+      policy_layers: [256, 128, 64, 64]
+      batch_size: 32
+      log_dir: training_models/bc_policy
+
+    dataset:
+      type: gelsight_tb.models.datasets.tb_dataset.TBDataset
+      folder: demo_data/
+      dataloader_workers: 4
+      norm:
+        mean: [6700, 5700, 900, -25]
+        scale: [1300, 2000, 900, 25]
+
+    train_frac: 0.8
+    num_epochs: 100
+    checkpoint_every: 5
+
+    exp_name: bc_policy
