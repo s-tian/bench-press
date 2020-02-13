@@ -18,5 +18,5 @@ class DummyEnv(BaseEnv):
                         'z': 500
                     },
                 'images': {f'cam_{i}': np.random.randint(0, 256, (48, 64, 3)) for i in range(3)},
-                'dynamixel_state': np.random.randint(0, 30)}
+                'dynamixel_state': -49.5}
 

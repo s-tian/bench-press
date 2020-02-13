@@ -1,9 +1,12 @@
 import torch
+from torchvision import transforms
 import numpy as np
 
 from gelsight_tb.run.policy.base_policy import BasePolicy
 from gelsight_tb.utils.obs_to_np import obs_to_state, obs_to_images, denormalize_action
 from gelsight_tb.utils.infra import str_to_class, deep_map
+from gelsight_tb.models.datasets.transforms import ImageTransform
+from gelsight_tb.models.modules.vgg_encoder import pretrained_model_normalize
 import gelsight_tb.run.actions.action as action
 
 
@@ -15,6 +18,7 @@ class NNPolicy(BasePolicy):
             self.device = torch.device('cuda')
         else:
             self.device = torch.device('cpu')
+        self.image_transform = ImageTransform(pretrained_model_normalize)
         self.model_class = str_to_class(self.policy_conf.model_conf.model.type)
         self.model = self.model_class(self.policy_conf.model_conf.model).to(self.device)
         print(f'Loading model from {self.policy_conf.model_checkpoint}')
@@ -30,7 +34,7 @@ class NNPolicy(BasePolicy):
         """
         prepped = []
         for im in images:
-            im_p = np.transpose(im, (2, 0, 1))[None].astype(np.float32) / 255.
+            im_p = np.transpose(im, (2, 0, 1)).astype(np.float32) / 255.
             prepped.append(im_p)
         return prepped
 
@@ -45,6 +49,9 @@ class NNPolicy(BasePolicy):
             'state': state[None]
         }
         inp = deep_map(lambda x: torch.from_numpy(x).to(self.device), inp)
+        inp = self.image_transform(inp)
+        for i, img in enumerate(inp['images']):
+            inp['images'][i] = img[None]
         output = denormalize_action(self.model(inp).cpu().detach().numpy(), norm_conf)[0]
 
         gripper_open = True

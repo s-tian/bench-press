@@ -10,6 +10,7 @@ import sys
 import os
 from gelsight_tb.utils.infra import str_to_class, deep_map
 from gelsight_tb.models.datasets.transforms import ImageTransform
+from gelsight_tb.models.modules.vgg_encoder import pretrained_model_normalize
 from gelsight_tb.utils.obs_to_np import denormalize_action
 
 
@@ -33,18 +34,21 @@ class Trainer:
 
         self.train_dataset.dataset.transform = transforms.Compose(
             [
+                ImageTransform(transforms.ToPILImage()),
                 transforms.RandomApply(
                 [
-                    ImageTransform(transforms.ToPILImage()),
                     ImageTransform(transforms.ColorJitter(brightness=0.3, contrast=0.2, saturation=0.2, hue=0.2)),
                     ImageTransform(transforms.RandomRotation(5))
                 ]),
                 ImageTransform(transforms.ToTensor()),
+                ImageTransform(pretrained_model_normalize)
             ])
 
         self.val_dataset.dataset.transform = transforms.Compose(
             [
+                ImageTransform(transforms.ToPILImage()),
                 ImageTransform(transforms.ToTensor()),
+                ImageTransform(pretrained_model_normalize)
             ]
         )
 

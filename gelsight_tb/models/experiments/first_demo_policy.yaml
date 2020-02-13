@@ -8,18 +8,18 @@ model:
   state_dim: 4
   policy_layers: [256, 128, 64, 64]
   batch_size: 32
-  log_dir: training_models/bc_policy
+  log_dir: training_models/bc_policy_pre
+  exp_name: bc_policy_pretrain
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset.TBDataset
   folder: demo_data/
-  dataloader_workers: 4
+  dataloader_workers: 12
   norm:
     mean: [6700, 5700, 900, -25]
     scale: [1300, 2000, 900, 25]
 
 train_frac: 0.8
 num_epochs: 100
-checkpoint_every: 5
+checkpoint_every: 3
 
-exp_name: bc_policy

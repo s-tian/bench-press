@@ -11,7 +11,7 @@ env:
 
 policy:
   type: gelsight_tb.run.policy.nn_policy.NNPolicy
-  model_checkpoint: training_models/bc_policy/None_02-10:10:42:00/40.pth
+  model_checkpoint: "training_models/bc_policy_pre/bc_policy_pre_02-12:16:20:05/weights/15.pth"
   model_conf:
     seed: 0
     model:

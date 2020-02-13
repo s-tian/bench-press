@@ -36,9 +36,10 @@ class Model(nn.Module):
 
         # Delete previous model versions to save space :(
         checkpoints = os.listdir(folder_name)
-        checkpoints.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
-        oldest_file = os.path.join(folder_name, checkpoints[0])
-        os.remove(oldest_file)
+        if len(checkpoints) > 2:
+            checkpoints.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+            oldest_file = os.path.join(folder_name, checkpoints[0])
+            os.remove(oldest_file)
 
     def build_network(self):
         raise NotImplementedError
