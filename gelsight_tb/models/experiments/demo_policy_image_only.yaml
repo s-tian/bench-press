@@ -1,17 +1,17 @@
-seed: 0
+seed: 100 
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
   num_image_inputs: 3
   encoder_features: 64
   encoder_type: resnet
-  use_state: True
+  use_state: False
   action_dim: 4
   state_dim: 4
   policy_layers: [256, 128, 64, 64]
   batch_size: 32
   log_dir: training_models/bc_policy_pre
-  exp_name: relu_states_images_resnet 
+  exp_name: image_only_resnet
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset.TBDataset
@@ -24,8 +24,8 @@ dataset:
     action_norm:
       mean: [-39, 0, 0.4, -29]
       scale: [86, 53, 101, 23]
+
 train_frac: 0.8
 num_epochs: 100
-augment_prob: 0.5
 checkpoint_every: 3
 

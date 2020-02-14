@@ -39,7 +39,8 @@ class Trainer:
                 [
                     ImageTransform(transforms.ColorJitter(brightness=0.3, contrast=0.2, saturation=0.2, hue=0.2)),
                     ImageTransform(transforms.RandomRotation(5))
-                ]),
+                ], p=self.conf.augment_prob),
+                ImageTransform(transforms.Resize(64)),
                 ImageTransform(transforms.ToTensor()),
                 ImageTransform(pretrained_model_normalize)
             ])
@@ -47,6 +48,7 @@ class Trainer:
         self.val_dataset.dataset.transform = transforms.Compose(
             [
                 ImageTransform(transforms.ToPILImage()),
+                ImageTransform(transforms.Resize(64)),
                 ImageTransform(transforms.ToTensor()),
                 ImageTransform(pretrained_model_normalize)
             ]
@@ -101,8 +103,8 @@ class Trainer:
                 output = self.model(inputs)
                 loss = self.model.loss(output, inputs['label'])
                 if verbose:
-                    true_action_batch = denormalize_action(batch['label'], self.conf.dataset.norm)
-                    policy_action_batch = denormalize_action(output.cpu().numpy(), self.conf.dataset.norm)
+                    true_action_batch = denormalize_action(batch['label'], self.conf.dataset.norms.action_norm)
+                    policy_action_batch = denormalize_action(output.cpu().numpy(), self.conf.dataset.norms.action_norm)
                     for true_action, policy_action in zip(true_action_batch, policy_action_batch):
                         print('-------------------------------------------')
                         print(f'Expert action was {true_action}')

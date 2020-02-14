@@ -39,11 +39,11 @@ class NNPolicy(BasePolicy):
         return prepped
 
     def get_action(self, observation, num_steps):
-        norm_conf = self.policy_conf.model_conf.dataset.norm
-        images = obs_to_images(observation, norm_conf)
+        action_norm = self.policy_conf.model_conf.dataset.norms.action_norm
+        images = obs_to_images(observation, action_norm)
         images = self.prep_images(images)
 
-        state = obs_to_state(observation, norm_conf).astype(np.float32)
+        state = obs_to_state(observation, action_norm).astype(np.float32)
         inp = {
             'images': images, # Add batch dimensions to inputs
             'state': state[None]
@@ -52,13 +52,13 @@ class NNPolicy(BasePolicy):
         inp = self.image_transform(inp)
         for i, img in enumerate(inp['images']):
             inp['images'][i] = img[None]
-        output = denormalize_action(self.model(inp).cpu().detach().numpy(), norm_conf)[0]
+        output = denormalize_action(self.model(inp).cpu().detach().numpy(), action_norm)[0]
 
         gripper_open = True
         if output[-1] < -49.5 / 2:
             gripper_open = False
         gripper_action = action.DynamixelAngleAction(0) if gripper_open else action.DynamixelAngleAction(-49.5)
-
+        import ipdb; ipdb.set_trace()
         for i in range(len(output)):
             if np.abs(output[i]) < 10:
                 output[i] = 0

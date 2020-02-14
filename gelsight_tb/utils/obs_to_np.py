@@ -14,18 +14,20 @@ def normalize_img(img):
     return img
 
 
-def obs_to_state(obs, norm_conf):
+def obs_to_state(obs, norm_conf, should_normalize=True):
     x = obs['tb_state']['x']
     y = obs['tb_state']['y']
     z = obs['tb_state']['z']
     dynamixel = obs['dynamixel_state']
 
     unnormalized_state = np.concatenate((np.array([x, y, z]), np.array([dynamixel])))
+    if not should_normalize:
+        return unnormalized_state
     normalized_state = normalize(unnormalized_state, norm_conf.mean, norm_conf.scale)
     return normalized_state
 
 
-def obs_to_images(obs, norm_conf):
+def obs_to_images(obs):
     images_dict = obs['images']
     images = []
     for key in sorted(images_dict.keys()):
@@ -34,11 +36,11 @@ def obs_to_images(obs, norm_conf):
 
 
 def obs_to_action(obs_1, obs_2, norm_conf):
-    state_1 = obs_to_state(obs_1, norm_conf)
-    state_2 = obs_to_state(obs_2, norm_conf)
-    action = state_2 - state_1
-    action[3] = state_2[3] # The gripper action is an absolute action
-    return action
+    state_1 = obs_to_state(obs_1, norm_conf, should_normalize=False)
+    state_2 = obs_to_state(obs_2, norm_conf, should_normalize=False)
+    unnormalized_action = state_2 - state_1
+    unnormalized_action[3] = state_2[3] # The gripper action is an absolute action
+    return normalize(unnormalized_action, norm_conf.mean, norm_conf.scale)
 
 
 def denormalize_action(action, norm_conf):
@@ -47,6 +49,4 @@ def denormalize_action(action, norm_conf):
     :param norm_conf: dict containing mean and scale parameters
     :return: denormalized actions in real testbench tick space
     """
-    action_means = np.zeros(action.shape[1])
-    action_means[-1] = norm_conf.mean[-1]
-    return denormalize(action, action_means, norm_conf.scale)
+    return denormalize(action, norm_conf.mean, norm_conf.scale)

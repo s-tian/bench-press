@@ -18,3 +18,8 @@ def get_vgg_encoder(vgg_type, num_features):
     model.classifier[-1] = nn.Linear(in_features=4096, out_features=num_features)
     return model
 
+
+def get_resnet_encoder(resnet_type, num_features):
+    model = resnet_type(pretrained=True, progress=True)
+    model.fc = nn.Linear(in_features=model.fc.in_features, out_features=num_features)
+    return model

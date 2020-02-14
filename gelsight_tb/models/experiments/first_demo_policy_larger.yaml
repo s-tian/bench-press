@@ -4,23 +4,23 @@ model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
   num_image_inputs: 3
   encoder_features: 64
+  use_state: True
   action_dim: 4
   state_dim: 4
-  policy_layers: [256, 128, 64, 64]
+  policy_layers: [512, 256, 256, 256, 128]
   batch_size: 32
-  log_dir: training_models/test_model
+  log_dir: training_models/bc_policy_pre
+  exp_name: larger_bc_policy_pretrain
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset.TBDataset
-  folder: test_training_data/
-  dataloader_workers: 1
+  folder: demo_data/
+  dataloader_workers: 12
   norm:
     mean: [6700, 5700, 900, -25]
     scale: [1300, 2000, 900, 25]
 
 train_frac: 0.8
 num_epochs: 100
-checkpoint_every: 5
-augment_prob: 0.5
+checkpoint_every: 3
 
-exp_name: testing

@@ -13,8 +13,8 @@ class DummyEnv(BaseEnv):
                         #'x': np.random.randint(1000, 1500),
                         #'y': np.random.randint(1700, 2400),
                         #'z': np.random.randint(0, 1000)
-                        'x': 1300,
-                        'y': 2400,
+                        'x': 6700,
+                        'y': 5700,
                         'z': 500
                     },
                 'images': {f'cam_{i}': np.random.randint(0, 256, (48, 64, 3)) for i in range(3)},
