@@ -106,7 +106,8 @@ class Trainer:
                     true_action_batch = denormalize_action(batch['label'], self.conf.dataset.norms.action_norm)
                     policy_action_batch = denormalize_action(output.cpu().numpy(), self.conf.dataset.norms.action_norm)
                     for true_action, policy_action in zip(true_action_batch, policy_action_batch):
-                        print('-------------------------------------------') print(f'Expert action was {true_action}')
+                        print('-------------------------------------------') 
+                        print(f'Expert action was {true_action}')
                         print(f'Policy action was {policy_action}')
                         print('-------------------------------------------')
                 losses.append(loss * self._batch_size(batch))
