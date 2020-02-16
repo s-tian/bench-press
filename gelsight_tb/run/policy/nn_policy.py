@@ -18,7 +18,13 @@ class NNPolicy(BasePolicy):
             self.device = torch.device('cuda')
         else:
             self.device = torch.device('cpu')
-        self.image_transform = ImageTransform(pretrained_model_normalize)
+        self.image_transform = transforms.Compose(
+            [
+                ImageTransform(transforms.ToPILImage()),
+                ImageTransform(transforms.Resize(64)),
+                ImageTransform(transforms.ToTensor()),
+                ImageTransform(pretrained_model_normalize),
+            ])
         self.model_class = str_to_class(self.policy_conf.model_conf.model.type)
         self.model = self.model_class(self.policy_conf.model_conf.model).to(self.device)
         print(f'Loading model from {self.policy_conf.model_checkpoint}')
@@ -34,31 +40,35 @@ class NNPolicy(BasePolicy):
         """
         prepped = []
         for im in images:
-            im_p = np.transpose(im, (2, 0, 1)).astype(np.float32) / 255.
+            im_p = np.transpose(im, (2, 0, 1)).astype(np.float32)
             prepped.append(im_p)
         return prepped
 
     def get_action(self, observation, num_steps):
         action_norm = self.policy_conf.model_conf.dataset.norms.action_norm
-        images = obs_to_images(observation, action_norm)
+        state_norm = self.policy_conf.model_conf.dataset.norms.state_norm
+        images = obs_to_images(observation)
         images = self.prep_images(images)
 
-        state = obs_to_state(observation, action_norm).astype(np.float32)
+        state = obs_to_state(observation, state_norm).astype(np.float32)
         inp = {
-            'images': images, # Add batch dimensions to inputs
-            'state': state[None]
+            'images': images, 
+            'state': state[None] # Add batch dimension to state
         }
-        inp = deep_map(lambda x: torch.from_numpy(x).to(self.device), inp)
+        inp = deep_map(lambda x: torch.from_numpy(x), inp)
         inp = self.image_transform(inp)
+        inp = deep_map(lambda x: x.to(self.device), inp)
         for i, img in enumerate(inp['images']):
             inp['images'][i] = img[None]
-        output = denormalize_action(self.model(inp).cpu().detach().numpy(), action_norm)[0]
+        #output = denormalize_action(self.model(inp).cpu().detach().numpy(), action_norm)[0]
+        output = self.model(inp).cpu().detach().numpy()
+        import ipdb; ipdb.set_trace()
+        output = denormalize_action(output, action_norm)[0]
 
         gripper_open = True
         if output[-1] < -49.5 / 2:
             gripper_open = False
         gripper_action = action.DynamixelAngleAction(0) if gripper_open else action.DynamixelAngleAction(-49.5)
-        import ipdb; ipdb.set_trace()
         for i in range(len(output)):
             if np.abs(output[i]) < 10:
                 output[i] = 0
