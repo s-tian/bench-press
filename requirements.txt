@@ -68,3 +68,5 @@ tqdm==4.26.0
 urllib3==1.23
 Werkzeug==0.14.1
 omegaconf==1.4.1
+torch
+torchvision

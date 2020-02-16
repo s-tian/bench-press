@@ -3,7 +3,7 @@ agent:
   max_steps: 200
 
 logger:
-  log_folder: test_bc_policy_resnet/
+  log_folder: dagger_data/
   log_text: True
 
 env:

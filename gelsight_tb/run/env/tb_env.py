@@ -74,6 +74,7 @@ class TBEnv(BaseEnv):
 
     def move_to(self, position):
         position = np.array(position)
+        position = np.clip(position, self.min_bounds, self.max_bounds)
         if np.any(position < self.min_bounds):
             self.logger.log_text(f'Position target {position} must be at least min bounds')
             return
