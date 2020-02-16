@@ -3,6 +3,7 @@ from torchvision import transforms
 import numpy as np
 
 from gelsight_tb.run.policy.base_policy import BasePolicy
+from gelsight_tb.run.policy.keyboard_policy import KeyboardPolicy 
 from gelsight_tb.utils.obs_to_np import obs_to_state, obs_to_images, denormalize_action
 from gelsight_tb.utils.infra import str_to_class, deep_map
 from gelsight_tb.models.datasets.transforms import ImageTransform
@@ -28,9 +29,11 @@ class NNPolicy(BasePolicy):
         self.model_class = str_to_class(self.policy_conf.model_conf.model.type)
         self.model = self.model_class(self.policy_conf.model_conf.model).to(self.device)
         print(f'Loading model from {self.policy_conf.model_checkpoint}')
-        checkpoint = torch.load(self.policy_conf.model_checkpoint)
+        checkpoint = torch.load(self.policy_conf.model_checkpoint, map_location=self.device)
         self.model.load_state_dict(checkpoint['state_dict'])
         self.model.eval()
+        self.keyboard_override = False
+        self.keyboard_policy = KeyboardPolicy(None)
 
     @staticmethod
     def prep_images(images):
@@ -45,6 +48,16 @@ class NNPolicy(BasePolicy):
         return prepped
 
     def get_action(self, observation, num_steps):
+        if num_steps == 0:
+            self.keyboard_override = False
+        if not self.keyboard_override:
+            response = input('take control?')
+            if response == 'y':
+                self.keyboard_override = 25 
+        if self.keyboard_override:
+            self.keyboard_override -= 1
+            return self.keyboard_policy.get_action(observation, num_steps)
+
         action_norm = self.policy_conf.model_conf.dataset.norms.action_norm
         state_norm = self.policy_conf.model_conf.dataset.norms.state_norm
         images = obs_to_images(observation)
@@ -62,15 +75,14 @@ class NNPolicy(BasePolicy):
             inp['images'][i] = img[None]
         #output = denormalize_action(self.model(inp).cpu().detach().numpy(), action_norm)[0]
         output = self.model(inp).cpu().detach().numpy()
-        import ipdb; ipdb.set_trace()
         output = denormalize_action(output, action_norm)[0]
-
+        print(output)
         gripper_open = True
         if output[-1] < -49.5 / 2:
             gripper_open = False
         gripper_action = action.DynamixelAngleAction(0) if gripper_open else action.DynamixelAngleAction(-49.5)
         for i in range(len(output)):
-            if np.abs(output[i]) < 10:
+            if np.abs(output[i]) < 5:
                 output[i] = 0
 
         return action.SequentialAction(
