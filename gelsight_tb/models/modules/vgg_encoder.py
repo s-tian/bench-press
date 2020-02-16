@@ -19,7 +19,10 @@ def get_vgg_encoder(vgg_type, num_features):
     return model
 
 
-def get_resnet_encoder(resnet_type, num_features):
+def get_resnet_encoder(resnet_type, num_features, freeze=False):
     model = resnet_type(pretrained=True, progress=True)
+    if freeze:
+        for param in model.parameters():
+            param.requires_grad = False
     model.fc = nn.Linear(in_features=model.fc.in_features, out_features=num_features)
     return model

@@ -10,9 +10,11 @@ class TBDataset(Dataset):
 
     def __init__(self, conf, transform=None):
         self.conf = conf
-        self.folder = conf.folder
+        self.folders = conf.folders
         self.transform = transform
-        self.h5_files = [folder for folder in glob.glob(f'{self.folder}**/*.h5')]
+        self.h5_files = []
+        for folder in self.folders:
+            self.h5_files.extend(glob.glob(f'{folder}**/*.h5'))
         print(f'located {len(self.h5_files)} h5 files!')
         self.file_lengths = []
         for f in self.h5_files:

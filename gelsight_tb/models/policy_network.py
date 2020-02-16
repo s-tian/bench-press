@@ -12,12 +12,18 @@ class PolicyNetwork(Model):
         super(PolicyNetwork, self).__init__(conf, load_resume)
         self.batch_size = self.conf.batch_size
         self.loss = nn.MSELoss()
+        if self.conf.activation == 'relu':
+            self.activation = torch.nn.ReLU()
+        elif self.conf.activation == 'sigmoid':
+            self.activation = torch.nn.Sigmoid()
+        else:
+            self.activation = lambda x: x
 
     def build_network(self):
         num_image_inputs = self.conf.num_image_inputs
         if self.conf.encoder_type == 'resnet':
             self.image_encoders = nn.ModuleList(
-                [get_resnet_encoder(models.resnet18, self.conf.encoder_features) for _ in range(num_image_inputs)])
+                [get_resnet_encoder(models.resnet18, self.conf.encoder_features, freeze=self.conf.freeze) for _ in range(num_image_inputs)])
         else:
             self.image_encoders = nn.ModuleList(
                 [get_vgg_encoder(models.vgg13, self.conf.encoder_features) for _ in range(num_image_inputs)])
@@ -32,7 +38,6 @@ class PolicyNetwork(Model):
             self.fc_layers.append(nn.Linear(current_layer_width, layer))
             current_layer_width = layer
         self.output_layer = nn.Linear(current_layer_width, self.conf.action_dim)
-        self.relu = torch.nn.ReLU()
 
     def forward(self, inputs):
         """
@@ -44,14 +49,18 @@ class PolicyNetwork(Model):
 
         image_inputs, state_input = inputs['images'], inputs['state']
         image_encodings = []
-        for camera_i_images, encoder in zip(image_inputs, self.image_encoders):
-            image_encodings.append(encoder(camera_i_images))
-        image_encodings_cat = torch.cat(image_encodings, dim=1)  # form [B, num_cam*encoder_features] tensor
-        output = image_encodings_cat
+        if self.image_encoders:
+            for camera_i_images, encoder in zip(image_inputs, self.image_encoders):
+                image_encodings.append(encoder(camera_i_images))
+            image_encodings_cat = torch.cat(image_encodings, dim=1)  # form [B, num_cam*encoder_features] tensor
+            output = image_encodings_cat
         if self.conf.use_state:
-            output = torch.cat((image_encodings_cat, state_input), dim=1)
+            if image_encodings: 
+                output = torch.cat((image_encodings_cat, state_input), dim=1)
+            else:
+                output = state_input
         for layer in self.fc_layers:
-            output = self.relu(layer(output))
+            output = self.activation(layer(output))
         output = self.output_layer(output)
         return output
 

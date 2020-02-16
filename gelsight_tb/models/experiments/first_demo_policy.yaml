@@ -5,17 +5,19 @@ model:
   num_image_inputs: 3
   encoder_features: 64
   encoder_type: resnet
+  activation: relu 
+  freeze: False 
   use_state: True
   action_dim: 4
   state_dim: 4
   policy_layers: [256, 128, 64, 64]
   batch_size: 32
   log_dir: training_models/bc_policy_pre
-  exp_name: relu_states_images_resnet 
+  exp_name: early_stopping 
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset.TBDataset
-  folder: demo_data/
+  folders: ['demo_data/', 'dagger_data/']
   dataloader_workers: 12
   norms:
     state_norm:
@@ -24,8 +26,8 @@ dataset:
     action_norm:
       mean: [-39, 0, 0.4, -29]
       scale: [86, 53, 101, 23]
-train_frac: 0.8
-num_epochs: 100
+train_frac: 0.9
+num_epochs: 17
 augment_prob: 0.5
-checkpoint_every: 3
+checkpoint_every: 1
 
