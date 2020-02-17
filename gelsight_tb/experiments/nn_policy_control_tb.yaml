@@ -44,6 +44,8 @@ policy:
       num_image_inputs: 3
       encoder_features: 64
       encoder_type: resnet
+      activation: relu
+      freeze: False
       use_state: True
       action_dim: 4
       state_dim: 4
