@@ -12,8 +12,8 @@ model:
   state_dim: 4
   policy_layers: [256, 128, 64, 64]
   batch_size: 32
-  log_dir: training_models/bc_policy_pre
-  exp_name: early_stopping 
+  log_dir: training_models/dagger
+  exp_name: dagger_30
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset.TBDataset
@@ -27,7 +27,7 @@ dataset:
       mean: [-39, 0, 0.4, -29]
       scale: [86, 53, 101, 23]
 train_frac: 0.9
-num_epochs: 17
+num_epochs: 100
 augment_prob: 0.5
-checkpoint_every: 1
+checkpoint_every: 10
 
