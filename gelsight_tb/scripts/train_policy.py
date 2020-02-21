@@ -8,7 +8,10 @@ from omegaconf import OmegaConf
 from tqdm import tqdm
 import sys
 import os
+import copy
 from gelsight_tb.utils.infra import str_to_class, deep_map
+from gelsight_tb.models.datasets.tb_dataset import TBDataset
+from gelsight_tb.models.datasets.tb_dataset_subset import TBDatasetSubset
 from gelsight_tb.models.datasets.transforms import ImageTransform
 from gelsight_tb.models.modules.vgg_encoder import pretrained_model_normalize
 from gelsight_tb.utils.obs_to_np import denormalize_action
@@ -26,25 +29,33 @@ class Trainer:
         self.model_class = str_to_class(conf.model.type)
         self.model = self.model_class(conf.model, resume_dir).to(self.device)
         self.dataset_class = str_to_class(conf.dataset.type)
-        self.dataset = self.dataset_class(conf.dataset)
+        if self.conf.dataset.filter:
+            self.filter_class = str_to_class(conf.dataset.filter)
+        if self.dataset_class is TBDataset:
+            self.dataset = self.dataset_class(conf.dataset)
+        elif self.dataset_class is TBDatasetSubset:
+            self.dataset = self.dataset_class(conf.dataset, self.filter_class)
+
         self.total_dataset_len = len(self.dataset)
         self.train_val_split = [int(self.conf.train_frac * self.total_dataset_len),
                                 self.total_dataset_len - int(self.conf.train_frac * self.total_dataset_len)]
         self.train_dataset, self.val_dataset = torch.utils.data.random_split(self.dataset, self.train_val_split)
-
         self.train_dataset.dataset.transform = transforms.Compose(
             [
                 ImageTransform(transforms.ToPILImage()),
                 transforms.RandomApply(
                 [
-                    ImageTransform(transforms.ColorJitter(brightness=0.3, contrast=0.2, saturation=0.2, hue=0.2)),
-                    ImageTransform(transforms.RandomRotation(5))
+                    ImageTransform(transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5)),
+                    ImageTransform(transforms.RandomRotation(5)),
+                    ImageTransform(transforms.RandomResizedCrop((48, 64), scale=(0.6, 1.0)))
                 ], p=self.conf.augment_prob),
                 ImageTransform(transforms.Resize(64)),
                 ImageTransform(transforms.ToTensor()),
                 ImageTransform(pretrained_model_normalize)
-            ])
-
+            ]
+        )
+        # IMPORTANT: Copy dataset so we can do a different transform here
+        self.val_dataset.dataset = copy.copy(self.train_dataset.dataset)
         self.val_dataset.dataset.transform = transforms.Compose(
             [
                 ImageTransform(transforms.ToPILImage()),
@@ -128,8 +139,8 @@ class Trainer:
                         'state_dict': self.model.state_dict(),
                         'optimizer': self.optimizer.state_dict(),
                     }, self.current_epoch)
-                self.model.dump_params()
                 self._train_one_epoch(self.current_epoch)
+                self.model.dump_params(self.conf)
                 pbar.update(1)
 
     def _train_one_epoch(self, epoch_num):

@@ -54,8 +54,8 @@ def view_file_interactive(filename, raw=True):
             ind = int(x)
             data = file[ind]
             print(data['tb_state'])
-            fig, axs = plot_images(data, raw=raw)
-            plt.show()
+            #fig, axs = plot_images(data, raw=raw)
+            #plt.show()
         except ValueError:
             print('not a valid index?')
 
