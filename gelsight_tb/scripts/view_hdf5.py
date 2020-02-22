@@ -32,16 +32,16 @@ def make_gif_of_traj(filename, output_filename, raw=True, fps=5):
         if np.abs(sorted_act[0]) == 0 and sorted_act[1] == 0:
             print('alert alert')
         print(act)
-        #fig, axs = plot_images(data, raw=raw)
-        #fig.canvas.draw()
-        #image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
-        #image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-        #traj_images.append(image)
-    #clip = ImageSequenceClip(traj_images, fps=fps)
+        fig, axs = plot_images(data, raw=raw)
+        fig.canvas.draw()
+        image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+        image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        traj_images.append(image)
+    clip = ImageSequenceClip(traj_images, fps=fps)
     print(f'Writing out to {output_filename}.mp4')
-    #clip.write_videofile(f'{output_filename}.mp4', fps=fps)
+    clip.write_videofile(f'{output_filename}.mp4', fps=fps)
     print(f'Writing out to {output_filename}.gif')
-    #clip.write_gif(f'{output_filename}.gif', fps=fps, program='imageio', opt='wu')
+    clip.write_gif(f'{output_filename}.gif', fps=fps, program='imageio', opt='wu')
 
 
 def view_file_interactive(filename, raw=True):

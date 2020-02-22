@@ -3,7 +3,7 @@ agent:
   max_steps: 200
 
 logger:
-  log_folder: dagger_data/
+  log_folder: tape_insert_dagger_data/
   log_text: True
 
 env:
@@ -11,7 +11,7 @@ env:
   serial_name: '/dev/ttyACM0'
   home_pos: [6700, 5700, 0]
   min_bounds: [1000, 0, 0]
-  max_bounds: [8000, 12000, 1800] 
+  max_bounds: [8000, 12000, 1850] 
   dynamixel:
     name: '/dev/ttyUSB1'
     home_pos: 1565 
@@ -35,39 +35,43 @@ env:
       thread_rate: 60
 
 policy:
-  type: gelsight_tb.run.policy.nn_policy.NNPolicy
-  model_checkpoint: "training_models/bc_policy_pre/relu_states_images_resnet_02-14:13:12:58/weights/99.pth"
+  type: gelsight_tb.run.policy.nn_insert_policy.NNInsertPolicy
+  model_checkpoint: "training_models/insertion_policy/pol/weights/100.pth"
   model_conf:
     seed: 0
+    
     model:
       type: gelsight_tb.models.policy_network.PolicyNetwork
       num_image_inputs: 3
       encoder_features: 64
       encoder_type: resnet
-      activation: relu
-      freeze: False
+      activation: relu 
+      freeze: False 
       use_state: True
       action_dim: 4
       state_dim: 4
       policy_layers: [256, 128, 64, 64]
       batch_size: 32
-      log_dir: training_models/bc_policy_pre
-      exp_name: relu_states_images_resnet 
-
+      log_dir: training_models/insertion_policy
+      exp_name: cropcolorrot0-61 
+    
     dataset:
-      type: gelsight_tb.models.datasets.tb_dataset.TBDataset
-      folder: demo_data/
+      type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
+      folders: ['demo_data/', 'dagger_data/']
+      #folders: ['dagger_data/']
+      filter: gelsight_tb.models.datasets.filter_fns.InsertFilter
       dataloader_workers: 12
       norms:
         state_norm:
-          mean: [5884, 5745, 441, -29]
-          scale: [1106, 747, 569, 23]
+          mean: [3550, 5667, 20, -47.7]
+          scale: [143, 102, 41, 0.14]
         action_norm:
-          mean: [-39, 0, 0.4, -29]
-          scale: [86, 53, 101, 23]
-    train_frac: 0.8
+          mean: [-83, -2, 0, -47.7]
+          scale: [75.4, 17, 2.4, 0.14]
+    
+    train_frac: 0.85
     num_epochs: 100
     augment_prob: 0.5
-    checkpoint_every: 3
+    checkpoint_every: 10
 
-    exp_name: bc_policy
+exp_name: bc_policy

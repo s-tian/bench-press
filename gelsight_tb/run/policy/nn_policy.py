@@ -53,7 +53,7 @@ class NNPolicy(BasePolicy):
         if not self.keyboard_override:
             response = input('take control?')
             if response == 'y':
-                self.keyboard_override = 25 
+                self.keyboard_override = 1000
         if self.keyboard_override:
             self.keyboard_override -= 1
             return self.keyboard_policy.get_action(observation, num_steps)
@@ -77,6 +77,7 @@ class NNPolicy(BasePolicy):
         output = self.model(inp).cpu().detach().numpy()
         output = denormalize_action(output, action_norm)[0]
         print(output)
+
         gripper_open = True
         if output[-1] < -49.5 / 2:
             gripper_open = False
@@ -84,7 +85,6 @@ class NNPolicy(BasePolicy):
         for i in range(len(output)):
             if np.abs(output[i]) < 5:
                 output[i] = 0
-
         return action.SequentialAction(
             [
                 action.DeltaAction(output[:3]),
