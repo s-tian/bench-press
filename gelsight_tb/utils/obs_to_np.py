@@ -9,11 +9,6 @@ def denormalize(arr, mean, std):
     return (arr * np.array(std)) + np.array(mean)
 
 
-def normalize_img(img):
-    #return (img / 255.) * 2 - 1
-    return img
-
-
 def obs_to_state(obs, norm_conf, should_normalize=True):
     x = obs['tb_state']['x']
     y = obs['tb_state']['y']
@@ -32,7 +27,7 @@ def obs_to_images(obs):
     images = []
     for key in sorted(images_dict.keys()):
         images.append(images_dict[key])
-    return [normalize_img(image).astype(np.uint8) for image in images]
+    return [image.astype(np.uint8) for image in images]
 
 
 def obs_to_action(obs_1, obs_2, norm_conf):

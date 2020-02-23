@@ -6,10 +6,13 @@ class TBDatasetSubset(TBDataset):
 
     def __init__(self, conf, filter_fn, transform=None):
         super(TBDatasetSubset, self).__init__(conf, transform=transform)
-        self.filter_fn = filter_fn()
+        if filter_fn is None:
+            self.filter_fn = lambda x, y: True
+        else:
+            self.filter_fn = filter_fn()
         self.subset_inds = self.get_filter_idxs()
         self.subset_len = len(self.subset_inds)
-        print(f'Created subset of length {self.subset_len}')
+        print(f'Created subset of length {self.subset_len}. This is {1.0 * self.subset_len / self.total_length} of the original.')
         #self.compute_dataset_statistics(raw=True)
 
     def get_filter_idxs(self):

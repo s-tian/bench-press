@@ -22,7 +22,7 @@ class TBDataset(Dataset):
             self.file_lengths.append(len(contents)-1)
         self.file_len_cumsum = np.cumsum(np.array(self.file_lengths))
         self.total_length = self.file_len_cumsum[-1]
-        #self.compute_dataset_statistics(raw=False)
+        #self.compute_dataset_statistics(raw=True)
 
     def __len__(self):
         return self.total_length

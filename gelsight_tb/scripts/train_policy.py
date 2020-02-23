@@ -28,9 +28,12 @@ class Trainer:
             self.device = torch.device('cpu')
         self.model_class = str_to_class(conf.model.type)
         self.model = self.model_class(conf.model, resume_dir).to(self.device)
+        print(list(self.conf.model.final_size)[::-1])
         self.dataset_class = str_to_class(conf.dataset.type)
         if self.conf.dataset.filter:
             self.filter_class = str_to_class(conf.dataset.filter)
+        else:
+            self.filter_class = None
         if self.dataset_class is TBDataset:
             self.dataset = self.dataset_class(conf.dataset)
         elif self.dataset_class is TBDatasetSubset:
@@ -45,10 +48,10 @@ class Trainer:
                 ImageTransform(transforms.ToPILImage()),
                 transforms.RandomApply(
                 [
-                    ImageTransform(transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.25, hue=0)),
-                    ImageTransform(transforms.RandomResizedCrop((48, 64), scale=(0.9, 1.0)))
+                    ImageTransform(transforms.ColorJitter(brightness=self.conf.brightness, contrast=0.25, saturation=0.25, hue=0)),
+                    ImageTransform(transforms.RandomResizedCrop(tuple(self.conf.model.final_size), scale=(0.9, 1.0)))
                 ], p=self.conf.augment_prob),
-                ImageTransform(transforms.Resize(64)),
+                ImageTransform(transforms.Resize(tuple(self.conf.model.final_size))),
                 ImageTransform(transforms.ToTensor()),
                 ImageTransform(pretrained_model_normalize)
             ]
@@ -58,7 +61,7 @@ class Trainer:
         self.val_dataset.dataset.transform = transforms.Compose(
             [
                 ImageTransform(transforms.ToPILImage()),
-                ImageTransform(transforms.Resize(64)),
+                ImageTransform(transforms.Resize(tuple(self.conf.model.final_size))),
                 ImageTransform(transforms.ToTensor()),
                 ImageTransform(pretrained_model_normalize)
             ]

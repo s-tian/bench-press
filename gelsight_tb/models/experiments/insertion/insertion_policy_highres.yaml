@@ -3,7 +3,7 @@ seed: 0
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
   num_image_inputs: 3
-  image_input_min_dim: 64
+  final_size: [96, 128]
   encoder_features: 64
   encoder_type: resnet
   activation: relu 
@@ -13,25 +13,27 @@ model:
   state_dim: 4
   policy_layers: [256, 128, 64, 64]
   batch_size: 32
-  log_dir: training_models/insertion_policy_21
-  exp_name: all_data
+  log_dir: training_models/insertion_policy_23
+  exp_name: test_96_128_brightness05
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
-  folders: ['tape_insert_dagger_data/', 'demo_data/', 'dagger_data/']
+  #type: gelsight_tb.models.datasets.tb_dataset.TBDataset
+  folders: ['tape_insert_dagger_data/', 'tape_insert_dagger_data_22/']
   #folders: ['dagger_data/']
   filter: gelsight_tb.models.datasets.filter_fns.InsertFilter
   dataloader_workers: 12
   norms:
     state_norm:
-      mean: [3581, 5668, 53, -47.7]
-      scale: [267, 98, 68, 0.12]
+      mean: [3881, 5661, 85.6, -47.9]
+      scale: [465, 136, 83, 0.11]
     action_norm:
-      mean: [-64, -1.4, -4.6, -48]
-      scale: [56, 30, 27.7, 0.12]
+      mean: [-64, -2, 1.9, -47.9]
+      scale: [56, 51, 46.5, 0.11]
 
 train_frac: 0.85
 num_epochs: 300
 augment_prob: 0.5
+brightness: 0.5
 checkpoint_every: 10
 
