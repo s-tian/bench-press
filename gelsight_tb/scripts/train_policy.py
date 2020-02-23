@@ -2,7 +2,7 @@ import torch
 from torch import autograd
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms, utils
-import numpy as np
+import numpy as np 
 import argparse
 from omegaconf import OmegaConf
 from tqdm import tqdm
@@ -45,9 +45,8 @@ class Trainer:
                 ImageTransform(transforms.ToPILImage()),
                 transforms.RandomApply(
                 [
-                    ImageTransform(transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5)),
-                    ImageTransform(transforms.RandomRotation(5)),
-                    ImageTransform(transforms.RandomResizedCrop((48, 64), scale=(0.6, 1.0)))
+                    ImageTransform(transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.25, hue=0)),
+                    ImageTransform(transforms.RandomResizedCrop((48, 64), scale=(0.9, 1.0)))
                 ], p=self.conf.augment_prob),
                 ImageTransform(transforms.Resize(64)),
                 ImageTransform(transforms.ToTensor()),

@@ -2,7 +2,7 @@ seed: 0
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
-  num_image_inputs: 3
+  num_image_inputs: 2
   encoder_features: 64
   encoder_type: resnet
   activation: relu 
@@ -12,24 +12,25 @@ model:
   state_dim: 4
   policy_layers: [256, 128, 64, 64]
   batch_size: 32
-  log_dir: training_models/insertion_policy
-  exp_name: no_aug
+  log_dir: training_models/insertion_policy_21
+  exp_name: touch_only 
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
-  folders: ['demo_data/', 'dagger_data/']
+  folders: ['tape_insert_dagger_data/', 'demo_data/', 'dagger_data/']
   #folders: ['dagger_data/']
   filter: gelsight_tb.models.datasets.filter_fns.InsertFilter
   dataloader_workers: 12
   norms:
     state_norm:
-      mean: [3550, 5667, 20, -47.7]
-      scale: [143, 102, 41, 0.14]
+      mean: [3581, 5668, 53, -47.7]
+      scale: [267, 98, 68, 0.12]
     action_norm:
-      mean: [-83, -2, 0, -47.7]
-      scale: [75.4, 17, 2.4, 0.14]
+      mean: [-64, -1.4, -4.6, -48]
+      scale: [56, 30, 27.7, 0.12]
+
 train_frac: 0.85
-num_epochs: 100
-augment_prob: 0
+num_epochs: 300
+augment_prob: 0.5
 checkpoint_every: 10
 

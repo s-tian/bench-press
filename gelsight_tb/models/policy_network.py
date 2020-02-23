@@ -48,6 +48,8 @@ class PolicyNetwork(Model):
         """
 
         image_inputs, state_input = inputs['images'], inputs['state']
+        if self.conf.num_image_inputs < 3:
+            image_inputs = image_inputs[1:]
         image_encodings = []
         if self.image_encoders:
             for camera_i_images, encoder in zip(image_inputs, self.image_encoders):
