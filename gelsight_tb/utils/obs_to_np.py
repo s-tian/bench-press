@@ -23,10 +23,13 @@ def obs_to_state(obs, norm_conf, should_normalize=True):
 
 
 def obs_to_images(obs):
-    images_dict = obs['images']
+    images_dict = obs['raw_images']
     images = []
     for key in sorted(images_dict.keys()):
-        images.append(images_dict[key])
+        if key == 'external':
+            images.append(np.rot90(images_dict[key], k=2))
+        else:
+            images.append(images_dict[key])
     return [image.astype(np.uint8) for image in images]
 
 

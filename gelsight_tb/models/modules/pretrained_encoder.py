@@ -19,10 +19,17 @@ def get_vgg_encoder(vgg_type, num_features):
     return model
 
 
+def print_hook(self, input, output):
+    print(f'output size: {output.data.size()}')
+    print(f'output norm: {output.data.norm()}')
+
+
 def get_resnet_encoder(resnet_type, num_features, freeze=False):
     model = resnet_type(pretrained=True, progress=True)
-    if freeze:
-        for param in model.parameters():
-            param.requires_grad = False
+    for param in model.parameters():
+        param.requires_grad = not freeze
     model.fc = nn.Linear(in_features=model.fc.in_features, out_features=num_features)
+    avgpool = model.avgpool
+    #avgpool.register_forward_hook(print_hook)
+    #import ipdb; ipdb.set_trace()
     return model

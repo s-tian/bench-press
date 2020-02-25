@@ -3,7 +3,7 @@ seed: 0
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
   num_image_inputs: 3
-  final_size: [48, 64]
+  final_size: [64, 85]
   encoder_features: 64
   encoder_type: resnet
   activation: relu 
@@ -14,14 +14,14 @@ model:
   policy_layers: [256, 128, 64, 64]
   batch_size: 32
   log_dir: training_models/insertion_policy_23
-  exp_name: all_data_no_aug
+  exp_name: no_aug
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
   folders: ['tape_insert_dagger_data_22/', 'tape_insert_dagger_data/']
   #folders: ['dagger_data/']
   filter: gelsight_tb.models.datasets.filter_fns.InsertFilter
-  dataloader_workers: 12
+  dataloader_workers: 8
   norms:
     state_norm:
       mean: [3881, 5661, 85.6, -47.9]

@@ -2,20 +2,24 @@ import torch
 import torch.nn as nn
 from torchvision import models
 import numpy as np
-from gelsight_tb.models.modules.vgg_encoder import get_vgg_encoder, get_resnet_encoder
+from gelsight_tb.models.modules.pretrained_encoder import get_vgg_encoder, get_resnet_encoder
 from gelsight_tb.models.model import Model
 
 
 class PolicyNetwork(Model):
 
+    activations = {
+        'relu': torch.nn.ReLU(),
+        'sigmoid': torch.nn.Sigmoid(),
+        'leaky_relu': torch.nn.LeakyReLU()
+    }
+
     def __init__(self, conf, load_resume=None):
         super(PolicyNetwork, self).__init__(conf, load_resume)
         self.batch_size = self.conf.batch_size
         self.loss = nn.MSELoss()
-        if self.conf.activation == 'relu':
-            self.activation = torch.nn.ReLU()
-        elif self.conf.activation == 'sigmoid':
-            self.activation = torch.nn.Sigmoid()
+        if self.conf.activation in self.activations:
+            self.activation = self.activations[self.conf.activation]
         else:
             self.activation = lambda x: x
 
@@ -23,7 +27,7 @@ class PolicyNetwork(Model):
         num_image_inputs = self.conf.num_image_inputs
         if self.conf.encoder_type == 'resnet':
             self.image_encoders = nn.ModuleList(
-                [get_resnet_encoder(models.resnet18, self.conf.encoder_features, freeze=self.conf.freeze) for _ in range(num_image_inputs)])
+                [get_resnet_encoder(models.resnet18, self.conf.encoder_features, freeze=False) for _ in range(num_image_inputs)])
         else:
             self.image_encoders = nn.ModuleList(
                 [get_vgg_encoder(models.vgg13, self.conf.encoder_features) for _ in range(num_image_inputs)])

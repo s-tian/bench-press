@@ -7,7 +7,7 @@ from gelsight_tb.run.policy.keyboard_policy import KeyboardPolicy
 from gelsight_tb.utils.obs_to_np import obs_to_state, obs_to_images, denormalize_action
 from gelsight_tb.utils.infra import str_to_class, deep_map
 from gelsight_tb.models.datasets.transforms import ImageTransform
-from gelsight_tb.models.modules.vgg_encoder import pretrained_model_normalize
+from gelsight_tb.models.modules.pretrained_encoder import pretrained_model_normalize
 import gelsight_tb.run.actions.action as action
 
 

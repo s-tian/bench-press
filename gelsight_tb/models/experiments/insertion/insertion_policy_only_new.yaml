@@ -3,18 +3,18 @@ seed: 0
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
   num_image_inputs: 3
-  final_size: [48, 64]
-  encoder_features: 64
+  final_size: [96, 128]
+  encoder_features: 128
   encoder_type: resnet
-  activation: relu 
-  freeze: False 
+  activation: leaky_relu
+  freeze: False
   use_state: True
   action_dim: 4
   state_dim: 4
-  policy_layers: [256, 128, 64, 64]
+  policy_layers: [256, 256, 128, 64]
   batch_size: 32
-  log_dir: training_models/insertion_policy_23
-  exp_name: train_48_64_b05
+  log_dir: training_models/insertion_policy_24
+  exp_name: 05005no_contr
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
@@ -23,7 +23,8 @@ dataset:
   #folders: ['tape_insert_dagger_data_22/']
   #folders: ['dagger_data/']
   filter: gelsight_tb.models.datasets.filter_fns.InsertFilter
-  dataloader_workers: 12
+  save_inds_to: 'subset_inds.pkl'
+  dataloader_workers: 8
   norms:
     state_norm:
       mean: [3881, 5661, 85.6, -47.9]
@@ -36,5 +37,6 @@ train_frac: 0.85
 num_epochs: 300
 augment_prob: 0.5
 brightness: 0.5
+hue: 0.05
 checkpoint_every: 10
 

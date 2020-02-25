@@ -1,7 +1,8 @@
 import torch
 from torch import autograd
 from torch.utils.tensorboard import SummaryWriter
-from torchvision import transforms, utils
+import torchvision
+from torchvision import transforms
 import numpy as np 
 import argparse
 from omegaconf import OmegaConf
@@ -13,7 +14,7 @@ from gelsight_tb.utils.infra import str_to_class, deep_map
 from gelsight_tb.models.datasets.tb_dataset import TBDataset
 from gelsight_tb.models.datasets.tb_dataset_subset import TBDatasetSubset
 from gelsight_tb.models.datasets.transforms import ImageTransform
-from gelsight_tb.models.modules.vgg_encoder import pretrained_model_normalize
+from gelsight_tb.models.modules.pretrained_encoder import pretrained_model_normalize
 from gelsight_tb.utils.obs_to_np import denormalize_action
 
 
@@ -48,7 +49,7 @@ class Trainer:
                 ImageTransform(transforms.ToPILImage()),
                 transforms.RandomApply(
                 [
-                    ImageTransform(transforms.ColorJitter(brightness=self.conf.brightness, contrast=0.25, saturation=0.25, hue=0)),
+                    ImageTransform(transforms.ColorJitter(brightness=self.conf.brightness, contrast=0, saturation=0, hue=self.conf.hue)),
                     ImageTransform(transforms.RandomResizedCrop(tuple(self.conf.model.final_size), scale=(0.9, 1.0)))
                 ], p=self.conf.augment_prob),
                 ImageTransform(transforms.Resize(tuple(self.conf.model.final_size))),
@@ -69,12 +70,12 @@ class Trainer:
 
         if self.conf.dataset.dataloader_workers > 1:
             self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size,
-                                                                num_workers=conf.dataset.dataloader_workers)
+                                                                num_workers=conf.dataset.dataloader_workers, shuffle=True)
             self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size,
-                                                              num_workers=conf.dataset.dataloader_workers)
+                                                              num_workers=conf.dataset.dataloader_workers, shuffle=True)
         else:
-            self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size)
-            self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size)
+            self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size, shuffle=True)
+            self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size, shuffle=True)
 
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.summary_writer = self._make_summary_writer()
@@ -111,6 +112,7 @@ class Trainer:
     def val(self, verbose=False):
         with autograd.no_grad():
             losses = []
+            x_l, y_l, z_l = [], [], []
             for batch_idx, batch in enumerate(self.val_dataloader):
                 inputs = deep_map(lambda x: x.to(self.device), batch)
                 output = self.model(inputs)
@@ -123,8 +125,19 @@ class Trainer:
                         print(f'Expert action was {true_action}')
                         print(f'Policy action was {policy_action}')
                         print('-------------------------------------------')
+                p = torch.mean((output - inputs['label']) ** 2, dim=0)
+                x_l.append(p[0] * self._batch_size(batch))
+                y_l.append(p[1] * self._batch_size(batch))
+                z_l.append(p[2] * self._batch_size(batch))
                 losses.append(loss * self._batch_size(batch))
+            self.visualize_images(inputs, 'val')
             loss = sum(losses) / len(self.val_dataloader.dataset)
+            x_l = sum(x_l) / len(self.val_dataloader.dataset)
+            y_l = sum(y_l) / len(self.val_dataloader.dataset)
+            z_l = sum(z_l) / len(self.val_dataloader.dataset)
+            self.summary_writer.add_scalar('val/xloss', x_l, self.global_step)
+            self.summary_writer.add_scalar('val/yloss', y_l, self.global_step)
+            self.summary_writer.add_scalar('val/zloss', z_l, self.global_step)
             self.summary_writer.add_scalar('val/loss', loss, self.global_step)
 
     def train(self):
@@ -150,6 +163,7 @@ class Trainer:
         epoch_len = len(self.train_dataloader)
         print(epoch_len)
         losses = []
+        x_l, y_l, z_l = [], [], []
         for batch_idx, batch in tqdm(enumerate(self.train_dataloader)):
             inputs = deep_map(lambda x: x.to(self.device), batch)
             self.optimizer.zero_grad()
@@ -158,10 +172,28 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
             self.global_step = self.global_step + 1
+            p = torch.mean((output - inputs['label'])**2, dim=0)
+            x_l.append(p[0] * self._batch_size(batch))
+            y_l.append(p[1] * self._batch_size(batch))
+            z_l.append(p[2] * self._batch_size(batch))
             losses.append(loss * self._batch_size(batch))
             del output, loss
+        self.visualize_images(inputs, 'train')
         loss = sum(losses) / len(self.train_dataloader.dataset)
+        x_l = sum(x_l) / len(self.train_dataloader.dataset)
+        y_l = sum(y_l) / len(self.train_dataloader.dataset)
+        z_l = sum(z_l) / len(self.train_dataloader.dataset)
         self.summary_writer.add_scalar('train/loss', loss, self.global_step)
+        self.summary_writer.add_scalar('train/xloss', x_l, self.global_step)
+        self.summary_writer.add_scalar('train/yloss', y_l, self.global_step)
+        self.summary_writer.add_scalar('train/zloss', z_l, self.global_step)
+
+    def visualize_images(self, inputs, train_val):
+        images = inputs['images']
+        for cam_i, image in enumerate(images):
+            img_grid = torchvision.utils.make_grid(image[:16], normalize=True)
+            self.summary_writer.add_image(f'{train_val}/cam_{cam_i}', img_grid)
+
 
     @staticmethod
     def _batch_size(batch):

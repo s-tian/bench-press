@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import Dataset
+from multiprocessing import Pool
 import deepdish as dd
 import glob
 import bisect
@@ -16,13 +17,20 @@ class TBDataset(Dataset):
         for folder in self.folders:
             self.h5_files.extend(glob.glob(f'{folder}**/*.h5'))
         print(f'located {len(self.h5_files)} h5 files!')
-        self.file_lengths = []
-        for f in self.h5_files:
-            contents = dd.io.load(f)
-            self.file_lengths.append(len(contents)-1)
+        self.file_lengths = self._get_file_lengths()
         self.file_len_cumsum = np.cumsum(np.array(self.file_lengths))
         self.total_length = self.file_len_cumsum[-1]
         #self.compute_dataset_statistics(raw=True)
+
+    @staticmethod
+    def _get_ind_file_len(file):
+        contents = dd.io.load(file)
+        return len(contents) - 1
+
+    def _get_file_lengths(self):
+        with Pool(self.conf.dataloader_workers) as pool:
+            file_lengths = pool.map(self._get_ind_file_len, self.h5_files)
+        return file_lengths
 
     def __len__(self):
         return self.total_length
