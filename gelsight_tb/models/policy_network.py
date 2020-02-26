@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision import models
 import numpy as np
-from gelsight_tb.models.modules.pretrained_encoder import get_vgg_encoder, get_resnet_encoder
+from gelsight_tb.models.modules.pretrained_encoder import *
 from gelsight_tb.models.model import Model
 
 
@@ -28,6 +28,9 @@ class PolicyNetwork(Model):
         if self.conf.encoder_type == 'resnet':
             self.image_encoders = nn.ModuleList(
                 [get_resnet_encoder(models.resnet18, self.conf.encoder_features, freeze=False) for _ in range(num_image_inputs)])
+        elif self.conf.encoder_type == 'resnet_spatial':
+            self.image_encoders = nn.ModuleList(
+                [get_resnet_spatial_encoder(models.resnet18, self.conf.encoder_features, freeze=False) for _ in range(num_image_inputs)])
         else:
             self.image_encoders = nn.ModuleList(
                 [get_vgg_encoder(models.vgg13, self.conf.encoder_features) for _ in range(num_image_inputs)])
