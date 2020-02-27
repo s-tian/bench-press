@@ -22,7 +22,7 @@ class NNPolicy(BasePolicy):
         self.image_transform = transforms.Compose(
             [
                 ImageTransform(transforms.ToPILImage()),
-                ImageTransform(transforms.Resize(64)),
+                ImageTransform(transforms.Resize(tuple(self.policy_conf.model_conf.model.final_size))),
                 ImageTransform(transforms.ToTensor()),
                 ImageTransform(pretrained_model_normalize),
             ])
@@ -47,17 +47,7 @@ class NNPolicy(BasePolicy):
             prepped.append(im_p)
         return prepped
 
-    def get_action(self, observation, num_steps):
-        if num_steps == 0:
-            self.keyboard_override = False
-        if not self.keyboard_override:
-            response = input('take control?')
-            if response == 'y':
-                self.keyboard_override = 1000
-        if self.keyboard_override:
-            self.keyboard_override -= 1
-            return self.keyboard_policy.get_action(observation, num_steps)
-
+    def forward_model(self, observation):
         action_norm = self.policy_conf.model_conf.dataset.norms.action_norm
         state_norm = self.policy_conf.model_conf.dataset.norms.state_norm
         images = obs_to_images(observation)
@@ -65,7 +55,7 @@ class NNPolicy(BasePolicy):
 
         state = obs_to_state(observation, state_norm).astype(np.float32)
         inp = {
-            'images': images, 
+            'images': images,
             'state': state[None] # Add batch dimension to state
         }
         inp = deep_map(lambda x: torch.from_numpy(x), inp)
@@ -85,9 +75,36 @@ class NNPolicy(BasePolicy):
         for i in range(len(output)):
             if np.abs(output[i]) < 5:
                 output[i] = 0
+        return output[:3], gripper_action
+
+    def get_action(self, observation, num_steps):
+        if num_steps == 0:
+            self.keyboard_override = False
+        if not self.keyboard_override:
+            response = input('take control?')
+            if response == 'y':
+                self.keyboard_override = 1000
+        if self.keyboard_override:
+            self.keyboard_override -= 1
+            return self.keyboard_policy.get_action(observation, num_steps)
+
+        xyz_action, gripper_action = self.forward_model(observation)
+
+        if self.policy_conf.order:
+            build_action = []
+            assert isinstance(self.policy_conf.order, str) and len(self.policy_conf.order) <= 3, "Order param must be in format of permutation of x, y, z"
+            for axis in self.policy_conf.order:
+                if axis == 'x':
+                    build_action.append(action.DeltaAction((xyz_action[0], 0, 0)))
+                elif axis == 'y':
+                    build_action.append(action.DeltaAction((0, xyz_action[1], 0)))
+                elif axis == 'z':
+                    build_action.append(action.DeltaAction((0, 0, xyz_action[2])))
+            return action.SequentialAction(build_action)
+
         return action.SequentialAction(
             [
-                action.DeltaAction(output[:3]),
+                action.DeltaAction(xyz_action),
                 gripper_action,
             ]
         )

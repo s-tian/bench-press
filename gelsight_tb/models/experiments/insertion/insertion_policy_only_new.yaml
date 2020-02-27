@@ -3,18 +3,18 @@ seed: 0
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
   num_image_inputs: 3
-  final_size: [96, 128]
+  final_size: [192, 256]
   encoder_features: 128
-  encoder_type: resnet
+  encoder_type: resnet_spatial
   activation: leaky_relu
   freeze: False
   use_state: True
   action_dim: 4
   state_dim: 4
-  policy_layers: [256, 256, 128, 64]
+  policy_layers: [256, 64]
   batch_size: 32
   log_dir: training_models/insertion_policy_24
-  exp_name: 05005no_contr
+  exp_name: spatial
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
@@ -36,7 +36,7 @@ dataset:
 train_frac: 0.85
 num_epochs: 300
 augment_prob: 0.5
-brightness: 0.5
+brightness: 0.3
 hue: 0.05
 checkpoint_every: 10
 

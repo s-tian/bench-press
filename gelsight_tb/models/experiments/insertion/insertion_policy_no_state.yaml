@@ -8,7 +8,7 @@ model:
   encoder_type: resnet
   activation: relu
   freeze: False
-  use_state: False
+  use_state: True
   action_dim: 4
   state_dim: 4
   policy_layers: [256, 256, 128, 64]

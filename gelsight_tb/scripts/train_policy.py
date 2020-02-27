@@ -15,7 +15,7 @@ from gelsight_tb.models.datasets.tb_dataset import TBDataset
 from gelsight_tb.models.datasets.tb_dataset_subset import TBDatasetSubset
 from gelsight_tb.models.datasets.transforms import ImageTransform
 from gelsight_tb.models.modules.pretrained_encoder import pretrained_model_normalize
-from gelsight_tb.utils.obs_to_np import denormalize_action
+from gelsight_tb.utils.obs_to_np import denormalize_action, denormalize
 
 
 class Trainer:
@@ -113,23 +113,35 @@ class Trainer:
         with autograd.no_grad():
             losses = []
             x_l, y_l, z_l = [], [], []
+            totals = []
+            total_real = []
             for batch_idx, batch in enumerate(self.val_dataloader):
                 inputs = deep_map(lambda x: x.to(self.device), batch)
                 output = self.model(inputs)
                 loss = self.model.loss(output, inputs['label'])
                 if verbose:
-                    true_action_batch = denormalize_action(batch['label'], self.conf.dataset.norms.action_norm)
+                    true_state_batch = denormalize(batch['state'].cpu().numpy(), self.conf.dataset.norms.state_norm.mean, self.conf.dataset.norms.state_norm.scale)
+                    true_action_batch = denormalize_action(batch['label'].cpu().numpy(), self.conf.dataset.norms.action_norm)
                     policy_action_batch = denormalize_action(output.cpu().numpy(), self.conf.dataset.norms.action_norm)
-                    for true_action, policy_action in zip(true_action_batch, policy_action_batch):
+                    for true_action, policy_action, true_state in zip(true_action_batch, policy_action_batch, true_state_batch):
                         print('-------------------------------------------') 
                         print(f'Expert action was {true_action}')
                         print(f'Policy action was {policy_action}')
+                        print(f'Estimated final position is {policy_action + true_state}')
+                        print(f'True final position is {true_state + true_action}')
                         print('-------------------------------------------')
+                    totals.extend(policy_action_batch + true_state_batch)
+                    total_real.extend(true_state_batch + true_action_batch)
                 p = torch.mean((output - inputs['label']) ** 2, dim=0)
                 x_l.append(p[0] * self._batch_size(batch))
                 y_l.append(p[1] * self._batch_size(batch))
                 z_l.append(p[2] * self._batch_size(batch))
                 losses.append(loss * self._batch_size(batch))
+            if verbose:
+                print(f'Mean pred final position: {np.mean(totals, axis=0)}')
+                print(f'Mean real final position: {np.mean(total_real, axis=0)}')
+                print(f'Std pred final position: {np.std(totals, axis=0)}')
+                print(f'Std real final position: {np.std(total_real, axis=0)}')
             self.visualize_images(inputs, 'val')
             loss = sum(losses) / len(self.val_dataloader.dataset)
             x_l = sum(x_l) / len(self.val_dataloader.dataset)

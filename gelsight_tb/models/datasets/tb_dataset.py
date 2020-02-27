@@ -43,13 +43,16 @@ class TBDataset(Dataset):
         else:
             sub_index = idx - self.file_len_cumsum[file_index-1]
         contents = dd.io.load(file_name, group=[f'/data/i{sub_index}', f'/data/i{sub_index+1}'])
-        data_point = self._make_data_point(contents[0], contents[1])
+        contents2 = dd.io.load(file_name, group=f'/data/i{self.file_lengths[file_index]-1}')
+        data_point = self._make_data_point(contents[0], contents[1], contents2)
         return data_point
 
-    def _make_data_point(self, obs_1, obs_2):
+    def _make_data_point(self, obs_1, obs_2, final):
         images = obs_to_images(obs_1)
         state = obs_to_state(obs_1, self.conf.norms.state_norm).astype(np.float32)
-        actions = obs_to_action(obs_1, obs_2, self.conf.norms.action_norm).astype(np.float32)
+        actions = obs_to_action(obs_1, final, self.conf.norms.action_norm).astype(np.float32)
+        #actions = obs_to_state(final, self.conf.norms.state_norm).astype(np.float32)
+
         data_point = {
             'images': images,
             'state': state,
