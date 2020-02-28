@@ -23,6 +23,7 @@ class PolicyNetwork(Model):
         if self.conf.activation in self.activations:
             self.activation = self.activations[self.conf.activation]
         else:
+            print(f'!! Activation {self.conf.activation} not found! Defaulting to identity')
             self.activation = lambda x: x
 
     def build_network(self):
