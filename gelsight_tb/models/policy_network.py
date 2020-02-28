@@ -59,6 +59,7 @@ class PolicyNetwork(Model):
         image_inputs, state_input = inputs['images'], inputs['state']
         sel_image_inputs = []
         for name in self.conf.image_inputs:
+            assert name in self.input_sources
             ind = self.input_sources.index(name)
             sel_image_inputs.append(image_inputs[ind])
 
