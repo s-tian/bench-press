@@ -2,10 +2,10 @@ seed: 0
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
-  num_image_inputs: 3
-  final_size: [192, 256]
+  image_inputs: ['gelsight_side', 'gelsight_top']
+  final_size: [48, 64]
   encoder_features: 128
-  encoder_type: resnet_spatial
+  encoder_type: resnet
   activation: leaky_relu
   freeze: False
   use_state: True
@@ -14,7 +14,7 @@ model:
   policy_layers: [256, 64]
   batch_size: 32
   log_dir: training_models/insertion_policy_24
-  exp_name: no_state_absolute
+  exp_name: state_touch
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
