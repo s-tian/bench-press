@@ -2,7 +2,7 @@ seed: 0
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
-  num_image_inputs: 2
+  image_inputs: ['gelsight_side', 'gelsight_top']
   encoder_features: 64
   encoder_type: resnet
   activation: relu 

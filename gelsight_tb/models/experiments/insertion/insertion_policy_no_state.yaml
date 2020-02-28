@@ -2,7 +2,7 @@ seed: 0
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
-  num_image_inputs: 3
+  image_inputs: ['external', 'gelsight_side', 'gelsight_top']
   final_size: [240, 320]
   encoder_features: 128
   encoder_type: resnet
