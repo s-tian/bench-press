@@ -3,7 +3,7 @@ from gelsight_tb.run.actions.action import *
 import numpy as np
 
 
-class NNInsertPolicy(NNPolicy):
+class NNEarlyInsertPolicy(NNPolicy):
 
     SCRIPT = [
         None,
@@ -16,7 +16,7 @@ class NNInsertPolicy(NNPolicy):
     NUM_SCRIPTED = len(SCRIPT)
 
     def __init__(self, conf):
-        super(NNInsertPolicy, self).__init__(conf)
+        super(NNEarlyInsertPolicy, self).__init__(conf)
         self.x_rad, self.y_rad, self.z_rad = self.conf.x_rad, self.conf.y_rad, self.conf.z_rad
 
     def get_action(self, observation, num_steps):
@@ -44,3 +44,4 @@ class NNInsertPolicy(NNPolicy):
             return self.SCRIPT[num_steps]
         else:
             return super(NNInsertPolicy, self).get_action(observation, num_steps)
+

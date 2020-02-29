@@ -1,0 +1,16 @@
+agent:
+  type: gelsight_tb.run.agent.Agent
+  max_steps: 6
+
+logger:
+  log_folder: test_policy_data/
+  log_text: True
+
+env:
+  type: gelsight_tb.run.env.dummy_env.DummyEnv
+
+policy:
+  type: gelsight_tb.run.policy.nn_early_random_insert_policy.NNEarlyInsertPolicy
+  order: zy
+  model_checkpoint: "training_models/insertion_policy_24/to_end/weights/300.pth"
+  model_conf_path: "training_models/insertion_policy_24/to_end/conf.yaml"
