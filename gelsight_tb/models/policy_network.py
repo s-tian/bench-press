@@ -14,6 +14,8 @@ class PolicyNetwork(Model):
         'leaky_relu': torch.nn.LeakyReLU()
     }
 
+    input_sources = sorted(['external', 'gelsight_side', 'gelsight_top'])
+
     def __init__(self, conf, load_resume=None):
         super(PolicyNetwork, self).__init__(conf, load_resume)
         self.batch_size = self.conf.batch_size
@@ -21,10 +23,11 @@ class PolicyNetwork(Model):
         if self.conf.activation in self.activations:
             self.activation = self.activations[self.conf.activation]
         else:
+            print(f'!! Activation {self.conf.activation} not found! Defaulting to identity')
             self.activation = lambda x: x
 
     def build_network(self):
-        num_image_inputs = self.conf.num_image_inputs
+        num_image_inputs = len(self.conf.image_inputs)
         if self.conf.encoder_type == 'resnet':
             self.image_encoders = nn.ModuleList(
                 [get_resnet_encoder(models.resnet18, self.conf.encoder_features, freeze=False) for _ in range(num_image_inputs)])
@@ -55,8 +58,13 @@ class PolicyNetwork(Model):
         """
 
         image_inputs, state_input = inputs['images'], inputs['state']
-        if self.conf.num_image_inputs < 3:
-            image_inputs = image_inputs[1:]
+        sel_image_inputs = []
+        for name in self.conf.image_inputs:
+            assert name in self.input_sources
+            ind = self.input_sources.index(name)
+            sel_image_inputs.append(image_inputs[ind])
+
+        image_inputs = sel_image_inputs
         image_encodings = []
         if self.image_encoders:
             for camera_i_images, encoder in zip(image_inputs, self.image_encoders):

@@ -2,10 +2,10 @@ seed: 0
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
-  num_image_inputs: 3
-  final_size: [48, 64]
+  image_inputs: ['external', 'gelsight_side', 'gelsight_top']
+  final_size: [192, 256]
   encoder_features: 128
-  encoder_type: resnet
+  encoder_type: resnet_spatial
   activation: leaky_relu
   freeze: False
   use_state: True

@@ -6,6 +6,7 @@ import numpy as np
 class NNInsertPolicy(NNPolicy):
 
     SCRIPT = [
+        None,
         DeltaAction((0, 0, 1850)),
         DynamixelAngleAction(-49.5),
         DeltaAction((0, 0, -1850)),
@@ -16,6 +17,7 @@ class NNInsertPolicy(NNPolicy):
 
     def __init__(self, conf):
         super(NNInsertPolicy, self).__init__(conf)
+        self.x_rad, self.y_rad, self.z_rad = self.conf.x_rad, self.conf.y_rad, self.conf.z_rad
 
     def get_action(self, observation, num_steps):
         """
@@ -25,16 +27,20 @@ class NNInsertPolicy(NNPolicy):
                  Otherwise query the NN Policy.
         """
         if num_steps == 0:
-            self.keyboard_override = False
+            print('DOING DEMOS, KEYBOARD OVERRIDE ENABLED')
+            self.keyboard_override = 1000
         if num_steps < self.NUM_SCRIPTED:
             if num_steps == self.NUM_SCRIPTED - 1:
                 import ipdb; ipdb.set_trace()
+            if num_steps == 1:
+                import ipdb; ipdb.set_trace()
+            if num_steps == 0:
+                rand_x = int(np.random.uniform(-self.x_rad, self.x_rad) + 0.5)
+                rand_y = int(np.random.uniform(-self.y_rad, self.y_rad) + 0.5)
+                return SequentialAction([
+                    DeltaAction((rand_x, 0, 0)),
+                    DeltaAction((0, rand_y, 0)),
+                ])
             return self.SCRIPT[num_steps]
-        elif num_steps == self.NUM_SCRIPTED:
-            theta = np.random.rand() * np.pi - np.pi/2
-            r = 250 
-            y = r*np.sin(theta)
-            z = r*np.cos(theta) 
-            return DeltaAction((0, y, z)) 
         else:
             return super(NNInsertPolicy, self).get_action(observation, num_steps)

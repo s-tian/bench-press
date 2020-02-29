@@ -23,6 +23,9 @@ class DeltaAction(Action):
     def apply(self, environment):
         environment.move_delta(self.delta)
 
+    def inverse(self):
+        return DeltaAction(-self.delta)
+
     def __str__(self):
         return f'[Action: DeltaAction {self.delta}]'
 
@@ -49,8 +52,20 @@ class SleepAction(Action):
     def apply(self, environment):
         time.sleep(self.time)
 
+    def inverse(self):
+        return self
+
     def __str__(self):
         return f'[Action: Sleep for {self.time} seconds]'
+
+
+class DebugAction(Action):
+
+    def apply(self, environment):
+        import ipdb; ipdb.set_trace()
+
+    def inverse(self):
+        return self
 
 
 class SequentialAction(Action):
@@ -63,6 +78,18 @@ class SequentialAction(Action):
     def apply(self, environment):
         for action in self.action_list:
             action.apply(environment)
+
+    def inverse(self):
+        """
+        Compute the "inverse" of a sequence of actions. This just computes the inverse of each action
+        individually, and returns them in reverse order. This is so that applying the inverse right after an action undoes
+        the most recent action first, then the second most recent, etc.
+        :return: the SequentialAction representing the inverse
+        """
+        inverse_actions = []
+        for action in reversed(self.action_list):
+            inverse_actions.append(action.inverse())
+        return SequentialAction(inverse_actions)
 
     def __str__(self):
         return '\n'.join([str(a) for a in self.action_list])

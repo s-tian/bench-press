@@ -1,6 +1,7 @@
 import torch
 from torchvision import transforms
 import numpy as np
+from omegaconf import OmegaConf
 
 from gelsight_tb.run.policy.base_policy import BasePolicy
 from gelsight_tb.run.policy.keyboard_policy import KeyboardPolicy 
@@ -15,6 +16,7 @@ class NNPolicy(BasePolicy):
 
     def __init__(self, conf):
         super(NNPolicy, self).__init__(conf)
+        self.policy_conf.model_conf = OmegaConf.load(self.policy_conf.model_conf_path)
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
         else:

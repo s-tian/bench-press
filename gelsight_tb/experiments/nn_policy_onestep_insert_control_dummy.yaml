@@ -13,43 +13,4 @@ policy:
   type: gelsight_tb.run.policy.nn_insert_policy.NNInsertPolicy
   order: zy
   model_checkpoint: "training_models/insertion_policy_24/to_end/weights/300.pth"
-  model_conf:
-    seed: 0
-    model:
-      type: gelsight_tb.models.policy_network.PolicyNetwork
-      num_image_inputs: 3
-      final_size: [192, 256]
-      encoder_features: 128
-      encoder_type: resnet_spatial
-      activation: leaky_relu
-      freeze: False
-      use_state: True
-      action_dim: 4
-      state_dim: 4
-      policy_layers: [256, 64]
-      batch_size: 32
-      log_dir: training_models/insertion_policy_24
-      exp_name: no_state_absolute
-
-    dataset:
-      type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
-      #type: gelsight_tb.models.datasets.tb_dataset.TBDataset
-      folders: ['tape_insert_dagger_data/', 'tape_insert_dagger_data_22/']
-      #folders: ['tape_insert_dagger_data_22/']
-      #folders: ['dagger_data/']
-      filter: gelsight_tb.models.datasets.filter_fns.InsertFilter
-      save_inds_to: 'subset_inds.pkl'
-      dataloader_workers: 8
-      norms:
-        state_norm:
-          mean: [3881, 5661, 85.6, -47.9]
-          scale: [465, 136, 83, 0.11]
-        action_norm:
-          mean: [-678, -12, -54.6, -47.9]
-          scale: [457, 128, 89, 0.12]
-    train_frac: 0.85
-    num_epochs: 300
-    augment_prob: 0.5
-    brightness: 0.3
-    hue: 0.05
-    checkpoint_every: 10
+  model_conf_path: "training_models/insertion_policy_24/to_end/conf.yaml"
