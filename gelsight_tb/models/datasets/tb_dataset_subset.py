@@ -15,7 +15,7 @@ class TBDatasetSubset(TBDataset):
         self.subset_inds = self.get_filter_idxs()
         self.subset_len = len(self.subset_inds)
         print(f'Created subset of length {self.subset_len}. This is {1.0 * self.subset_len / self.total_length} of the original.')
-        #self.compute_dataset_statistics(raw=True)
+        self.compute_dataset_statistics(raw=True)
 
     def get_filter_idxs(self):
         print('Loading subset filter indices...')
