@@ -2,19 +2,19 @@ seed: 0
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
-  image_inputs: ['external', 'gelsight_side', 'gelsight_top']
+  image_inputs: ['external', 'gelsight_side']
   final_size: [48, 64]
   encoder_features: 128
   encoder_type: resnet
   activation: leaky_relu
   freeze: False
-  use_state: True
+  use_state: False 
   action_dim: 4
   state_dim: 4
   policy_layers: [256, 64]
   batch_size: 32
   log_dir: training_models/pattern_insert_policy
-  exp_name: everything 
+  exp_name: external_side 
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
@@ -32,6 +32,7 @@ dataset:
     action_norm:
       mean: [-794, -9.2, -1.98, -48]
       scale: [471.5, 70.1, 17.1, 0.057]
+
 train_frac: 0.85
 num_epochs: 300
 augment_prob: 0.5

@@ -8,13 +8,13 @@ model:
   encoder_type: resnet
   activation: leaky_relu
   freeze: False
-  use_state: True
+  use_state: False 
   action_dim: 4
   state_dim: 4
   policy_layers: [256, 64]
   batch_size: 32
   log_dir: training_models/pattern_insert_policy
-  exp_name: everything 
+  exp_name: no_state 
 
 dataset:
   type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
