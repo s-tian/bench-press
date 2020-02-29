@@ -4,20 +4,24 @@ import numpy as np
 
 
 class NNEarlyInsertPolicy(NNPolicy):
+    
+    PRESS_DIST = 1150
+    UP_DIST = 250
 
     SCRIPT = [
         None,
-        DeltaAction((0, 0, 1850)),
+        DeltaAction((0, 0, PRESS_DIST)),
+        None,
         DynamixelAngleAction(-49.5),
-        DeltaAction((0, 0, -1850)),
-        DeltaAction((-2000, 0, 0))
+        DeltaAction((0, 0, UP_DIST-PRESS_DIST)),
+        DeltaAction((-1200, 0, 0))
     ]
 
     NUM_SCRIPTED = len(SCRIPT)
 
     def __init__(self, conf):
         super(NNEarlyInsertPolicy, self).__init__(conf)
-        self.x_rad, self.y_rad, self.z_rad = self.conf.x_rad, self.conf.y_rad, self.conf.z_rad
+        self.x_rad, self.y_rad, self.z_rad = self.policy_conf.x_rad, self.policy_conf.y_rad, self.policy_conf.z_rad
 
     def get_action(self, observation, num_steps):
         """
@@ -41,7 +45,11 @@ class NNEarlyInsertPolicy(NNPolicy):
                     DeltaAction((rand_x, 0, 0)),
                     DeltaAction((0, rand_y, 0)),
                 ])
+            if num_steps == 2:
+                rand_z = int(np.random.uniform(-self.z_rad, self.z_rad) + 0.5)
+                return DeltaAction((0, 0, -self.UP_DIST + rand_z))
+
             return self.SCRIPT[num_steps]
         else:
-            return super(NNInsertPolicy, self).get_action(observation, num_steps)
+            return super(NNEarlyInsertPolicy, self).get_action(observation, num_steps)
 

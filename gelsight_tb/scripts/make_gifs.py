@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 
-def make_gif_from_file(filename, fps=5):
+def make_gif_from_file(filename, fps=2):
     file = dd.io.load(filename)
     print(f'{len(file)} frames will be added')
     gif_lists = {
