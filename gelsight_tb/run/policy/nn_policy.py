@@ -65,8 +65,9 @@ class NNPolicy(BasePolicy):
             inp['images'][i] = img[None]
         #output = denormalize_action(self.model(inp).cpu().detach().numpy(), action_norm)[0]
         output = self.model(inp).cpu().detach().numpy()
+        print(f'normalized output: {output}')
         output = denormalize_action(output, action_norm)[0]
-        print(output)
+        print(f'denormalized output: {output}')
 
         gripper_open = True
         if output[-1] < -49.5 / 2:

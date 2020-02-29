@@ -3,7 +3,7 @@ agent:
   max_steps: 200
 
 logger:
-  log_folder: tape_insert_dagger_data/
+  log_folder: examples_24/
   log_text: True
 
 env:
@@ -13,7 +13,7 @@ env:
   min_bounds: [1000, 0, 0]
   max_bounds: [8000, 12000, 1850] 
   dynamixel:
-    name: '/dev/ttyUSB1'
+    name: '/dev/ttyUSB0'
     home_pos: 1565 
     reset_on_start: True
     bounds: [-49.5, 0]
@@ -36,13 +36,13 @@ env:
 
 policy:
   type: gelsight_tb.run.policy.nn_insert_policy.NNInsertPolicy
-  model_checkpoint: "training_models/insertion_policy/pol/weights/100.pth"
+  model_checkpoint: "training_models/insertion_policy/pol_23/weights/50.pth"
   model_conf:
     seed: 0
-    
     model:
       type: gelsight_tb.models.policy_network.PolicyNetwork
       num_image_inputs: 3
+      final_size: [48, 64]
       encoder_features: 64
       encoder_type: resnet
       activation: relu 
@@ -52,26 +52,29 @@ policy:
       state_dim: 4
       policy_layers: [256, 128, 64, 64]
       batch_size: 32
-      log_dir: training_models/insertion_policy
-      exp_name: cropcolorrot0-61 
+      log_dir: training_models/insertion_policy_23
+      exp_name: train_48_64_b05
     
     dataset:
       type: gelsight_tb.models.datasets.tb_dataset_subset.TBDatasetSubset
-      folders: ['demo_data/', 'dagger_data/']
+      #type: gelsight_tb.models.datasets.tb_dataset.TBDataset
+      folders: ['tape_insert_dagger_data/', 'tape_insert_dagger_data_22/']
+      #folders: ['tape_insert_dagger_data_22/']
       #folders: ['dagger_data/']
       filter: gelsight_tb.models.datasets.filter_fns.InsertFilter
       dataloader_workers: 12
       norms:
         state_norm:
-          mean: [3550, 5667, 20, -47.7]
-          scale: [143, 102, 41, 0.14]
+          mean: [3881, 5661, 85.6, -47.9]
+          scale: [465, 136, 83, 0.11]
         action_norm:
-          mean: [-83, -2, 0, -47.7]
-          scale: [75.4, 17, 2.4, 0.14]
+          mean: [-64, -2, 1.9, -47.9]
+          scale: [56, 51, 46.5, 0.11]
     
     train_frac: 0.85
-    num_epochs: 100
+    num_epochs: 300
     augment_prob: 0.5
+    brightness: 0.5
     checkpoint_every: 10
 
 exp_name: bc_policy
