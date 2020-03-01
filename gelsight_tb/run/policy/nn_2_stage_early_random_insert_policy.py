@@ -1,28 +1,15 @@
+from gelsight_tb.run.policy.nn_early_random_insert_policy import NNEarlyInsertPolicy
 from gelsight_tb.run.policy.nn_policy import NNPolicy
 from gelsight_tb.run.actions.action import *
 import numpy as np
 
 
-class NNEarlyInsertPolicy(NNPolicy):
+class NN2StageEarlyInsertPolicy(NNEarlyInsertPolicy):
     
-    PRESS_DIST = 1150
-    UP_DIST = 250
-
-    SCRIPT = [
-        None,
-        DeltaAction((0, 0, PRESS_DIST)),
-        None,
-        DynamixelAngleAction(-49.5),
-        DeltaAction((0, 0, UP_DIST-PRESS_DIST)),
-        DeltaAction((-1200, 0, 0))
-    ]
-
-    NUM_SCRIPTED = len(SCRIPT)
-
     def __init__(self, conf):
-        super(NNEarlyInsertPolicy, self).__init__(conf)
-        self.x_rad, self.y_rad, self.z_rad = self.policy_conf.x_rad, self.policy_conf.y_rad, self.policy_conf.z_rad
-        self.raw_topgs, self.topgs = None, None
+        super(NN2StageEarlyInsertPolicy, self).__init__(conf)
+        self.state_estimation_policy = NNPolicy(self.conf.state_est_conf)
+        self.state_est = None
 
     def get_action(self, observation, num_steps):
         """
@@ -38,6 +25,9 @@ class NNEarlyInsertPolicy(NNPolicy):
                 import ipdb; ipdb.set_trace()
             if num_steps == 2:
                 self.raw_topgs, self.topgs = observation['raw_images']['gelsight_top'], observation['images']['gelsight_top']
+                self.state_est, _ = self.state_estimation_policy.forward_model(observation)
+                print(f'state estimation is  {self.state_est}')
+                print(f'true state is {observation["tb_state"]}')
             if num_steps == 0:
                 rand_x = int(np.random.uniform(-self.x_rad, self.x_rad) + 0.5)
                 rand_y = int(np.random.uniform(-self.y_rad, self.y_rad) + 0.5)
@@ -49,8 +39,16 @@ class NNEarlyInsertPolicy(NNPolicy):
                 rand_z = int(np.random.uniform(-self.z_rad, self.z_rad) + 0.5)
                 return DeltaAction((0, 0, -self.UP_DIST + rand_z))
 
-            return self.SCRIPT[num_steps]
+            action = self.SCRIPT[num_steps]
+            if num_steps >= 2:
+                if isinstance(action, DeltaAction):
+                    self.state_est += action.delta
+                    print(f'updating state estimation to {self.state_est}')
+
         else:
             observation['raw_images']['gelsight_top'], observation['images']['gelsight_top'] = self.raw_topgs, self.topgs
+            observation['tb_state']['x'] = self.state_est[0]
+            observation['tb_state']['y'] = self.state_est[1]
+            observation['tb_state']['z'] = self.state_est[2]
             return super(NNEarlyInsertPolicy, self).get_action(observation, num_steps)
 

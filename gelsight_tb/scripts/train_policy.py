@@ -39,6 +39,8 @@ class Trainer:
             self.dataset = self.dataset_class(conf.dataset)
         elif self.dataset_class is TBDatasetSubset:
             self.dataset = self.dataset_class(conf.dataset, self.filter_class)
+        else:
+            self.dataset = self.dataset_class(conf.dataset)
 
         self.total_dataset_len = len(self.dataset)
         self.train_val_split = [int(self.conf.train_frac * self.total_dataset_len),

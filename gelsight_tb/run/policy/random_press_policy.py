@@ -6,12 +6,13 @@ from gelsight_tb.run.actions.action import *
 
 class RandomPressPolicy(BasePolicy):
 
-    PRESS_HEIGHT = 1850
+    PRESS_HEIGHT = 1150
+    UP_DIST = 250
 
     setup = SequentialAction([
-        DeltaAction((0, 0, PRESS_HEIGHT)),
+        DeltaAction((0, 0, PRESS_HEIGHT-UP_DIST)),
         DynamixelAngleAction(-49.5),
-        DeltaAction((0, 0, -PRESS_HEIGHT)),
+        DeltaAction((0, 0, UP_DIST-PRESS_HEIGHT)),
     ])
 
     def __init__(self, conf):
@@ -28,11 +29,9 @@ class RandomPressPolicy(BasePolicy):
             else:
                 rand_x = int(np.random.uniform(-self.x_rad, self.x_rad) + 0.5)
                 rand_y = int(np.random.uniform(-self.y_rad, self.y_rad) + 0.5)
-                rand_z = int(np.random.uniform(-self.z_rad, self.z_rad) + 0.5)
                 action = SequentialAction([
                     DeltaAction((rand_x, 0, 0)),
                     DeltaAction((0, rand_y, 0)),
-                    DeltaAction((0, 0, -self.PRESS_HEIGHT + rand_z))
                 ])
                 self.previous_action = action
                 return action
