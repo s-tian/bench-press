@@ -40,5 +40,5 @@ policy:
   z_rad: 50
   type: gelsight_tb.run.policy.nn_early_random_insert_policy.NNEarlyInsertPolicy
   order: zyx
-  model_checkpoint: "training_models/insertion_policy_24/state_touch/weights/300.pth"
-  model_conf_path: "training_models/insertion_policy_24/state_touch/conf.yaml"
+  model_checkpoint: "training_models/pattern_insert_policy/only_state/weights/300.pth"
+  model_conf_path: "training_models/pattern_insert_policy/only_state/conf.yaml"

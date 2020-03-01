@@ -8,7 +8,7 @@ class NN2StageEarlyInsertPolicy(NNEarlyInsertPolicy):
     
     def __init__(self, conf):
         super(NN2StageEarlyInsertPolicy, self).__init__(conf)
-        self.state_estimation_policy = NNPolicy(self.conf.state_est_conf)
+        self.state_estimation_policy = NNPolicy(self.policy_conf.state_est_conf)
         self.state_est = None
 
     def get_action(self, observation, num_steps):
@@ -18,6 +18,8 @@ class NN2StageEarlyInsertPolicy(NNEarlyInsertPolicy):
         :return: if num_steps is within the scripted range, do the initial grasp.
                  Otherwise query the NN Policy.
         """
+        if num_steps == 0:
+            self.keyboard_override = False 
         if num_steps < self.NUM_SCRIPTED:
             if num_steps == self.NUM_SCRIPTED - 1:
                 import ipdb; ipdb.set_trace()
@@ -44,6 +46,7 @@ class NN2StageEarlyInsertPolicy(NNEarlyInsertPolicy):
                 if isinstance(action, DeltaAction):
                     self.state_est += action.delta
                     print(f'updating state estimation to {self.state_est}')
+            return action
 
         else:
             observation['raw_images']['gelsight_top'], observation['images']['gelsight_top'] = self.raw_topgs, self.topgs

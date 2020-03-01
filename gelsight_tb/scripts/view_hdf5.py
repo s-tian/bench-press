@@ -16,6 +16,7 @@ def plot_images(data, raw=True):
     for ax, im in zip(axs, images):
         ax.imshow(images[im].astype(float) / 255.)
         ax.set_title(im)
+    plt.show()
     return fig, axs
 
 
@@ -54,8 +55,7 @@ def view_file_interactive(filename, raw=True):
             ind = int(x)
             data = file[ind]
             print(data['tb_state'])
-            #fig, axs = plot_images(data, raw=raw)
-            #plt.show()
+            fig, axs = plot_images(data, raw=raw)
         except ValueError:
             print('not a valid index?')
 

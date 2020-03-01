@@ -31,6 +31,8 @@ class NNEarlyInsertPolicy(NNPolicy):
         :return: if num_steps is within the scripted range, do the initial grasp.
                  Otherwise query the NN Policy.
         """
+        if num_steps == 0:
+            self.keyboard_override = False 
         if num_steps < self.NUM_SCRIPTED:
             if num_steps == self.NUM_SCRIPTED - 1:
                 import ipdb; ipdb.set_trace()

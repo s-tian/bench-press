@@ -54,7 +54,7 @@ class NNPolicy(BasePolicy):
         state_norm = self.policy_conf.model_conf.dataset.norms.state_norm
         images = obs_to_images(observation)
         images = self.prep_images(images)
-
+        print(f'state coming in is {observation["tb_state"]}')
         state = obs_to_state(observation, state_norm).astype(np.float32)
         inp = {
             'images': images,
