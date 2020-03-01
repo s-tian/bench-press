@@ -5,10 +5,9 @@ import deepdish as dd
 import glob
 import bisect
 from gelsight_tb.utils.obs_to_np import *
-from gelsight_tb.run.policy.nn_policy import NNPolicy
 
 
-class TBDataset(Dataset):
+class RndGuessY(Dataset):
 
     def __init__(self, conf, transform=None):
         self.conf = conf
@@ -21,15 +20,12 @@ class TBDataset(Dataset):
         self.file_lengths = self._get_file_lengths()
         self.file_len_cumsum = np.cumsum(np.array(self.file_lengths))
         self.total_length = self.file_len_cumsum[-1]
-        self.pred_cache = [None] * len(self.h5_files)
-        if self.conf.predict_state:
-            self.state_predictor = NNPolicy(self.conf.state_est_conf)
         #self.compute_dataset_statistics(raw=True)
 
     @staticmethod
     def _get_ind_file_len(file):
         contents = dd.io.load(file)
-        return len(contents) - 1
+        return (len(contents) - 2) // 2
 
     def _get_file_lengths(self):
         with Pool(self.conf.dataloader_workers) as pool:
@@ -47,46 +43,15 @@ class TBDataset(Dataset):
         else:
             sub_index = idx - self.file_len_cumsum[file_index-1]
 
-        if self.conf.predict_state:
-            current, press, last = dd.io.load(file_name, group=[f'/data/i{sub_index}', f'/data/i2', f'/data/i{self.file_lengths[file_index]-1}'])
-            press_gt_state = obs_to_state(press, None, should_normalize=False)
-            current_gt_state = obs_to_state(current, None, should_normalize=False)
-            gt_start_delta = current_gt_state - press_gt_state
-
-            if self.pred_cache[file_index]:
-                press_est_state = self.pred_cache[file_index]
-            else:
-                press_est_state = self.state_predictor.forward_model(press) 
-                self.pred_cache[file_index] = press_est_state 
-
-            current_est_state = press_est_state + gt_start_delta
-            
-            images = obs_to_images(current)
-            state = normalize(current_est_state, self.conf.norms.state_norm).astype(np.float32)
-            actions = obs_to_action(current, last, self.conf.norms.action_norm).astype(np.float32)
-            return _format_data_point(images, state, actions)
-
-        elif self.conf.predict_final_action: 
-            contents = dd.io.load(file_name, group=[f'/data/i{sub_index}', f'/data/i{sub_index+1}'])
-            contents2 = dd.io.load(file_name, group=f'/data/i{self.file_lengths[file_index]-1}')
-            data_point = self._make_data_point(contents[0], contents2)
-        elif self.conf.use_initial_press:
-            contents = dd.io.load(file_name, group=[f'/data/i{sub_index}', f'/data/i{sub_index+1}', f'/data/i2'])
-            contents[0]['raw_images']['gelsight_top'] = contents[2]['raw_images']['gelsight_top'] 
-            contents[0]['images']['gelsight_top'] = contents[2]['images']['gelsight_top'] 
-            contents2 = dd.io.load(file_name, group=f'/data/i{self.file_lengths[file_index]-1}')
-            data_point = self._make_data_point(contents[0], contents2)
-        else:
-            contents = dd.io.load(file_name, group=[f'/data/i{sub_index}', f'/data/i{sub_index+1}'])
-            data_point = self._make_data_point(contents[0], contents[1])
+        contents = dd.io.load(file_name, group=[f'/data/i{2*sub_index + 2}'])
+        data_point = self._make_data_point(contents[0])
         return data_point
 
-
-    def _format_data_point(self, images, state, actions):
+    def _format_data_point(self, images, state):
         data_point = {
             'images': images,
             'state': state,
-            'label': actions
+            'label': state, 
         }
         if self.transform is None:
             return data_point
@@ -94,12 +59,11 @@ class TBDataset(Dataset):
         return transformed
 
 
-    def _make_data_point(self, obs_1, final):
+    def _make_data_point(self, obs_1):
         images = obs_to_images(obs_1)
         state = obs_to_state(obs_1, self.conf.norms.state_norm).astype(np.float32)
-        actions = obs_to_action(obs_1, final, self.conf.norms.action_norm).astype(np.float32)
         #actions = obs_to_state(final, self.conf.norms.state_norm).astype(np.float32)
-        return self._format_data_point(images, state, actions)
+        return self._format_data_point(images, state)
 
 
     def compute_dataset_statistics(self, raw=True):
@@ -112,7 +76,7 @@ class TBDataset(Dataset):
             print(f'std: {std}')
             return mean, std
 
-        old_statistics = self.conf.norms
+        old_statistics = copy.deepcopy(self.conf.norms)
         if raw:
             self.conf.norms.state_norm.mean = [0] * 4
             self.conf.norms.state_norm.scale = [1] * 4
@@ -135,3 +99,4 @@ class TBDataset(Dataset):
 
         # restore previous stats
         self.conf.norm = old_statistics
+        
