@@ -1,0 +1,39 @@
+seed: 0
+
+model:
+  type: gelsight_tb.models.policy_network.PolicyNetwork
+  image_inputs: ['gelsight_top']
+  final_size: [48, 64]
+  encoder_features: 128
+  encoder_type: resnet
+  activation: leaky_relu
+  freeze: False
+  use_state: False 
+  action_dim: 4
+  state_dim: 4
+  policy_layers: [256, 64]
+  batch_size: 32
+  log_dir: training_models/y_reg
+  exp_name: y_reg 
+
+dataset:
+  type: gelsight_tb.models.datasets.guess_y_dataset.GuessY
+  folders: ['pattern_demos/']
+  #folders: ['tape_insert_dagger_data_22/']
+  #folders: ['dagger_data/']
+  dataloader_workers: 8
+  norms:
+    state_norm:
+      mean: [5993, 5689, 1150, -0.09]
+      scale: [113, 112, 1, 0.02]
+    action_norm:
+      mean: [5993, 5689, 1150, -0.09]
+      scale: [113, 112, 1, 0.02]
+
+train_frac: 0.85
+num_epochs: 300
+augment_prob: 0.5
+brightness: 0.3
+hue: 0.05
+checkpoint_every: 10
+
