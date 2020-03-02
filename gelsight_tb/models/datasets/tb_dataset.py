@@ -52,19 +52,17 @@ class TBDataset(Dataset):
             press_gt_state = obs_to_state(press, None, should_normalize=False)
             current_gt_state = obs_to_state(current, None, should_normalize=False)
             gt_start_delta = current_gt_state - press_gt_state
-
-            if self.pred_cache[file_index]:
+            if self.pred_cache[file_index] is not None:
                 press_est_state = self.pred_cache[file_index]
             else:
-                press_est_state = self.state_predictor.forward_model(press) 
-                self.pred_cache[file_index] = press_est_state 
-
-            current_est_state = press_est_state + gt_start_delta
-            
+                press_est_state, _ = self.state_predictor.forward_model(press) 
+                press_est_state = np.concatenate((press_est_state, [0]))
+                self.pred_cache[file_index] = press_est_state
+            current_est_state = press_est_state + est_start_delta
             images = obs_to_images(current)
-            state = normalize(current_est_state, self.conf.norms.state_norm).astype(np.float32)
+            state = normalize(current_est_state, self.conf.norms.state_norm.mean, self.conf.norms.state_norm.scale).astype(np.float32)
             actions = obs_to_action(current, last, self.conf.norms.action_norm).astype(np.float32)
-            return _format_data_point(images, state, actions)
+            return self._format_data_point(images, state, actions)
 
         elif self.conf.predict_final_action: 
             contents = dd.io.load(file_name, group=[f'/data/i{sub_index}', f'/data/i{sub_index+1}'])

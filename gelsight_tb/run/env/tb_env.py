@@ -4,6 +4,10 @@ from gelsight_tb.tb_control.dynamixel_interface import Dynamixel
 from gelsight_tb.tb_control.testbench_control import TestBench
 from gelsight_tb.utils.camera import CameraThread, Camera
 from gelsight_tb.run.env.base_env import BaseEnv
+try:
+    from src.optoforce.optoforce import *
+except ImportError:
+    print('No optoforce drivers installed! Be careful')
 
 
 class TBEnv(BaseEnv):
@@ -16,6 +20,8 @@ class TBEnv(BaseEnv):
             self._setup_dynamixel()
             assert len(self.dynamixel_bounds) == 2, 'Dynamixel bounds should be [lower, upper]'
             assert self.dynamixel_bounds[0] < self.dynamixel_bounds[1], 'Dynamixel lower bound bigger than upper?'
+        if self.config.optoforce:
+            self.optoforce = self._setup_optoforce()
         self.tb = self._setup_tb()
         self.min_bounds = np.array(self.config.min_bounds)
         self.max_bounds = np.array(self.config.max_bounds)
@@ -25,6 +31,25 @@ class TBEnv(BaseEnv):
         for camera_thread in self.cameras:
             camera_thread.stop()
             camera_thread.join()
+
+    def _setup_optoforce(self):
+        opto = OptoforceDriver(self.config.optoforce.name, self.config.optoforce.sensor_type, self.config.optoforce.scale)
+        opto.request_serial_number()
+        done = False
+        while not done:
+            data = opto.read()
+            if isinstance(data, OptoforceSerialNumber):
+                print('Serial number received! ')
+                print(data)
+                done = True
+        return opto
+
+    def get_optoforce_data(self):
+        data = None
+        while not isinstance(data, OptoforceData):
+            data = self.optoforce.read()
+        print(f'Got optoforce data {data}')
+        return np.array(data.force)
 
     def reset(self):
         home_pos_x = np.copy(self.home_pos)
@@ -108,12 +133,13 @@ class TBEnv(BaseEnv):
         return self.tb.req_data()
 
     def get_obs(self):
-        if self.config.dynamixel:
-            return {'tb_state': self.get_tb_obs(),
-                    'images': self.get_current_image_obs(),
-                    'raw_images': self.get_current_raw_image_obs(),
-                    'dynamixel_state': self.dynamixel.get_current_angle()}
-        return {'tb_state': self.get_tb_obs(),
+        obs = {'tb_state': self.get_tb_obs(),
                 'images': self.get_current_image_obs(),
                 'raw_images': self.get_current_raw_image_obs()}
+        if self.config.dynamixel:
+            obs['dynamixel_state'] = self.dynamixel.get_current_angle()
+        if self.config.optoforce:
+            obs['optoforce'] = self.get_optoforce_data()
+
+        return obs
 

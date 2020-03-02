@@ -4,6 +4,7 @@ from multiprocessing import Pool
 import deepdish as dd
 import glob
 import bisect
+import copy
 from gelsight_tb.utils.obs_to_np import *
 
 
@@ -20,11 +21,12 @@ class RndGuessY(Dataset):
         self.file_lengths = self._get_file_lengths()
         self.file_len_cumsum = np.cumsum(np.array(self.file_lengths))
         self.total_length = self.file_len_cumsum[-1]
+        print(f'dset len = {self.total_length}')
         #self.compute_dataset_statistics(raw=True)
 
     @staticmethod
-    def _get_ind_file_len(file):
-        contents = dd.io.load(file)
+    def _get_ind_file_len(f):
+        contents = dd.io.load(f)
         return (len(contents) - 2) // 2
 
     def _get_file_lengths(self):

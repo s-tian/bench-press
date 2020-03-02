@@ -33,6 +33,15 @@ def obs_to_images(obs):
     return [image.astype(np.uint8) for image in images]
 
 
+def visualize_images(obs):
+    images_dict = obs['images']
+    import matplotlib.pyplot as plt            
+    for key in images_dict.keys():
+        img = images_dict[key]
+        plt.imshow(img)
+        plt.show()
+
+
 def obs_to_action(obs_1, obs_2, norm_conf):
     state_1 = obs_to_state(obs_1, norm_conf, should_normalize=False)
     state_2 = obs_to_state(obs_2, norm_conf, should_normalize=False)
