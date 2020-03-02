@@ -22,6 +22,13 @@ def obs_to_state(obs, norm_conf, should_normalize=True):
     return normalized_state
 
 
+def obs_to_opto(obs, norm_conf, should_normalize=True):
+    forces = np.array(obs['optoforce'])
+    if should_normalize:
+        forces = normalize(forces, norm_conf.mean, norm_conf.scale)
+    return forces
+
+
 def obs_to_images(obs):
     images_dict = obs['images']
     images = []
