@@ -7,8 +7,8 @@ import cv2
 class KeyboardPolicy(BasePolicy):
 
     INPUTS = {
-        'w': DeltaAction((75, 0, 0)),
-        's': DeltaAction((-75, 0, 0)),
+        'w': DeltaAction((150, 0, 0)),
+        's': DeltaAction((-150, 0, 0)),
         'a': DeltaAction((0, -100, 0)),
         'd': DeltaAction((0, 100, 0)),
         'n': DeltaAction((0, -600, 0)),

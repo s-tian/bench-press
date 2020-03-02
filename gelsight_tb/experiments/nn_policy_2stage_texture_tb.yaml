@@ -44,5 +44,5 @@ policy:
   model_conf_path: "training_models/pattern_insert_policy/only_state/conf.yaml"
   state_est_conf:
     type: gelsight_tb.run.policy.NNPolicy
-    model_checkpoint: "training_models/y_reg/y_reg/weights/300.pth"
-    model_conf_path: "training_models/y_reg/y_reg/conf.yaml"
+    model_checkpoint: "training_models/y_reg_rand/y_reg_rand/weights/300.pth"
+    model_conf_path: "training_models/y_reg_rand/y_reg_rand/conf.yaml"
