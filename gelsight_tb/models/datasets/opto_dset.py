@@ -104,4 +104,4 @@ class PatternPlugDset(Dataset):
         get_mean_std(total_images)
 
         # restore previous stats
-        self.conf.norm = old_statistics
+        self.conf.norms = old_statistics
