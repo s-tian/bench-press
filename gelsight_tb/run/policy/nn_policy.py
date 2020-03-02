@@ -53,15 +53,14 @@ class NNPolicy(BasePolicy):
         action_norm = self.policy_conf.model_conf.dataset.norms.action_norm
         state_norm = self.policy_conf.model_conf.dataset.norms.state_norm
         images = obs_to_images(observation)
-        images = self.prep_images(images)
         print(f'state coming in is {observation["tb_state"]}')
         state = obs_to_state(observation, state_norm).astype(np.float32)
         inp = {
             'images': images,
             'state': state[None] # Add batch dimension to state
         }
-        inp = deep_map(lambda x: torch.from_numpy(x), inp)
         inp = self.image_transform(inp)
+        inp = deep_map(lambda x: torch.from_numpy(x) if not isinstance(x, torch.Tensor) else x, inp)
         inp = deep_map(lambda x: x.to(self.device), inp)
         for i, img in enumerate(inp['images']):
             inp['images'][i] = img[None]
