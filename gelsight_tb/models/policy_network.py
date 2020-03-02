@@ -38,11 +38,14 @@ class PolicyNetwork(Model):
             self.image_encoders = nn.ModuleList(
                 [get_vgg_encoder(models.vgg13, self.conf.encoder_features) for _ in range(num_image_inputs)])
 
+        current_layer_width = len(self.image_encoders) * self.conf.encoder_features
         if self.conf.use_state:
-            current_layer_width = len(self.image_encoders) * self.conf.encoder_features + self.conf.state_dim
+            current_layer_width += self.conf.state_dim
         else:
             print('Not using state! ')
-            current_layer_width = len(self.image_encoders) * self.conf.encoder_features
+        if self.conf.use_opto:
+            current_layer_width += self.conf.opto_dim * 2
+
         self.fc_layers = nn.ModuleList()
         for layer in self.conf.policy_layers:
             self.fc_layers.append(nn.Linear(current_layer_width, layer))
@@ -76,6 +79,9 @@ class PolicyNetwork(Model):
                 output = torch.cat((image_encodings_cat, state_input), dim=1)
             else:
                 output = state_input
+        if self.conf.use_opto:
+            output = torch.cat((output, inputs['opto_1'], inputs['opto_2']), dim=1)
+
         for layer in self.fc_layers:
             output = self.activation(layer(output))
         output = self.output_layer(output)
