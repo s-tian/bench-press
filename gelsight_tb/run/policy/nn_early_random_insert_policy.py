@@ -32,7 +32,7 @@ class NNEarlyInsertPolicy(NNPolicy):
                  Otherwise query the NN Policy.
         """
         if num_steps == 0:
-            self.keyboard_override = False 
+            self.keyboard_override = 1000 
         if num_steps < self.NUM_SCRIPTED:
             if num_steps == self.NUM_SCRIPTED - 1:
                 import ipdb; ipdb.set_trace()

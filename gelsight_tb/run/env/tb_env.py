@@ -37,7 +37,7 @@ class TBEnv(BaseEnv):
             self.optoforce.join()
 
     def _setup_optoforce(self):
-        opto = OptoforceDriver(self.config.optoforce.name, self.config.optoforce.sensor_type, self.config.optoforce.scale)
+        opto = OptoforceDriver(self.config.optoforce.name, self.config.optoforce.sensor_type, [self.config.optoforce.scale])
         print(f'Building optoforce object...')
         opto_thread = OptoforceThread(opto)
         opto_thread.start()
