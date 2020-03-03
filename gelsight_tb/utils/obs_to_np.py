@@ -26,7 +26,7 @@ def obs_to_opto(obs, norm_conf, should_normalize=True):
     forces = np.array(obs['optoforce'])
     if should_normalize:
         forces = normalize(forces, norm_conf.mean, norm_conf.scale)
-    return forces
+    return np.array(forces).astype(np.float32)
 
 
 def obs_to_images(obs):

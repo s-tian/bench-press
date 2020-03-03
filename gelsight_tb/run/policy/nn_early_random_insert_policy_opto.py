@@ -53,5 +53,5 @@ class NNEarlyInsertPolicyOpto(NNPolicy):
                 return DeltaAction((0, 0, -self.UP_DIST + rand_z))
             return self.SCRIPT[num_steps]
         else:
-            return super(NNEarlyInsertPolicyOpto, self).get_action(observation, num_steps)
+            return super(NNEarlyInsertPolicyOpto, self).get_action(observation, num_steps, self.press_obs)
 

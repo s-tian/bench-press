@@ -8,7 +8,7 @@ import bisect
 from gelsight_tb.utils.obs_to_np import *
 
 
-class PatternPlugDset(Dataset):
+class OptoDset(Dataset):
 
     def __init__(self, conf, transform=None):
         self.conf = conf
@@ -38,8 +38,6 @@ class PatternPlugDset(Dataset):
     def __getitem__(self, idx):
         file_name = self.h5_files[idx]
         press, pt, final = dd.io.load(file_name, group=[f'/data/i2', '/data/i6', f'/data/i{self.file_lengths[idx]-1}'])
-        pt['raw_images']['gelsight_top'] = press['raw_images']['gelsight_top'] 
-        pt['images']['gelsight_top'] = press['images']['gelsight_top'] 
 
         return self._make_data_point(pt, final, press)
 
@@ -60,8 +58,8 @@ class PatternPlugDset(Dataset):
         images = obs_to_images(obs_1)
         state = obs_to_state(obs_1, self.conf.norms.state_norm).astype(np.float32)
         actions = obs_to_action(obs_1, final, self.conf.norms.action_norm).astype(np.float32)
-        press_opto = obs_to_opto(press, self.conf.norms.opto_norm)
-        curr_opto = obs_to_opto(obs_1, self.conf.norms.opto_norm)
+        press_opto = obs_to_opto(press, self.conf.norms.opto_press_norm)
+        curr_opto = obs_to_opto(obs_1, self.conf.norms.opto_curr_norm)
         #actions = obs_to_state(final, self.conf.norms.state_norm).astype(np.float32)
         return self._format_data_point(images, state, actions, press_opto, curr_opto)
 
@@ -81,25 +79,31 @@ class PatternPlugDset(Dataset):
             self.conf.norms.state_norm.scale = [1] * 4
             self.conf.norms.action_norm.mean = [0] * 4
             self.conf.norms.action_norm.scale = [1] * 4
-            self.conf.norms.opto_norm.mean = [0] * len(self.conf.norms.opto_norm.mean)
-            self.conf.norms.opto_norm.scale = [1] * 4
+            self.conf.norms.opto_press_norm.mean = [0] * 3
+            self.conf.norms.opto_press_norm.scale = [1] * 3
+            self.conf.norms.opto_curr_norm.mean = [0] * 3
+            self.conf.norms.opto_curr_norm.scale = [1] * 3
+
         total_states = []
         total_actions = []
         total_images = []
-        total_opto = []
+        total_opto_1 = []
+        total_opto_2 = []
         for idx in range(len(self)):
             data_point = self[idx]
             total_states.append(data_point['state'])
             total_actions.append(data_point['label'])
-            total_images.append(data_point['images'][2])
             if self.conf.optoforce:
-                total_opto.append(data_point['opto'])
+                total_opto_1.append(data_point['opto_1'])
+                total_opto_2.append(data_point['opto_2'])
         print('state statistics')
         get_mean_std(total_states)
         print('action statistics')
         get_mean_std(total_actions)
-        print('opto statistics')
-        get_mean_std(total_opto)
+        print('opto1 statistics')
+        get_mean_std(total_opto_1)
+        print('opto2 statistics')
+        get_mean_std(total_opto_2)
         print('image 0 stats')
         get_mean_std(total_images)
 

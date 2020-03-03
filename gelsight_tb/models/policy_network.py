@@ -80,8 +80,10 @@ class PolicyNetwork(Model):
             else:
                 output = state_input
         if self.conf.use_opto:
-            output = torch.cat((output, inputs['opto_1'], inputs['opto_2']), dim=1)
-
+            if image_encodings or self.conf.use_state:
+                output = torch.cat((output, inputs['opto_1'], inputs['opto_2']), dim=1)
+            else: 
+                output = torch.cat((inputs['opto_1'], inputs['opto_2']), dim=1)
         for layer in self.fc_layers:
             output = self.activation(layer(output))
         output = self.output_layer(output)

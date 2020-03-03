@@ -49,15 +49,23 @@ class NNPolicy(BasePolicy):
             prepped.append(im_p)
         return prepped
 
-    def forward_model(self, observation):
+    def forward_model(self, observation, press_obs=None):
         action_norm = self.policy_conf.model_conf.dataset.norms.action_norm
         state_norm = self.policy_conf.model_conf.dataset.norms.state_norm
+        if self.policy_conf.optoforce:
+            opto_press_norm = self.policy_conf.model_conf.dataset.norms.opto_press_norm
+            opto_curr_norm = self.policy_conf.model_conf.dataset.norms.opto_curr_norm
+
         images = obs_to_images(observation)
         print(f'state coming in is {observation["tb_state"]}')
         state = obs_to_state(observation, state_norm).astype(np.float32)
+        opto_1 = obs_to_opto(observation, state_norm).astype(np.float32)
+        opto_2 = obs_to_opto(press_obs, state_norm).astype(np.float32)
         inp = {
             'images': images,
-            'state': state[None] # Add batch dimension to state
+            'state': state[None], # Addobservation batch dimension to state
+            'opto_1': opto1,
+            'opto_2': opto2,
         }
         inp = self.image_transform(inp)
         inp = deep_map(lambda x: torch.from_numpy(x) if not isinstance(x, torch.Tensor) else x, inp)
@@ -79,7 +87,7 @@ class NNPolicy(BasePolicy):
                 output[i] = 0
         return output[:3], gripper_action
 
-    def get_action(self, observation, num_steps):
+    def get_action(self, observation, num_steps, press_obs=None):
         if num_steps == 0:
             self.keyboard_override = False
         if not self.keyboard_override:
@@ -90,7 +98,7 @@ class NNPolicy(BasePolicy):
             self.keyboard_override -= 1
             return self.keyboard_policy.get_action(observation, num_steps)
 
-        xyz_action, gripper_action = self.forward_model(observation)
+        xyz_action, gripper_action = self.forward_model(observation, press_obs)
 
         if self.policy_conf.order:
             build_action = []
