@@ -3,6 +3,7 @@ import time
 from gelsight_tb.tb_control.dynamixel_interface import Dynamixel
 from gelsight_tb.tb_control.testbench_control import TestBench
 from gelsight_tb.utils.camera import CameraThread, Camera
+from gelsight_tb.utils.optoforce import OptoforceThread
 from gelsight_tb.run.env.base_env import BaseEnv
 try:
     from src.optoforce.optoforce import *
@@ -31,25 +32,16 @@ class TBEnv(BaseEnv):
         for camera_thread in self.cameras:
             camera_thread.stop()
             camera_thread.join()
+        if self.config.optoforce:
+            self.optoforce.stop()
+            self.optoforce.join()
 
     def _setup_optoforce(self):
         opto = OptoforceDriver(self.config.optoforce.name, self.config.optoforce.sensor_type, self.config.optoforce.scale)
-        opto.request_serial_number()
-        done = False
-        while not done:
-            data = opto.read()
-            if isinstance(data, OptoforceSerialNumber):
-                print('Serial number received! ')
-                print(data)
-                done = True
-        return opto
-
-    def get_optoforce_data(self):
-        data = None
-        while not isinstance(data, OptoforceData):
-            data = self.optoforce.read()
-        print(f'Got optoforce data {data}')
-        return np.array(data.force)
+        print(f'Building optoforce object...')
+        opto_thread = OptoforceThread(opto)
+        opto_thread.start()
+        return opto_thread
 
     def reset(self):
         home_pos_x = np.copy(self.home_pos)
@@ -139,7 +131,7 @@ class TBEnv(BaseEnv):
         if self.config.dynamixel:
             obs['dynamixel_state'] = self.dynamixel.get_current_angle()
         if self.config.optoforce:
-            obs['optoforce'] = self.get_optoforce_data()
+            obs['optoforce'] = self.optoforce.get_force()
 
         return obs
 
