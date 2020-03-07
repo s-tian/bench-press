@@ -2,7 +2,8 @@ seed: 100
 
 model:
   type: gelsight_tb.models.policy_network.PolicyNetwork
-  num_image_inputs: 0
+  image_inputs: []
+  final_size: [48, 64]
   encoder_features: 64
   encoder_type: resnet
   activation: relu
@@ -30,4 +31,5 @@ train_frac: 0.9
 num_epochs: 100
 augment_prob: 0.5
 checkpoint_every: 3
-
+brightness: 0.2
+hue: 0.05

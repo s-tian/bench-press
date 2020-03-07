@@ -5,7 +5,7 @@ from omegaconf import OmegaConf
 
 from gelsight_tb.run.policy.base_policy import BasePolicy
 from gelsight_tb.run.policy.keyboard_policy import KeyboardPolicy 
-from gelsight_tb.utils.obs_to_np import obs_to_state, obs_to_images, denormalize_action
+from gelsight_tb.utils.obs_to_np import obs_to_state, obs_to_images, obs_to_opto, denormalize_action
 from gelsight_tb.utils.infra import str_to_class, deep_map
 from gelsight_tb.models.datasets.transforms import ImageTransform
 from gelsight_tb.models.modules.pretrained_encoder import pretrained_model_normalize
@@ -50,29 +50,29 @@ class NNPolicy(BasePolicy):
         return prepped
 
     def forward_model(self, observation, press_obs=None):
-        action_norm = self.policy_conf.model_conf.dataset.norms.action_norm
-        state_norm = self.policy_conf.model_conf.dataset.norms.state_norm
-        if self.policy_conf.optoforce:
-            opto_press_norm = self.policy_conf.model_conf.dataset.norms.opto_press_norm
-            opto_curr_norm = self.policy_conf.model_conf.dataset.norms.opto_curr_norm
+        action_norm = self.policy_conf.model_conf.dataset.norms.label
+        state_norm = self.policy_conf.model_conf.dataset.norms.state
 
         images = obs_to_images(observation)
         print(f'state coming in is {observation["tb_state"]}')
         state = obs_to_state(observation, state_norm).astype(np.float32)
-        opto_1 = obs_to_opto(observation, state_norm).astype(np.float32)
-        opto_2 = obs_to_opto(press_obs, state_norm).astype(np.float32)
         inp = {
             'images': images,
-            'state': state[None], # Addobservation batch dimension to state
-            'opto_1': opto1,
-            'opto_2': opto2,
+            'state': state[None], # Add observation batch dimension to state
         }
+        if self.policy_conf.optoforce:
+            if self.policy_conf.optoforce:
+                opto_press_norm = self.policy_conf.model_conf.dataset.norms.opto_1
+                opto_curr_norm = self.policy_conf.model_conf.dataset.norms.opto_2
+            opto_1 = obs_to_opto(press_obs, opto_press_norm).astype(np.float32)
+            opto_2 = obs_to_opto(observation, opto_curr_norm).astype(np.float32)
+            inp['opto_1'], inp['opto_2'] = opto_1[None], opto_2[None] # Add batch dimension here
+
         inp = self.image_transform(inp)
         inp = deep_map(lambda x: torch.from_numpy(x) if not isinstance(x, torch.Tensor) else x, inp)
         inp = deep_map(lambda x: x.to(self.device), inp)
         for i, img in enumerate(inp['images']):
             inp['images'][i] = img[None]
-        #output = denormalize_action(self.model(inp).cpu().detach().numpy(), action_norm)[0]
         output = self.model(inp).cpu().detach().numpy()
         print(f'normalized output: {output}')
         output = denormalize_action(output, action_norm)[0]
