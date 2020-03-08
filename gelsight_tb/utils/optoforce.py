@@ -3,6 +3,7 @@ import threading
 import time
 from src.optoforce.optoforce import *
 
+
 class OptoforceThread(threading.Thread):
 
     def __init__(self, optoforce, thread_rate=5000):
@@ -35,6 +36,7 @@ class OptoforceThread(threading.Thread):
     def stop(self):
         with self.running_lock:
             self.running = False
+
 
 if __name__ == "__main__":
     test_opto = OptoforceDriver("/dev/ttyACM1", 's-ch/3-axis', [[1] * 3])
