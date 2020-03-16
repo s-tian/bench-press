@@ -3,7 +3,7 @@ agent:
   max_steps: 100 
 
 logger:
-  log_folder: patterned_plug_demos/
+  log_folder: patterned_plug_runs/
   log_text: True
 
 env:
@@ -38,7 +38,7 @@ policy:
   x_rad: 200
   y_rad: 200
   z_rad: 50
-  type: bench_press.run.policy.nn_early_random_insert_policy.NNEarlyInsertPolicy
+  type: bench_press.run.policy.nn_early_random_insert_policy.NNOnestepInsertPolicy
   order: zyx
   model_checkpoint: "training_models/pattern_plug/side/weights/300.pth"
   model_conf_path: "training_models/pattern_plug/side/conf.yaml"
