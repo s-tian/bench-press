@@ -1,0 +1,38 @@
+agent:
+  type: bench_press.run.agent.Agent
+  max_steps: 200
+
+logger:
+  log_folder: demo_data/
+  log_text: True
+
+env:
+  type: bench_press.run.env.tb_env.TBEnv
+  serial_name: '/dev/ttyACM0'
+  home_pos: [6700, 5700, 0]
+  min_bounds: [1000, 0, 0]
+  max_bounds: [8000, 12000, 1800] 
+  dynamixel:
+    name: '/dev/ttyUSB1'
+    home_pos: 1565 
+    reset_on_start: True
+    bounds: [-49.5, 0]
+  cameras:
+    external:
+      index: 2
+      goal_height: 48
+      goal_width: 64
+      thread_rate: 60
+    gelsight_top:
+      index: 4
+      goal_height: 48
+      goal_width: 64
+      thread_rate: 60
+    gelsight_side:
+      index: 0
+      goal_height: 48
+      goal_width: 64
+      thread_rate: 60
+
+policy:
+  type: bench_press.run.policy.keyboard_policy.KeyboardPolicy

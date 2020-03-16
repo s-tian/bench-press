@@ -1,0 +1,15 @@
+agent:
+  type: bench_press.run.agent.Agent
+  max_steps: 10
+
+logger:
+  log_folder: logs/
+  log_text: True
+
+env:
+  type: bench_press.run.env.tb_env.TBEnv
+  serial_name: '/dev/ttyACM0'
+  cameras:
+   
+policy:
+  type: bench_press.run.policy.dummy_policy.DummyPolicy

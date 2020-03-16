@@ -1,10 +1,10 @@
 from setuptools import setup
 
 setup(
-    name='gelsight_tb',
+    name='bench_press',
     version='1.0',
-    description='Control gelsight tb',
+    description='Robot control and model training code for tactile sensor testbench',
     author='ST ',
     author_email='stephentian@berkeley.edu',
-    packages=['gelsight_tb'],  #same as name
+    packages=['bench_press'],  #same as name
 )

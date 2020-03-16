@@ -1,0 +1,13 @@
+agent:
+  type: bench_press.run.agent.Agent
+  max_steps: 10
+
+logger:
+  log_folder: test_training_data/
+  log_text: True
+
+env:
+  type: bench_press.run.env.dummy_env.DummyEnv
+
+policy:
+  type: bench_press.run.policy.keyboard_policy.KeyboardPolicy

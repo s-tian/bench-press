@@ -1,0 +1,33 @@
+seed: 0
+
+model:
+  type: bench_press.models.policy_network.PolicyNetwork
+  image_inputs: ['gelsight_top']
+  final_size: [48, 64]
+  encoder_features: 128
+  encoder_type: resnet
+  activation: leaky_relu
+  freeze: False
+  use_state: False 
+  action_dim: 4
+  state_dim: 4
+  policy_layers: [256, 64]
+  batch_size: 32
+  log_dir: training_models/pattern_plug
+  exp_name: top 
+
+dataset:
+  type: bench_press.models.datasets.patterned_plug_dset.PatternPlugDataset
+  use_initial_press: True
+  folders: ['patterned_plug_demos/']
+  #folders: ['tape_insert_dagger_data_22/']
+  #folders: ['dagger_data/']
+  dataloader_workers: 8
+
+train_frac: 0.85
+num_epochs: 300
+augment_prob: 0.5
+brightness: 0.3
+hue: 0.05
+checkpoint_every: 10
+
