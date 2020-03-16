@@ -208,7 +208,6 @@ class Trainer:
             img_grid = torchvision.utils.make_grid(image[:16], normalize=True)
             self.summary_writer.add_image(f'{train_val}/cam_{cam_i}', img_grid)
 
-
     @staticmethod
     def _batch_size(batch):
         return batch['label'].shape[0]

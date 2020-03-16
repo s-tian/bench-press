@@ -1,13 +1,12 @@
-from tb_control.testbench_control import TestBench
-import time
-import datetime
-import cv2
-import numpy as np
-import sys
-from scipy.io import savemat
 import argparse
-import yaml
+import datetime
 import os
+import time
+
+import numpy as np
+import yaml
+from scipy.io import savemat
+from tb_control.testbench_control import TestBench
 
 with open('config_edge_2cam.yaml', 'r') as f:
     config = yaml.load(f)
@@ -72,12 +71,12 @@ dy = 0
 
 mX = 6000
 mY = 12000
-mZ = 1500 
+mZ = 1500
 
 MIN_FORCE_THRESH = 7
 MAX_FORCE_THRESH = 19
 
-NEW_FILE_EVERY = 30 
+NEW_FILE_EVERY = 30
 data_file_num = 0
 
 pre_press_frames = []
@@ -101,41 +100,41 @@ with open(data_dir + '/config.yaml', 'w') as outfile:
     yaml.dump(config, outfile)
 
 for i in range(num_trials):
-    target_x, target_y, target_z = x, y, z 
+    target_x, target_y, target_z = x, y, z
     print('---------- TRIAL {} -----------'.format(i))
     tb.target_pos(target_x, target_y, target_z)
 
     while tb.busy():
         tb.update()
-    
+
     p_z = int(np.random.uniform(0, z_radius))
-    #p_z = z_radius
-    p_y = 0  
-    p_x = 0	 
+    # p_z = z_radius
+    p_y = 0
+    p_x = 0
     dx = p_x
     dy = p_y
     dz = p_z
-    
+
     target_x = x + dx
     target_y = y + dy
     target_z = z + dz
-    
+
     assert target_x < mX, "Invalid X target: " + str(target_x)
     assert target_y < mY, "Invalid Y target: " + str(target_y)
     assert target_z < mZ, "Invalid Z target: " + str(target_z)
-    time.sleep(0.5) 
+    time.sleep(0.5)
     # Grab before pressing image
     frame, frame2 = tb.get_frame()
     # cv2.imwrite("cap_framebefore" + str(i) + ".png", frame)
     ppf, ppf2 = np.copy(frame), np.copy(frame2)
-    
+
     tb.target_pos(target_x, target_y, target_z)
-    
+
     while tb.busy():
         tb.update()
     time.sleep(.5)
-    py = int(np.random.uniform(0, y_radius)) 
-    #py = y_radius
+    py = int(np.random.uniform(0, y_radius))
+    # py = y_radius
 
     target_y += py
     tb.target_pos(target_x, target_y, target_z)
@@ -145,7 +144,7 @@ for i in range(num_trials):
     time.sleep(.5)
     data = tb.req_data()
     print(data)
-    
+
     x_pos.append(data['x'])
     y_pos.append(data['y'])
     z_pos.append(data['z'])
@@ -153,7 +152,7 @@ for i in range(num_trials):
     force_2.append(data['force_2'])
     force_3.append(data['force_3'])
     force_4.append(data['force_4'])
-    
+
     frame, frame2 = tb.get_frame()
     # cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
     pre_press_frames.append(np.copy(ppf))
@@ -167,8 +166,8 @@ for i in range(num_trials):
     while tb.busy():
         tb.update()
 
-    if i % NEW_FILE_EVERY == 0 and i > 0: # Save progress often so we don't lose data!
-        savemat(data_dir  + '/data_{}.mat'.format(data_file_num),
+    if i % NEW_FILE_EVERY == 0 and i > 0:  # Save progress often so we don't lose data!
+        savemat(data_dir + '/data_{}.mat'.format(data_file_num),
                 {
                     "x": x_pos,
                     "y": y_pos,
@@ -179,11 +178,11 @@ for i in range(num_trials):
                     "force_4": force_4,
                     "press_frames": press_frames,
                     "press_frames_2": press_frames_2,
-                    "pre_press_frames" : pre_press_frames,
-                    "pre_press_frames_2" : pre_press_frames_2
+                    "pre_press_frames": pre_press_frames,
+                    "pre_press_frames_2": pre_press_frames_2
                 })
-        
-        data_file_num+=1
+
+        data_file_num += 1
         pre_press_frames = []
         pre_press_frames_2 = []
         press_frames = []
@@ -207,8 +206,8 @@ savemat(data_dir + '/data_{}.mat'.format(data_file_num),
             "force_4": force_4,
             "press_frames": press_frames,
             "press_frames_2": press_frames_2,
-            "pre_press_frames" : pre_press_frames,
-            "pre_press_frames_2" : pre_press_frames_2
+            "pre_press_frames": pre_press_frames,
+            "pre_press_frames_2": pre_press_frames_2
         })
 
 tb.reset()

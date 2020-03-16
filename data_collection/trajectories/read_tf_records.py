@@ -1,7 +1,8 @@
-import tensorflow as tf
-import numpy as np 
-import matplotlib.pyplot as plt
 import glob
+
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
 
 data_path = 'gelsight_data/train/*.tfrecord'
 
@@ -14,18 +15,17 @@ print(data_paths)
 with tf.Session(config=config) as sess:
     feature = {'1/img': tf.FixedLenFeature([], tf.string),
                '1/state': tf.FixedLenFeature([8], tf.float32)}
- 
-    filename_queue = tf.train.string_input_producer(data_paths, num_epochs = 2)
+
+    filename_queue = tf.train.string_input_producer(data_paths, num_epochs=2)
     reader = tf.TFRecordReader()
     _, serialized_example = reader.read(filename_queue)
-     
+
     features = tf.parse_single_example(serialized_example, features=feature)
 
     image = tf.decode_raw(features['1/img'], tf.uint8)
     state = tf.cast(features['1/state'], tf.float32)
 
     image = tf.reshape(image, [48, 64, 3])
-         
 
     tf.global_variables_initializer().run()
     tf.local_variables_initializer().run()
@@ -34,7 +34,7 @@ with tf.Session(config=config) as sess:
     for i in range(10):
         img = sess.run(image)
         img = img.astype(np.uint8)
-     
+
         plt.imshow(img)
         plt.show()
         state_val = sess.run(state)
@@ -45,5 +45,3 @@ with tf.Session(config=config) as sess:
     coord.join(threads)
 
     sess.close()
-     
- 

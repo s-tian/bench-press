@@ -1,20 +1,19 @@
-from tb_control.testbench_control import TestBench
-import time
-import datetime
-import cv2
-import numpy as np
-import sys
-from scipy.io import savemat
 import argparse
+import datetime
+import time
+
+import numpy as np
+from scipy.io import savemat
+from tb_control.testbench_control import TestBench
 
 # XY coordinates experimentally determined for each of the shapes
 SHAPE_POS = {'star': {'x': 1384, 'y': 6073},
              'triangle': {'x': 1400, 'y': 7800},
-             'square': { 'x': 2650, 'y': 7780},
+             'square': {'x': 2650, 'y': 7780},
              'hemisphere': {'x': 2650, 'y': 6040},
              'cylinder': {'x': 3900, 'y': 7780},
              'side-cylinder': {'x': 3900, 'y': 6020}
-            }
+             }
 
 '''
 Command line arg format:
@@ -31,8 +30,10 @@ parser.add_argument('shape_name', metavar='shape', type=str, choices=SHAPE_POS.k
 parser.add_argument('num_trials', metavar='N', type=int, help='number of presses to collect')
 parser.add_argument('radius', metavar='radius', type=int, help='radius of circle to uniformly select press location in')
 parser.add_argument('num_images', metavar='num_images', type=int, help='number of images to get per press')
-parser.add_argument('min_force', metavar='min_force', type=float, help='minimum of the range to select random threshold forces from')
-parser.add_argument('max_force', metavar='max_force', type=float, help='maximum of the range to select random threshold forces from')
+parser.add_argument('min_force', metavar='min_force', type=float,
+                    help='minimum of the range to select random threshold forces from')
+parser.add_argument('max_force', metavar='max_force', type=float,
+                    help='maximum of the range to select random threshold forces from')
 parser.add_argument('--out', metavar='out', type=str, default='data/', help='dir for output data')
 
 args = parser.parse_args()
@@ -97,7 +98,7 @@ for i in range(num_trials):
     p_x = int(np.random.uniform(-radius, radius))
     p_y = int(np.random.uniform(-radius, radius))
 
-    while p_x**2 + p_y**2 > radius**2:
+    while p_x ** 2 + p_y ** 2 > radius ** 2:
         p_x = int(np.random.uniform(-radius, radius))
         p_y = int(np.random.uniform(-radius, radius))
 
@@ -151,13 +152,12 @@ for i in range(num_trials):
         force_3.append(data['force_3'])
         force_4.append(data['force_4'])
 
-
         frame = tb.get_frame()
         # cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
         pre_press_frames.append(np.copy(ppf))
         press_frames.append(np.copy(frame))
 
-    if i % 5 == 0: # Save progress often so we don't lose data!
+    if i % 5 == 0:  # Save progress often so we don't lose data!
         savemat(out + ctimestr + '-' + shape_name + '.mat',
                 {
                     "x": x_pos,
@@ -170,7 +170,7 @@ for i in range(num_trials):
                     "force_3": force_3,
                     "force_4": force_4,
                     "press_frames": press_frames,
-                    "pre_press_frames" : pre_press_frames
+                    "pre_press_frames": pre_press_frames
                 })
 
     tb.reset_z()
@@ -190,7 +190,7 @@ savemat(out + ctimestr + '-' + shape_name + '.mat',
             "force_3": force_3,
             "force_4": force_4,
             "press_frames": press_frames,
-            "pre_press_frames" : pre_press_frames
+            "pre_press_frames": pre_press_frames
         })
 
 tb.reset()

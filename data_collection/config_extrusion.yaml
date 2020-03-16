@@ -1,8 +1,8 @@
 home:
-    x: 2750  
-    y: 5800
-    z: 0 
+  x: 2750
+  y: 5800
+  z: 0
 
 dynamixel:
-    home: 2880
-    max-angle: 22.5
+  home: 2880
+  max-angle: 22.5

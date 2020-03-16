@@ -1,9 +1,9 @@
 home:
-    x: 2700
-    y: 1700 
-    z: 0 
+  x: 2700
+  y: 1700
+  z: 0
 
 dynamixel:
-    home: 2880
-    max-angle: 90 
-    min-angle: 60 
+  home: 2880
+  max-angle: 90
+  min-angle: 60

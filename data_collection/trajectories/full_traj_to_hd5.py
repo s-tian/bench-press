@@ -1,12 +1,12 @@
-import tensorflow as tf
+import argparse
+import glob
+import os
+import pickle
+
+import cv2
+import deepdish as dd
 import numpy as np
 from tqdm import tqdm
-import glob
-import pickle
-import os
-import cv2
-import argparse
-import deepdish as dd
 
 '''
 Script to convert data stored in .mat files (collect_data.py) to .tfrecord
@@ -14,9 +14,10 @@ Script to convert data stored in .mat files (collect_data.py) to .tfrecord
 
 parser = argparse.ArgumentParser(description='Convert full trajectory folders to .tfrecord')
 parser.add_argument('inp_path', metavar='inp_path', type=str, help='directory containing trajectory subdirectories')
-parser.add_argument('out_path', metavar='out_path', type=str, help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
-parser.add_argument('-n', '--num', metavar='record_size', type=int, default=1, help='number of examples to store in each .tfrecord file')
-
+parser.add_argument('out_path', metavar='out_path', type=str,
+                    help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
+parser.add_argument('-n', '--num', metavar='record_size', type=int, default=1,
+                    help='number of examples to store in each .tfrecord file')
 
 args = parser.parse_args()
 
@@ -44,37 +45,36 @@ z_act: mean: 0.06966666666666667 std: 6.070706704238715
 x: mean: 2644.52925 std: 209.59929224857643
 """
 mean = {
-        'force_1': 5.548266944444444,
-        'z': 1115.4815277777777,
-        'x_act': 0,
-        'force_4': 5.346665555555556,
-        'y_act': 0,
-        'y': 6045.260583333334,
-        'force_3': 6.150440555555555,
-        'force_2': 6.4838152777777776,
-        'z_act': 0,
-        'x': 2644.52925
-    }
+    'force_1': 5.548266944444444,
+    'z': 1115.4815277777777,
+    'x_act': 0,
+    'force_4': 5.346665555555556,
+    'y_act': 0,
+    'y': 6045.260583333334,
+    'force_3': 6.150440555555555,
+    'force_2': 6.4838152777777776,
+    'z_act': 0,
+    'x': 2644.52925
+}
 std = {
-        'force_1': 8.618291543401973,
-        'z': 34.865522493962516,
-        'x_act': 40.55583610822862,
-        'force_4': 5.871973470396116,
-        'y_act': 40.9047147811397,
-        'y': 212.2458477847846,
-        'force_3': 7.239953607917641,
-        'force_2': 4.568602618451527,
-        'z_act': 6.070706704238715,
-        'x': 209.59929224857643
+    'force_1': 8.618291543401973,
+    'z': 34.865522493962516,
+    'x_act': 40.55583610822862,
+    'force_4': 5.871973470396116,
+    'y_act': 40.9047147811397,
+    'y': 212.2458477847846,
+    'force_3': 7.239953607917641,
+    'force_2': 4.568602618451527,
+    'z_act': 6.070706704238715,
+    'x': 209.59929224857643
 
-    }
-
+}
 
 f = {
     'force_1': [],
-    'force_2':[],
-    'force_3':[],
-    'force_4':[],
+    'force_2': [],
+    'force_3': [],
+    'force_4': [],
     'x': [],
     'y': [],
     'z': [],
@@ -121,9 +121,9 @@ for fname in tqdm(traj_paths):
             step_data['force_3'],
             step_data['force_4']
         ]
-        traj['img_%d' % (i-1)] = img
-        traj['action_%d' % (i-1)] = act
-        traj['state_%d' % (i-1)] = state
+        traj['img_%d' % (i - 1)] = img
+        traj['action_%d' % (i - 1)] = act
+        traj['state_%d' % (i - 1)] = state
 
     pre_img = cv2.imread(glob.glob(fname + '/traj*_0.jpg')[0])
     pre_img = cv2.resize(pre_img, dsize=(64, 48))

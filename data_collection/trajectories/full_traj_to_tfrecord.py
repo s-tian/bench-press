@@ -1,33 +1,44 @@
-import tensorflow as tf
-import numpy as np
-from tqdm import tqdm
-import glob
-import pickle
-import os
-import cv2
 import argparse
+import glob
+import os
+import pickle
+
+import cv2
+import numpy as np
+import tensorflow as tf
+from tqdm import tqdm
 
 '''
 Script to convert data stored in .mat files (collect_data.py) to .tfrecord
 '''
 
+
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
 
+
 def _bytes_feature(value):
-    return tf.train.Feature(bytes_list=tf.train.BytesList(value = [value]))
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
 
 def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=value))
 
+
 parser = argparse.ArgumentParser(description='Convert full trajectory folders to .tfrecord')
 parser.add_argument('inp_path', metavar='inp_path', type=str, help='directory containing trajectory subdirectories')
-parser.add_argument('out_path', metavar='out_path', type=str, help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
-parser.add_argument('pickle_stats', metavar='stats_pkl', type=str, help='pickle to load stats from for normalization: see compute_stats.py')
-parser.add_argument('-n', '--num', metavar='record_size', type=int, default=1, help='number of examples to store in each .tfrecord file')
-parser.add_argument('-p_train', metavar='p_train', type=float, default=0.9, help='proportion of examples, on average, to put in training set')
-parser.add_argument('-p_test', metavar='p_test', type=float, default=0.05, help='proportion of examples, on average, to put in test set')
-parser.add_argument('-p_val', metavar='p_val', type=float, default=0.05, help='proportion of examples, on average, to put into validation set')
+parser.add_argument('out_path', metavar='out_path', type=str,
+                    help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
+parser.add_argument('pickle_stats', metavar='stats_pkl', type=str,
+                    help='pickle to load stats from for normalization: see compute_stats.py')
+parser.add_argument('-n', '--num', metavar='record_size', type=int, default=1,
+                    help='number of examples to store in each .tfrecord file')
+parser.add_argument('-p_train', metavar='p_train', type=float, default=0.9,
+                    help='proportion of examples, on average, to put in training set')
+parser.add_argument('-p_test', metavar='p_test', type=float, default=0.05,
+                    help='proportion of examples, on average, to put in test set')
+parser.add_argument('-p_val', metavar='p_val', type=float, default=0.05,
+                    help='proportion of examples, on average, to put into validation set')
 
 args = parser.parse_args()
 
@@ -70,7 +81,7 @@ for fname in tqdm(traj_paths):
     feature = {}
     data = pickle.load(open(glob.glob(fname + '*.pkl')[0], 'rb'))
     if data[1]['slip'] == 1:
-        slip += 1 
+        slip += 1
 
     for i in range(1, len(data)):
         step_data = data[i]
@@ -91,9 +102,9 @@ for fname in tqdm(traj_paths):
             step_data['force_3'],
             step_data['force_4']
         ]
-        feature['%d/img' % (i-1)] = _bytes_feature(img.tostring())
-        feature['%d/action' % (i-1)] = _float_feature(act)
-        feature['%d/state' % (i-1)] = _float_feature(state)
+        feature['%d/img' % (i - 1)] = _bytes_feature(img.tostring())
+        feature['%d/action' % (i - 1)] = _float_feature(act)
+        feature['%d/state' % (i - 1)] = _float_feature(state)
 
     pre_img = cv2.imread(glob.glob(fname + '/traj*_0.jpg')[0])
     pre_img = cv2.resize(pre_img, dsize=(64, 48))
@@ -134,12 +145,14 @@ for fname in tqdm(traj_paths):
 # Clear out data in 'incomplete' files
 
 if len(train) > 0:
-    writer = tf.python_io.TFRecordWriter('{}train/train_{}.tfrecord'.format(output_dir, train_ind, train_ind + len(train) - 1))
+    writer = tf.python_io.TFRecordWriter(
+        '{}train/train_{}.tfrecord'.format(output_dir, train_ind, train_ind + len(train) - 1))
     for ex in train:
         writer.write(ex.SerializeToString())
 
 if len(test) > 0:
-    writer = tf.python_io.TFRecordWriter('{}test/test_{}.tfrecord'.format(output_dir, test_ind, test_ind + len(test) - 1))
+    writer = tf.python_io.TFRecordWriter(
+        '{}test/test_{}.tfrecord'.format(output_dir, test_ind, test_ind + len(test) - 1))
     for ex in test:
         writer.write(ex.SerializeToString())
 

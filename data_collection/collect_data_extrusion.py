@@ -1,15 +1,12 @@
-from tb_control.testbench_control import TestBench
-import time
+import argparse
 import datetime
-import cv2
-import numpy as np
-import sys
+import os
+import time
+
+import yaml
 from scipy.io import savemat
 from tb_control.dynamixel_interface import Dynamixel
-import argparse
-import ipdb
-import yaml
-import os
+from tb_control.testbench_control import TestBench
 
 with open('config_extrusion.yaml', 'r') as f:
     config = yaml.load(f)
@@ -65,12 +62,12 @@ dy = 0
 
 mX = 6000
 mY = 12000
-mZ = 1500 
+mZ = 1500
 
 MIN_FORCE_THRESH = 7
 MAX_FORCE_THRESH = 19
 
-NEW_FILE_EVERY = 30 
+NEW_FILE_EVERY = 30
 data_file_num = 0
 dynamixel_angle_max = dyna_config['max-angle']
 
@@ -90,15 +87,18 @@ data_dir = out + ctimestr
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 import numpy as np
+
+
 def meanwoutliers(data):
     data = [i for i in data if i < 30]
     if len(data) > 2:
-        std = np.std(data)  
+        std = np.std(data)
         m = np.mean(data)
         print(f'std: {std}, mean: {m}')
-        data = [i for i in data if (i - m) < 1.2*std]
+        data = [i for i in data if (i - m) < 1.2 * std]
     print(data)
     return np.mean(data)
+
 
 with open(data_dir + '/config.yaml', 'w') as outfile:
     yaml.dump(config, outfile)
@@ -106,12 +106,12 @@ with open(data_dir + '/config.yaml', 'w') as outfile:
 for i in range(num_trials):
 
     target_x, target_y, target_z = HOME_POS['x'], HOME_POS['y'], HOME_POS['z']
-    x, y, z = target_x, target_y, target_z 
-    
+    x, y, z = target_x, target_y, target_z
+
     tb.target_pos(target_x, target_y, target_z)
     while tb.busy():
         tb.update()
-    
+
     dyna.move_to_angle(0)
     time.sleep(1)
 
@@ -119,30 +119,30 @@ for i in range(num_trials):
 
     dyna.move_to_angle(offset_angle)
 
-    time.sleep(0.5) 
+    time.sleep(0.5)
     # Grab before pressing image
     frame = tb.get_frame()
     # cv2.imwrite("cap_framebefore" + str(i) + ".png", frame)
     ppf = np.copy(frame)
-    
+
     while tb.busy():
         tb.update()
-    force_mean = 0 
+    force_mean = 0
 
     while force_mean < MIN_FORCE_THRESH:
-        target_z += 50 
+        target_z += 50
         tb.target_pos(target_x, target_y, target_z)
         while tb.busy():
             tb.update()
         data = tb.req_data()
         print(data)
-        #force_mean = meanwoutliers([data['force_1'], data['force_2'], data['force_3'], data['force_4']])
+        # force_mean = meanwoutliers([data['force_1'], data['force_2'], data['force_3'], data['force_4']])
         force_mean = min([data['force_1'], data['force_2'], data['force_3'], data['force_4']])
 
     time.sleep(0.5)
     data = tb.req_data()
     print(data)
-    
+
     x_pos.append(data['x'])
     y_pos.append(data['y'])
     z_pos.append(data['z'])
@@ -151,15 +151,15 @@ for i in range(num_trials):
     force_3.append(data['force_3'])
     force_4.append(data['force_4'])
     contact_angle.append(offset_angle)
-    
+
     frame = tb.get_frame()
     # cv2.imwrite("cap_frame" + str(i) + 'f=' + str(force_threshold) + ".png", frame)
     pre_press_frames.append(np.copy(ppf))
     press_frames.append(np.copy(frame))
     time.sleep(0.5)
 
-    if i % NEW_FILE_EVERY == 0 and i > 0: # Save progress often so we don't lose data!
-        savemat(data_dir  + '/data_{}.mat'.format(data_file_num),
+    if i % NEW_FILE_EVERY == 0 and i > 0:  # Save progress often so we don't lose data!
+        savemat(data_dir + '/data_{}.mat'.format(data_file_num),
                 {
                     "x": x_pos,
                     "y": y_pos,
@@ -170,10 +170,10 @@ for i in range(num_trials):
                     "force_4": force_4,
                     "contact_angle": contact_angle,
                     "press_frames": press_frames,
-                    "pre_press_frames" : pre_press_frames
+                    "pre_press_frames": pre_press_frames
                 })
-        
-        data_file_num+=1
+
+        data_file_num += 1
         pre_press_frames = []
         press_frames = []
         x_pos = []
@@ -196,7 +196,7 @@ savemat(data_dir + '/data_{}.mat'.format(data_file_num),
             "force_4": force_4,
             "contact_angle": contact_angle,
             "press_frames": press_frames,
-            "pre_press_frames" : pre_press_frames
+            "pre_press_frames": pre_press_frames
         })
 
 tb.reset()
