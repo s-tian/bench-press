@@ -1,11 +1,10 @@
-from gelsight_tb.run.policy.base_policy import BasePolicy
-from gelsight_tb.run.actions.action import DeltaAction, DynamixelAngleAction, EndAction
-import getch
 import cv2
+import getch
+from gelsight_tb.run.actions.action import DeltaAction, DynamixelAngleAction, EndAction
+from gelsight_tb.run.policy.base_policy import BasePolicy
 
 
 class KeyboardPolicy(BasePolicy):
-
     INPUTS = {
         'w': DeltaAction((150, 0, 0)),
         's': DeltaAction((-150, 0, 0)),

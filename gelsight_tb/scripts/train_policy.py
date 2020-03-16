@@ -1,21 +1,22 @@
-import torch
-from torch import autograd
-from torch.utils.tensorboard import SummaryWriter
-import torchvision
-from torchvision import transforms
-import numpy as np 
 import argparse
-from omegaconf import OmegaConf
-from tqdm import tqdm
-import sys
-import os
 import copy
-from gelsight_tb.utils.infra import str_to_class, deep_map
+import os
+import sys
+
+import numpy as np
+import torch
+import torchvision
 from gelsight_tb.models.datasets.tb_dataset import TBDataset
 from gelsight_tb.models.datasets.tb_dataset_subset import TBDatasetSubset
 from gelsight_tb.models.datasets.transforms import ImageTransform
 from gelsight_tb.models.modules.pretrained_encoder import pretrained_model_normalize
+from gelsight_tb.utils.infra import str_to_class, deep_map
 from gelsight_tb.utils.obs_to_np import denormalize_action, denormalize
+from omegaconf import OmegaConf
+from torch import autograd
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
+from tqdm import tqdm
 
 
 class Trainer:
@@ -50,10 +51,12 @@ class Trainer:
             [
                 ImageTransform(transforms.ToPILImage()),
                 transforms.RandomApply(
-                [
-                    ImageTransform(transforms.ColorJitter(brightness=self.conf.brightness, contrast=0, saturation=0, hue=self.conf.hue)),
-                    ImageTransform(transforms.RandomResizedCrop(tuple(self.conf.model.final_size), scale=(0.9, 1.0)))
-                ], p=self.conf.augment_prob),
+                    [
+                        ImageTransform(transforms.ColorJitter(brightness=self.conf.brightness, contrast=0, saturation=0,
+                                                              hue=self.conf.hue)),
+                        ImageTransform(
+                            transforms.RandomResizedCrop(tuple(self.conf.model.final_size), scale=(0.9, 1.0)))
+                    ], p=self.conf.augment_prob),
                 ImageTransform(transforms.Resize(tuple(self.conf.model.final_size))),
                 ImageTransform(transforms.ToTensor()),
                 ImageTransform(pretrained_model_normalize)
@@ -72,12 +75,15 @@ class Trainer:
 
         if self.conf.dataset.dataloader_workers > 1:
             self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size,
-                                                                num_workers=conf.dataset.dataloader_workers, shuffle=True)
+                                                                num_workers=conf.dataset.dataloader_workers,
+                                                                shuffle=True)
             self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size,
                                                               num_workers=conf.dataset.dataloader_workers, shuffle=True)
         else:
-            self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size, shuffle=True)
-            self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size, shuffle=True)
+            self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=conf.model.batch_size,
+                                                                shuffle=True)
+            self.val_dataloader = torch.utils.data.DataLoader(self.val_dataset, batch_size=conf.model.batch_size,
+                                                              shuffle=True)
 
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.summary_writer = self._make_summary_writer()
@@ -122,11 +128,15 @@ class Trainer:
                 output = self.model(inputs)
                 loss = self.model.loss(output, inputs['label'])
                 if verbose:
-                    true_state_batch = denormalize(batch['state'].cpu().numpy(), self.conf.dataset.norms.state_norm.mean, self.conf.dataset.norms.state_norm.scale)
-                    true_action_batch = denormalize_action(batch['label'].cpu().numpy(), self.conf.dataset.norms.action_norm)
+                    true_state_batch = denormalize(batch['state'].cpu().numpy(),
+                                                   self.conf.dataset.norms.state_norm.mean,
+                                                   self.conf.dataset.norms.state_norm.scale)
+                    true_action_batch = denormalize_action(batch['label'].cpu().numpy(),
+                                                           self.conf.dataset.norms.action_norm)
                     policy_action_batch = denormalize_action(output.cpu().numpy(), self.conf.dataset.norms.action_norm)
-                    for true_action, policy_action, true_state in zip(true_action_batch, policy_action_batch, true_state_batch):
-                        print('-------------------------------------------') 
+                    for true_action, policy_action, true_state in zip(true_action_batch, policy_action_batch,
+                                                                      true_state_batch):
+                        print('-------------------------------------------')
                         print(f'Expert action was {true_action}')
                         print(f'Policy action was {policy_action}')
                         print(f'Estimated final position is {policy_action + true_state}')
@@ -186,7 +196,7 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
             self.global_step = self.global_step + 1
-            p = torch.mean((output - inputs['label'])**2, dim=0)
+            p = torch.mean((output - inputs['label']) ** 2, dim=0)
             x_l.append(p[0] * self._batch_size(batch))
             y_l.append(p[1] * self._batch_size(batch))
             z_l.append(p[2] * self._batch_size(batch))

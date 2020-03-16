@@ -1,8 +1,9 @@
-import deepdish as dd
 import argparse
+
+import attrdict
+import deepdish as dd
 import matplotlib.pyplot as plt
 import numpy as np
-import attrdict
 from gelsight_tb.utils.obs_to_np import obs_to_action
 from moviepy.editor import ImageSequenceClip
 
@@ -28,7 +29,7 @@ def make_gif_of_traj(filename, output_filename, raw=True, fps=5):
     a = attrdict.AttrDict({'mean': 0, 'scale': 1})
     for i in range(1, traj_len):
         data = file[i]
-        act = obs_to_action(data, file[i-1], a)
+        act = obs_to_action(data, file[i - 1], a)
         sorted_act = sorted(act, key=np.abs)
         if np.abs(sorted_act[0]) == 0 and sorted_act[1] == 0:
             print('alert alert')
@@ -71,4 +72,3 @@ if __name__ == "__main__":
         make_gif_of_traj(args.file, args.output_dest)
     else:
         view_file_interactive(args.file)
-

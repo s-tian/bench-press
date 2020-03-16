@@ -1,6 +1,6 @@
-from gelsight_tb.tb_control.testbench_control import TestBench
-import getch
 import time
+
+from gelsight_tb.tb_control.testbench_control import TestBench
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
         forces = [data['force_{}'.format(i)] for i in range(1, 5)]
         st = ''
         for i, force in enumerate(forces):
-            st += ' load cell {}: {}'.format(i+1, force)
+            st += ' load cell {}: {}'.format(i + 1, force)
         print(st)
         time.sleep(0.5)
 

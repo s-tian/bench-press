@@ -33,12 +33,17 @@ import os
 
 if os.name == 'nt':
     import msvcrt
+
+
     def getch():
         return msvcrt.getch().decode()
 else:
     import sys, tty, termios
+
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
+
+
     def getch():
         try:
             tty.setraw(sys.stdin.fileno())
@@ -47,11 +52,10 @@ else:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
-from dynamixel_sdk import *                    # Uses Dynamixel SDK library
+from dynamixel_sdk import *  # Uses Dynamixel SDK library
 
 
 class Dynamixel():
-
     # Control table address
     ADDR_PRO_TORQUE_ENABLE = 64  # Control table address is different in Dynamixel model
     ADDR_PRO_GOAL_POSITION = 116
@@ -79,7 +83,7 @@ class Dynamixel():
         # Set the port path
         # Get methods and members of PortHandlerLinux or PortHandlerWindows
         self.portHandler = PortHandler(device_name)
-        
+
         # Initialize PacketHandler instance
         # Set the protocol version
         # Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
@@ -94,7 +98,6 @@ class Dynamixel():
             getch()
             quit()
 
-
         # Set port baudrate
         if self.portHandler.setBaudRate(self.BAUDRATE):
             print("Succeeded to change the baudrate")
@@ -105,7 +108,8 @@ class Dynamixel():
             quit()
 
         # Enable Dynamixel Torque
-        dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.DXL_ID, self.ADDR_PRO_TORQUE_ENABLE, self.TORQUE_ENABLE)
+        dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.DXL_ID,
+                                                                       self.ADDR_PRO_TORQUE_ENABLE, self.TORQUE_ENABLE)
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
@@ -116,12 +120,13 @@ class Dynamixel():
         self.home_pos = home_pos
 
     def move_to_angle(self, angle):
-        target_pos = (int) ((angle / 360) * self.TICKS_PER_REV + self.home_pos)
+        target_pos = (int)((angle / 360) * self.TICKS_PER_REV + self.home_pos)
         self.set_pos(target_pos)
 
     def set_pos(self, position):
         # Write goal position
-        dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID, self.ADDR_PRO_GOAL_POSITION, position)
+        dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.DXL_ID,
+                                                                       self.ADDR_PRO_GOAL_POSITION, position)
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
             raise ValueError('communication failure!')
@@ -129,7 +134,9 @@ class Dynamixel():
             print("%s" % self.packetHandler.getRxPacketError(dxl_error))
 
     def get_pos(self):
-        dxl_present_position, dxl_comm_result, dxl_error = self.packetHandler.read4ByteTxRx(self.portHandler, self.DXL_ID, self.ADDR_PRO_PRESENT_POSITION)
+        dxl_present_position, dxl_comm_result, dxl_error = self.packetHandler.read4ByteTxRx(self.portHandler,
+                                                                                            self.DXL_ID,
+                                                                                            self.ADDR_PRO_PRESENT_POSITION)
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
@@ -143,7 +150,8 @@ class Dynamixel():
 
     def disable(self):
         # Disable Dynamixel Torque
-        dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.DXL_ID, self.ADDR_PRO_TORQUE_ENABLE, self.TORQUE_DISABLE)
+        dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.DXL_ID,
+                                                                       self.ADDR_PRO_TORQUE_ENABLE, self.TORQUE_DISABLE)
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:

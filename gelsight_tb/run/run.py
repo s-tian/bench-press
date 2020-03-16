@@ -1,7 +1,8 @@
-from omegaconf import OmegaConf
 import argparse
 import sys
+
 from gelsight_tb.utils.infra import str_to_class
+from omegaconf import OmegaConf
 
 
 def run(conf, num_rollouts):
@@ -31,4 +32,3 @@ if __name__ == '__main__':
         sys.exit()
 
     run(conf, args.num_rollouts)
-

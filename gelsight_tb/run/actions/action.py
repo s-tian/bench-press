@@ -1,5 +1,6 @@
-import numpy as np
 import time
+
+import numpy as np
 
 
 class Action:
@@ -62,7 +63,8 @@ class SleepAction(Action):
 class DebugAction(Action):
 
     def apply(self, environment):
-        import ipdb; ipdb.set_trace()
+        import ipdb;
+        ipdb.set_trace()
 
     def inverse(self):
         return self

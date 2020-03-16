@@ -1,11 +1,11 @@
-import cv2
 import argparse
+
+import cv2
 
 
 def main(cams):
-
     # Capture indices go up by 2 with the OmniTact setup
-    caps = [cv2.VideoCapture(i*2) for i in cams]
+    caps = [cv2.VideoCapture(i * 2) for i in cams]
 
     while True:
         frames = [cap.read()[1] for cap in caps]

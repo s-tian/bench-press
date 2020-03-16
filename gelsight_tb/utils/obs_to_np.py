@@ -46,7 +46,7 @@ def obs_to_images(obs):
 
 def visualize_images(obs):
     images_dict = obs['images']
-    import matplotlib.pyplot as plt            
+    import matplotlib.pyplot as plt
     for key in images_dict.keys():
         img = images_dict[key]
         plt.imshow(img)
@@ -59,7 +59,7 @@ def obs_to_action(obs_1, obs_2, norm_conf):
     state_1 = obs_to_state(obs_1, norm_conf, should_normalize=False)
     state_2 = obs_to_state(obs_2, norm_conf, should_normalize=False)
     unnormalized_action = state_2 - state_1
-    unnormalized_action[3] = state_2[3] # The gripper action is an absolute action
+    unnormalized_action[3] = state_2[3]  # The gripper action is an absolute action
     return normalize(unnormalized_action, norm_conf['mean'], norm_conf['std'])
 
 

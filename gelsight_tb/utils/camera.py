@@ -1,13 +1,14 @@
-import cv2
 import threading
 import time
+
+import cv2
 
 
 class Camera:
 
     def __init__(self, name, index, goal_height, goal_width):
-        self.name = name            # Human-friendly name
-        self.index = index          # Capture index (e.g. 0)
+        self.name = name  # Human-friendly name
+        self.index = index  # Capture index (e.g. 0)
         self.cap = cv2.VideoCapture(self.index)
         self.raw_height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.raw_width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -20,6 +21,7 @@ class Camera:
     """
     :returns current camera frame in BGR format!
     """
+
     def get_frame(self):
         success, raw_frame = self.get_raw_frame()
         return raw_frame, cv2.resize(raw_frame, (self.goal_width, self.goal_height), interpolation=cv2.INTER_AREA)
@@ -31,7 +33,7 @@ class CameraThread(threading.Thread):
         super(CameraThread, self).__init__()
         assert isinstance(camera, Camera), 'CameraThread must be built using Camera obj'
         self.camera = camera
-        self.thread_rate = thread_rate # (polling rate in Hz)
+        self.thread_rate = thread_rate  # (polling rate in Hz)
         self.current_frame, self.current_frame_raw = None, None
         self.running_lock = threading.Lock()
         self.running = None

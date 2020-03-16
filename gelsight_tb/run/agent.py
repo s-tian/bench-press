@@ -1,6 +1,7 @@
-from gelsight_tb.utils.logger import Logger
-from gelsight_tb.utils.infra import str_to_class
 from gelsight_tb.run.actions.action import EndAction
+from gelsight_tb.utils.infra import str_to_class
+from gelsight_tb.utils.logger import Logger
+
 
 class Agent:
 
@@ -36,4 +37,3 @@ class Agent:
             observations.append(observation)
             num_steps += 1
         self.logger.log_obs(observations, idx)
-

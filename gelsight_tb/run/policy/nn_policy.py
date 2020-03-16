@@ -1,15 +1,14 @@
-import torch
-from torchvision import transforms
+import gelsight_tb.run.actions.action as action
 import numpy as np
-from omegaconf import OmegaConf
-
-from gelsight_tb.run.policy.base_policy import BasePolicy
-from gelsight_tb.run.policy.keyboard_policy import KeyboardPolicy 
-from gelsight_tb.utils.obs_to_np import obs_to_state, obs_to_images, obs_to_opto, denormalize_action
-from gelsight_tb.utils.infra import str_to_class, deep_map
+import torch
 from gelsight_tb.models.datasets.transforms import ImageTransform
 from gelsight_tb.models.modules.pretrained_encoder import pretrained_model_normalize
-import gelsight_tb.run.actions.action as action
+from gelsight_tb.run.policy.base_policy import BasePolicy
+from gelsight_tb.run.policy.keyboard_policy import KeyboardPolicy
+from gelsight_tb.utils.infra import str_to_class, deep_map
+from gelsight_tb.utils.obs_to_np import obs_to_state, obs_to_images, obs_to_opto, denormalize_action
+from omegaconf import OmegaConf
+from torchvision import transforms
 
 
 class NNPolicy(BasePolicy):
@@ -58,7 +57,7 @@ class NNPolicy(BasePolicy):
         state = obs_to_state(observation, state_norm).astype(np.float32)
         inp = {
             'images': images,
-            'state': state[None], # Add observation batch dimension to state
+            'state': state[None],  # Add observation batch dimension to state
         }
         if self.policy_conf.optoforce:
             if self.policy_conf.optoforce:
@@ -66,7 +65,7 @@ class NNPolicy(BasePolicy):
                 opto_curr_norm = self.policy_conf.model_conf.dataset.norms.opto_2
             opto_1 = obs_to_opto(press_obs, opto_press_norm).astype(np.float32)
             opto_2 = obs_to_opto(observation, opto_curr_norm).astype(np.float32)
-            inp['opto_1'], inp['opto_2'] = opto_1[None], opto_2[None] # Add batch dimension here
+            inp['opto_1'], inp['opto_2'] = opto_1[None], opto_2[None]  # Add batch dimension here
 
         inp = self.image_transform(inp)
         inp = deep_map(lambda x: torch.from_numpy(x) if not isinstance(x, torch.Tensor) else x, inp)
@@ -102,7 +101,8 @@ class NNPolicy(BasePolicy):
 
         if self.policy_conf.order:
             build_action = []
-            assert isinstance(self.policy_conf.order, str) and len(self.policy_conf.order) <= 3, "Order param must be in format of permutation of x, y, z"
+            assert isinstance(self.policy_conf.order, str) and len(
+                self.policy_conf.order) <= 3, "Order param must be in format of permutation of x, y, z"
             for axis in self.policy_conf.order:
                 if axis == 'x':
                     build_action.append(action.DeltaAction((xyz_action[0], 0, 0)))
@@ -118,5 +118,3 @@ class NNPolicy(BasePolicy):
                 gripper_action,
             ]
         )
-
-

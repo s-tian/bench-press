@@ -1,5 +1,5 @@
-import sys
 import importlib
+
 import numpy as np
 
 
@@ -43,4 +43,4 @@ def deep_binary_apply(fn, x, y):
 
 
 def deep_sum(x, y):
-    return deep_binary_apply(lambda a, b: a+b, x, y)
+    return deep_binary_apply(lambda a, b: a + b, x, y)

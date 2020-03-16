@@ -1,32 +1,41 @@
-import tensorflow as tf
-import numpy as np
-from tqdm import tqdm
-import glob
-import sys
-import os
-from scipy.io import loadmat
 import argparse
+import glob
+import os
+
+import numpy as np
+import tensorflow as tf
+from scipy.io import loadmat
+from tqdm import tqdm
 
 '''
 Script to convert data stored in .mat files (collect_data.py) to .tfrecord
 '''
 
+
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
 
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
+
 def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
+
 parser = argparse.ArgumentParser(description='Convert .mat files to .tfrecord')
 parser.add_argument('inp_path', metavar='inp_path', type=str, help='directory containing .mat files')
-parser.add_argument('out_path', metavar='out_path', type=str, help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
-parser.add_argument('-n', '--num', metavar='record_size', type=int, default=5, help='number of examples to store in each .tfrecord file')
-parser.add_argument('-p_train', metavar='p_train', type=float, default=0.75, help='proportion of examples, on average, to put in training set')
-parser.add_argument('-p_test', metavar='p_test', type=float, default=0.2, help='proportion of examples, on average, to put in test set')
-parser.add_argument('-p_val', metavar='p_val', type=float, default=0.05, help='proportion of examples, on average, to put into validation set')
+parser.add_argument('out_path', metavar='out_path', type=str,
+                    help='directory to output .tfrecord files to. If it does not exist, it wil be created.')
+parser.add_argument('-n', '--num', metavar='record_size', type=int, default=5,
+                    help='number of examples to store in each .tfrecord file')
+parser.add_argument('-p_train', metavar='p_train', type=float, default=0.75,
+                    help='proportion of examples, on average, to put in training set')
+parser.add_argument('-p_test', metavar='p_test', type=float, default=0.2,
+                    help='proportion of examples, on average, to put in test set')
+parser.add_argument('-p_val', metavar='p_val', type=float, default=0.05,
+                    help='proportion of examples, on average, to put into validation set')
 
 args = parser.parse_args()
 
@@ -65,9 +74,8 @@ classes = {
     'hemisphere': 5
 }
 
-
 for fname in tqdm(mat_paths):
-    
+
     data = loadmat(fname)
     press_frames = data['press_frames']
     pre_press_frames = data['pre_press_frames']
@@ -80,23 +88,23 @@ for fname in tqdm(mat_paths):
     force3 = data['force_3'][0]
     force4 = data['force_4'][0]
     shapes = [classes[i] for i in data['shape']]
-    
+
     for i in tqdm(range(len(press_frames)), desc='Converting {}...'.format(fname)):
         feature = {
-                    'press_img': _bytes_feature(press_frames[i].tostring()),
-                    'pre_press_img': _bytes_feature(pre_press_frames[i].tostring()),
-                    'x': _int64_feature(x[i].item()),
-                    'y': _int64_feature(y[i].item()),
-                    'z': _int64_feature(z[i].item()),
-                    'thresh': _float_feature(thresh[i].item()),
-                    'force1': _float_feature(force1[i]),
-                    'force2': _float_feature(force2[i]),
-                    'force3': _float_feature(force3[i]),
-                    'force4': _float_feature(force4[i]),
-                    'shapes': _int64_feature(shapes[i])
-                  }
+            'press_img': _bytes_feature(press_frames[i].tostring()),
+            'pre_press_img': _bytes_feature(pre_press_frames[i].tostring()),
+            'x': _int64_feature(x[i].item()),
+            'y': _int64_feature(y[i].item()),
+            'z': _int64_feature(z[i].item()),
+            'thresh': _float_feature(thresh[i].item()),
+            'force1': _float_feature(force1[i]),
+            'force2': _float_feature(force2[i]),
+            'force3': _float_feature(force3[i]),
+            'force4': _float_feature(force4[i]),
+            'shapes': _int64_feature(shapes[i])
+        }
         example = tf.train.Example(features=tf.train.Features(feature=feature))
-        
+
         # Randomly determine which set to add to
 
         draw = np.random.rand()
@@ -107,41 +115,47 @@ for fname in tqdm(mat_paths):
             test.append(example)
         else:
             val.append(example)
-         
+
         if len(train) == record_size:
-            writer = tf.python_io.TFRecordWriter('{}train/train_example_{}_to_{}.tfrecord'.format(output_dir, train_ind, train_ind + record_size - 1))
+            writer = tf.python_io.TFRecordWriter(
+                '{}train/train_example_{}_to_{}.tfrecord'.format(output_dir, train_ind, train_ind + record_size - 1))
             for ex in train:
-                writer.write(ex.SerializeToString()) 
+                writer.write(ex.SerializeToString())
             train_ind += record_size
             train = []
         if len(test) == record_size:
-            writer = tf.python_io.TFRecordWriter('{}test/test_{}_to_{}.tfrecord'.format(output_dir, test_ind, test_ind + record_size - 1))
+            writer = tf.python_io.TFRecordWriter(
+                '{}test/test_{}_to_{}.tfrecord'.format(output_dir, test_ind, test_ind + record_size - 1))
             for ex in test:
-                writer.write(ex.SerializeToString()) 
-            test_ind += record_size 
+                writer.write(ex.SerializeToString())
+            test_ind += record_size
             test = []
         if len(val) == record_size:
-            writer = tf.python_io.TFRecordWriter('{}val/_val{}_to_{}.tfrecord'.format(output_dir, val_ind, val_ind + record_size - 1))
+            writer = tf.python_io.TFRecordWriter(
+                '{}val/_val{}_to_{}.tfrecord'.format(output_dir, val_ind, val_ind + record_size - 1))
             for ex in val:
-                writer.write(ex.SerializeToString()) 
-            val_ind += record_size 
+                writer.write(ex.SerializeToString())
+            val_ind += record_size
             val = []
 
 # Clear out data in 'incomplete' files
 
 if len(train) > 0:
-    writer = tf.python_io.TFRecordWriter('{}train/train_example_{}_to_{}.tfrecord'.format(output_dir, train_ind, train_ind + len(train) - 1))
+    writer = tf.python_io.TFRecordWriter(
+        '{}train/train_example_{}_to_{}.tfrecord'.format(output_dir, train_ind, train_ind + len(train) - 1))
     for ex in train:
-        writer.write(ex.SerializeToString()) 
+        writer.write(ex.SerializeToString())
 
 if len(test) > 0:
-    writer = tf.python_io.TFRecordWriter('{}test/test_{}_to_{}.tfrecord'.format(output_dir, test_ind, test_ind + len(test) - 1))
+    writer = tf.python_io.TFRecordWriter(
+        '{}test/test_{}_to_{}.tfrecord'.format(output_dir, test_ind, test_ind + len(test) - 1))
     for ex in test:
-        writer.write(ex.SerializeToString()) 
+        writer.write(ex.SerializeToString())
 
 if len(val) > 0:
-    writer = tf.python_io.TFRecordWriter('{}val/_val{}_to_{}.tfrecord'.format(output_dir, val_ind, val_ind + len(val) - 1))
+    writer = tf.python_io.TFRecordWriter(
+        '{}val/_val{}_to_{}.tfrecord'.format(output_dir, val_ind, val_ind + len(val) - 1))
     for ex in val:
-        writer.write(ex.SerializeToString()) 
+        writer.write(ex.SerializeToString())
 
 print('Done converting {} .mat files.'.format(len(mat_paths)))

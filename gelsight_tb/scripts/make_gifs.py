@@ -1,11 +1,9 @@
-import deepdish as dd
 import argparse
-import matplotlib.pyplot as plt
-from moviepy.editor import ImageSequenceClip
-import numpy as np
-import ipdb;
+
 import cv2
+import deepdish as dd
 import numpy as np
+from moviepy.editor import ImageSequenceClip
 
 
 def make_gif_from_file(filename, fps=2):
@@ -46,4 +44,3 @@ if __name__ == "__main__":
     parser.add_argument('file', action='store')
     args = parser.parse_args()
     make_gif_from_file(args.file)
-

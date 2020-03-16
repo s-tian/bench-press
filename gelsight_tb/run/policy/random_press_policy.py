@@ -1,16 +1,13 @@
-import numpy as np
-
-from gelsight_tb.run.policy.base_policy import BasePolicy
 from gelsight_tb.run.actions.action import *
+from gelsight_tb.run.policy.base_policy import BasePolicy
 
 
 class RandomPressPolicy(BasePolicy):
-
     PRESS_HEIGHT = 1150
     UP_DIST = 250
 
     setup = SequentialAction([
-        DeltaAction((0, 0, PRESS_HEIGHT-UP_DIST)),
+        DeltaAction((0, 0, PRESS_HEIGHT - UP_DIST)),
     ])
 
     def __init__(self, conf):
@@ -35,4 +32,3 @@ class RandomPressPolicy(BasePolicy):
                 ])
                 self.previous_action = action
                 return action
-

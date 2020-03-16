@@ -1,7 +1,8 @@
-from pathlib import Path
-from omegaconf import OmegaConf
 import datetime
+from pathlib import Path
+
 import deepdish as dd
+from omegaconf import OmegaConf
 
 
 class Logger:
@@ -29,5 +30,3 @@ class Logger:
     def log_obs(self, obs, index):
         assert isinstance(obs, list), 'observations should be logged in list format, first dim being time'
         dd.io.save(f"{self.log_dir}/record_{index}.h5", obs)
-
-

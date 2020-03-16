@@ -1,6 +1,6 @@
-import cv2
 import threading
 import time
+
 from src.optoforce.optoforce import *
 
 
@@ -9,8 +9,8 @@ class OptoforceThread(threading.Thread):
     def __init__(self, optoforce, thread_rate=5000):
         super(OptoforceThread, self).__init__()
         assert isinstance(optoforce, OptoforceDriver), 'Must be using optoforcedriver'
-        self.opto = optoforce 
-        self.thread_rate = thread_rate # (polling rate in Hz)
+        self.opto = optoforce
+        self.thread_rate = thread_rate  # (polling rate in Hz)
         self.current_reading = None
         self.running_lock = threading.Lock()
         self.running = None

@@ -1,11 +1,11 @@
+import numpy as np
+from gelsight_tb.run.actions.action import *
 from gelsight_tb.run.policy.nn_early_random_insert_policy import NNEarlyInsertPolicy
 from gelsight_tb.run.policy.nn_policy import NNPolicy
-from gelsight_tb.run.actions.action import *
-import numpy as np
 
 
 class NN2StageEarlyInsertPolicy(NNEarlyInsertPolicy):
-    
+
     def __init__(self, conf):
         super(NN2StageEarlyInsertPolicy, self).__init__(conf)
         self.state_estimation_policy = NNPolicy(self.policy_conf.state_est_conf)
@@ -19,14 +19,17 @@ class NN2StageEarlyInsertPolicy(NNEarlyInsertPolicy):
                  Otherwise query the NN Policy.
         """
         if num_steps == 0:
-            self.keyboard_override = False 
+            self.keyboard_override = False
         if num_steps < self.NUM_SCRIPTED:
             if num_steps == self.NUM_SCRIPTED - 1:
-                import ipdb; ipdb.set_trace()
+                import ipdb;
+                ipdb.set_trace()
             if num_steps == 1:
-                import ipdb; ipdb.set_trace()
+                import ipdb;
+                ipdb.set_trace()
             if num_steps == 2:
-                self.raw_topgs, self.topgs = observation['raw_images']['gelsight_top'], observation['images']['gelsight_top']
+                self.raw_topgs, self.topgs = observation['raw_images']['gelsight_top'], observation['images'][
+                    'gelsight_top']
                 self.state_est, _ = self.state_estimation_policy.forward_model(observation)
                 print(f'state estimation is  {self.state_est}')
                 print(f'true state is {observation["tb_state"]}')
@@ -49,9 +52,9 @@ class NN2StageEarlyInsertPolicy(NNEarlyInsertPolicy):
             return action
 
         else:
-            observation['raw_images']['gelsight_top'], observation['images']['gelsight_top'] = self.raw_topgs, self.topgs
+            observation['raw_images']['gelsight_top'], observation['images'][
+                'gelsight_top'] = self.raw_topgs, self.topgs
             observation['tb_state']['x'] = self.state_est[0]
             observation['tb_state']['y'] = self.state_est[1]
             observation['tb_state']['z'] = self.state_est[2]
             return super(NNEarlyInsertPolicy, self).get_action(observation, num_steps)
-
