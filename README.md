@@ -18,11 +18,11 @@ rolls out 5 trajectories in a dummy environment, using a policy which queries th
 
 To train a model using data collected using the `run` script, create a model configuration file and train the model using
 
-`python scripts/train.py <model_config>`
+`python scripts/train_policy.py <model_config>`
 
 for example
 
-`python scripts/train.py models/experiments/y_reg/y_reg_rand.yaml`
+`python scripts/train_policy.py models/experiments/y_reg/y_reg_rand.yaml`
 
 trains a model which regresses the XYZ location of the end effector from tactile images.
 
