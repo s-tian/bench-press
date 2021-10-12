@@ -63,7 +63,7 @@ numpy==1.18.1
 oauthlib==3.1.0
 olefile==0.46
 omegaconf==1.4.1
-opencv-python==4.1.2.30
+opencv-python==4.2.0.32
 opt-einsum==3.1.0
 packaging==20.0
 pandas==0.25.3
