@@ -59,7 +59,7 @@ moviepy==1.0.1
 msgpack==0.6.1
 networkx==2.1
 numexpr==2.6.8
-numpy==1.18.1
+numpy==1.22.0
 oauthlib==3.1.0
 olefile==0.46
 omegaconf==1.4.1
