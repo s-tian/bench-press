@@ -76,7 +76,7 @@ Pillow==7.0.0
 pluggy==0.7.1
 proglog==0.1.9
 prompt-toolkit==3.0.3
-protobuf==3.11.3
+protobuf==3.18.3
 psutil==5.4.7
 ptyprocess==0.6.0
 py==1.6.0
